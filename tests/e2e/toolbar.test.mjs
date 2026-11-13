@@ -89,3 +89,18 @@ test('text color adapts to the background so it stays readable', async () => {
   assert.equal(by.gray.halo, true, 'outline on mid-gray');
   assert.equal(by.photo.halo, true, 'outline on a busy picture');
 });
+
+test('A+ and A− sit in the middle of their buttons, by the letters themselves', async () => {
+  const { page } = b;
+  for (const sel of ['.panel .big', '.panel .small']) {
+    const m = await ui(page, sel).evaluate((btn) => {
+      const r = btn.getBoundingClientRect();
+      const s = btn.querySelector('.cap').getBoundingClientRect();
+      return { above: s.top - r.top, below: r.bottom - s.bottom, h: s.height, font: parseFloat(getComputedStyle(btn).fontSize) };
+    });
+    // Trimmed to the capital letters (not the font's extra space above and below them),
+    // which is what keeps it centered with every computer's font.
+    assert.ok(m.h < m.font * 0.8, `${sel} label is trimmed to the letters (${m.h}px for ${m.font}px text)`);
+    assert.ok(Math.abs(m.above - m.below) < 1, `${sel} centered: ${m.above.toFixed(1)}px above, ${m.below.toFixed(1)}px below`);
+  }
+});

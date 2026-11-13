@@ -155,10 +155,11 @@
       --glass-strong: rgba(255, 255, 255, .78);
       --glass-edge: rgba(255, 255, 255, .7);
       --ink: #0b0b12;
-      --ink-soft: rgba(11, 11, 18, .55);
+      --ink-soft: rgba(11, 11, 18, .62);
       --chip: rgba(255, 255, 255, .55);
       --chip-hover: rgba(255, 255, 255, .85);
       --accent: #c60e30;
+      --mark: #b91c1c; /* marked-letter examples in the tour: red's shade for light backgrounds */
       --shadow: 0 10px 40px rgba(40, 10, 16, .22), 0 2px 8px rgba(40, 10, 16, .12);
       --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, system-ui, sans-serif;
     }
@@ -168,10 +169,11 @@
         --glass-strong: rgba(36, 36, 44, .8);
         --glass-edge: rgba(255, 255, 255, .22);
         --ink: #f5f5f7;
-        --ink-soft: rgba(245, 245, 247, .6);
+        --ink-soft: rgba(245, 245, 247, .7);
         --chip: rgba(255, 255, 255, .12);
         --chip-hover: rgba(255, 255, 255, .24);
         --shadow: 0 10px 40px rgba(0, 0, 0, .5), 0 2px 8px rgba(0, 0, 0, .3);
+        --mark: #fca5a5; /* red's shade for dark backgrounds, like real marked text */
       }
     }
 
@@ -313,6 +315,9 @@
     .panel button { width: 36px; height: 36px; padding: 0; }
     .panel .big { font-size: 16px; font-weight: 700; }
     .panel .small { font-size: 11px; font-weight: 700; }
+    /* Center A+ / A− by the letters themselves (cap height to baseline), not by the
+       font's built-in spacing, which differs between Windows, Mac and Linux fonts. */
+    .panel .cap { display: block; line-height: 1; text-box: trim-both cap alphabetic; }
     .panel .size { width: 3ch; text-align: center; font-weight: 600; font-variant-numeric: tabular-nums; padding: 1px 0; white-space: nowrap; }
     .panel .size.bump { animation: bump .35s var(--spring); }
     @keyframes bump { 40% { transform: scale(1.3); } }
@@ -403,6 +408,7 @@
     .tour-pop h3 { margin: 6px 0 6px; font: 700 17px/1.25 var(--font); }
     .tour-pop p { margin: 0; font: 14px/1.45 var(--font); }
     .tour-pop p + p { margin-top: 8px; }
+    .tour-pop u.ex { color: var(--mark); text-decoration-thickness: .1em; text-underline-offset: .14em; }
     .tour-pop .content .ico { display: inline-block; width: 1.05em; height: 1.05em; vertical-align: -.17em; }
     /* Small and quiet: an optional way to support the project (last step only). */
     .tour-pop p.support { margin-top: 12px; font-size: 12px; }
@@ -557,11 +563,17 @@
     panel.className = 'glass panel hidden';
     const label = (t) => Object.assign(document.createElement('div'), { className: 'label', textContent: t });
     const hsep = () => Object.assign(document.createElement('div'), { className: 'sep' });
-    ui.bigger = btn('A+', 'Bigger text', () => changeSize(2), 'big');
+    const capLabel = (b, t) => {
+      b.textContent = '';
+      b.append(Object.assign(document.createElement('span'), { className: 'cap', textContent: t }));
+      b.setAttribute('aria-label', t);
+      return b;
+    };
+    ui.bigger = capLabel(btn('', 'Bigger text', () => changeSize(2), 'big'), 'A+');
     ui.size = document.createElement('div');
     ui.size.className = 'size';
     ui.size.title = 'Text size';
-    ui.smaller = btn('A−', 'Smaller text', () => changeSize(-2), 'small');
+    ui.smaller = capLabel(btn('', 'Smaller text', () => changeSize(-2), 'small'), 'A−');
     ui.swatches = COLORS.map((c) => {
       const sw = btn('', c.name + ' (switches to a lighter or darker shade automatically so it stays readable)', () => pickColor(c.id), 'swatch');
       // left half: shade used on light backgrounds; right half: shade used on dark ones
@@ -744,8 +756,8 @@
       target: () => [ui.mark],
       title: L('Highlight letters', 'Resaltar letras'),
       body: L(
-        `<p>Show a verb ending in another color, like <b>limpi<u style="color:#b91c1c">e</u></b>. Three ways:</p><p>• Type ${kbd('&gt;')} before the letters: <b>hac&gt;er</b> gives <b>hac<u style="color:#b91c1c">er</u></b>. A space ends it (${kbd('&gt;&gt;')} types a real &gt;).<br>• Select letters in your text, then click a color dot.<br>• Click <b>{{highlighter}}</b>, then click or drag across letters (or select letters first, then click it). Click again to unmark.</p>`,
-        `<p>Muestre una terminación verbal en otro color, como <b>limpi<u style="color:#b91c1c">e</u></b>. Tres maneras:</p><p>• Escriba ${kbd('&gt;')} antes de las letras: <b>hac&gt;er</b> da <b>hac<u style="color:#b91c1c">er</u></b>. Un espacio lo termina (${kbd('&gt;&gt;')} escribe un &gt; de verdad).<br>• Seleccione letras de su texto y pulse un punto de color.<br>• Pulse <b>{{highlighter}}</b> y haga clic o arrastre sobre las letras (o seleccione letras y luego púlselo). Otro clic las desmarca.</p>`
+        `<p>Show a verb ending in another color, like <b>limpi<u class="ex">e</u></b>. Three ways:</p><p>• Type ${kbd('&gt;')} before the letters: <b>hac&gt;er</b> gives <b>hac<u class="ex">er</u></b>. A space ends it (${kbd('&gt;&gt;')} types a real &gt;).<br>• Select letters in your text, then click a color dot.<br>• Click <b>{{highlighter}}</b>, then click or drag across letters (or select letters first, then click it). Click again to unmark.</p>`,
+        `<p>Muestre una terminación verbal en otro color, como <b>limpi<u class="ex">e</u></b>. Tres maneras:</p><p>• Escriba ${kbd('&gt;')} antes de las letras: <b>hac&gt;er</b> da <b>hac<u class="ex">er</u></b>. Un espacio lo termina (${kbd('&gt;&gt;')} escribe un &gt; de verdad).<br>• Seleccione letras de su texto y pulse un punto de color.<br>• Pulse <b>{{highlighter}}</b> y haga clic o arrastre sobre las letras (o seleccione letras y luego púlselo). Otro clic las desmarca.</p>`
       ),
     },
     {

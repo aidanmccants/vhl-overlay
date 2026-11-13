@@ -569,7 +569,7 @@ Needs [Node.js](https://nodejs.org) 20 or newer. Run `npm install` once, then
 | `npm run test:unit` | Fast tests for the release tool (zip, version bumps, release notes) |
 | `npm run test:e2e` | Loads the real extension in Chromium and tests every feature on a sample page (`tests/fixtures`) |
 | `npm test` | All of the above |
-| `npm run test:mutations` | Plants 41 realistic bugs, one at a time, and fails if the tests miss any of them |
+| `npm run test:mutations` | Plants 44 realistic bugs, one at a time, and fails if the tests miss any of them |
 
 The mutation check is what keeps the tests honest: if a test stops really checking its
 feature, a planted bug gets through and the check fails. Each mutant is listed in
