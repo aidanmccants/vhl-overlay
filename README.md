@@ -32,11 +32,12 @@ This takes about 3 minutes.
    A file called **VHL-Text-Overlay.zip** goes into your **Downloads** folder.
    - You can also find it on the **[Releases page](https://github.com/aidanmccants/vhl-overlay/releases/latest)**.
      Scroll down to **Assets** and click **VHL-Text-Overlay.zip**.
-2. Open your **Downloads** folder and double-click **VHL-Text-Overlay.zip**.
-   - **On a Mac:** a folder called **VHL Text Overlay** appears next to it.
-   - **On Windows:** click **Extract all** at the top of the window, then click **Extract**.
-     A new window opens with a folder called **VHL Text Overlay** inside it.
-3. **Don't delete the VHL Text Overlay folder**, or the tool stops working. You may want
+2. Open your **Downloads** folder and unzip **VHL-Text-Overlay.zip**:
+   - **On a Mac:** double-click it. A folder called **VHL-Text-Overlay** appears next to it.
+   - **On Windows:** right-click it, choose **Extract All…**, then click **Extract**. A folder
+     called **VHL-Text-Overlay** is created next to it, and Windows opens it to show the
+     files inside (`manifest.json`, `content.js`, an **icons** folder and a few more).
+3. **Don't delete the VHL-Text-Overlay folder**, or the tool stops working. You may want
    to move it somewhere safe, like your **Documents** folder.
 
 ### Step 2: Add it to Chrome
@@ -54,8 +55,9 @@ This takes about 3 minutes.
 
    <img src="docs/images/install-2-load-unpacked-en.png" width="600" alt="The Load unpacked button at the top left of the Extensions page">
 
-5. A window opens so you can choose a folder. Find the **VHL Text Overlay** folder from
-   Step 1, click it **once**, and click **Select** (or **Open**).
+5. A window opens so you can choose a folder. Find the **VHL-Text-Overlay** folder from
+   Step 1, click it **once**, and click **Select Folder** (on a Mac, **Select**). Choose
+   the folder itself, not a file inside it.
 6. A box named **VHL Text Overlay** now appears on the page. That means it's installed.
 
    <img src="docs/images/install-3-installed-en.png" width="600" alt="The VHL Text Overlay box on the Extensions page after installing">
@@ -175,7 +177,9 @@ includes what you can see on the screen, so scroll first to show the part you wa
 
 **Chrome says "Manifest file is missing or unreadable."**
 You chose the wrong folder in Step 2. Click **Load unpacked** again and pick the folder
-named **VHL Text Overlay**. It has a folder named **icons** inside it.
+that has **manifest.json** directly inside it. That's the **VHL-Text-Overlay** folder from
+Step 1. (If you downloaded an older version, the right folder may be one level deeper,
+named **VHL Text Overlay**.)
 
 **I clicked 📷 Screenshot but nothing happened, or it says "Screenshot cancelled."**
 When Chrome asks to share this tab, click **Share** (or **Allow**), not **Cancel**.
@@ -210,8 +214,8 @@ On a Mac, **Alt** is the **Option** key.
 
 ### Getting a newer version
 
-When a new version comes out, download it again (Step 1) and put the new **VHL Text
-Overlay** folder in place of the old one. Then go to `chrome://extensions` and click the
+When a new version comes out, download it again (Step 1) and put the new
+**VHL-Text-Overlay** folder in place of the old one. Then go to `chrome://extensions` and click the
 round arrow ↻ on the **VHL Text Overlay** box.
 
 ---
@@ -251,12 +255,14 @@ Tarda unos 3 minutos.
    Se descargará a su carpeta **Descargas** un archivo llamado **VHL-Text-Overlay.zip**.
    - También está en la **[página de versiones (Releases)](https://github.com/aidanmccants/vhl-overlay/releases/latest)**.
      Baje hasta **Assets** y haga clic en **VHL-Text-Overlay.zip**.
-2. Abra la carpeta **Descargas** y haga doble clic en **VHL-Text-Overlay.zip**.
-   - **En un Mac:** aparecerá al lado una carpeta llamada **VHL Text Overlay**.
-   - **En Windows:** haga clic en **Extraer todo** en la parte de arriba de la ventana y
-     luego en **Extraer**. Se abrirá una ventana con una carpeta llamada
-     **VHL Text Overlay** dentro.
-3. **No borre la carpeta VHL Text Overlay**, porque si no la herramienta deja de
+2. Abra la carpeta **Descargas** y descomprima **VHL-Text-Overlay.zip**:
+   - **En un Mac:** haga doble clic en él. Aparecerá al lado una carpeta llamada
+     **VHL-Text-Overlay**.
+   - **En Windows:** haga clic derecho en él, elija **Extraer todo…** y luego **Extraer**.
+     Se crea al lado una carpeta llamada **VHL-Text-Overlay** y Windows la abre para
+     mostrar los archivos que contiene (`manifest.json`, `content.js`, una carpeta
+     **icons** y algunos más).
+3. **No borre la carpeta VHL-Text-Overlay**, porque si no la herramienta deja de
    funcionar. Puede moverla a un lugar seguro, como **Documentos**.
 
 ### Paso 2: Añadirla a Chrome
@@ -273,8 +279,9 @@ Tarda unos 3 minutos.
 
    <img src="docs/images/install-2-load-unpacked-es.png" width="600" alt="El botón Cargar descomprimida arriba a la izquierda de la página Extensiones">
 
-5. Se abre una ventana para elegir una carpeta. Busque la carpeta **VHL Text Overlay** del
-   Paso 1, haga **un solo clic** en ella y luego en **Seleccionar** (o **Abrir**).
+5. Se abre una ventana para elegir una carpeta. Busque la carpeta **VHL-Text-Overlay** del
+   Paso 1, haga **un solo clic** en ella y luego en **Seleccionar carpeta** (en un Mac,
+   **Seleccionar**). Elija la carpeta, no un archivo de dentro.
 6. Ahora aparece un recuadro llamado **VHL Text Overlay**. Eso significa que está instalada.
 
    <img src="docs/images/install-3-installed-es.png" width="600" alt="El recuadro VHL Text Overlay en la página Extensiones después de instalarla">
@@ -399,7 +406,9 @@ incluye lo que se ve en la pantalla, así que desplácese primero hasta la parte
 
 **Chrome dice que falta el archivo de manifiesto ("Manifest file is missing").**
 Eligió una carpeta equivocada en el Paso 2. Pulse otra vez **Cargar descomprimida** y
-elija la carpeta llamada **VHL Text Overlay**. Dentro tiene una carpeta llamada **icons**.
+elija la carpeta que tiene **manifest.json** directamente dentro: la carpeta
+**VHL-Text-Overlay** del Paso 1. (Si descargó una versión anterior, la carpeta correcta
+puede estar un nivel más adentro y llamarse **VHL Text Overlay**.)
 
 **Pulsé 📷 Screenshot y no pasó nada, o sale "Captura cancelada".**
 Cuando Chrome pregunte si quiere compartir esta pestaña, pulse **Compartir** (o
@@ -436,7 +445,7 @@ En un Mac, **Alt** es la tecla **Opción**.
 ### Obtener una versión nueva
 
 Cuando salga una versión nueva, descárguela otra vez (Paso 1) y ponga la nueva carpeta
-**VHL Text Overlay** en lugar de la anterior. Luego vaya a `chrome://extensions` y haga
+**VHL-Text-Overlay** en lugar de la anterior. Luego vaya a `chrome://extensions` y haga
 clic en la flecha circular ↻ del recuadro **VHL Text Overlay**.
 
 ---
@@ -459,6 +468,7 @@ Needs [Node.js](https://nodejs.org) 20 or newer. Run `npm install` once, then
 The mutation check is what keeps the tests honest: if a test stops really checking its
 feature, a planted bug gets through and the check fails. Each mutant is listed in
 `scripts/mutation-check.mjs` with the bug it plants and the tests that must catch it.
+It runs automatically on every pull request (a few minutes).
 Add one whenever you add a feature.
 
 ### Publishing a release
@@ -470,7 +480,7 @@ The download link above always points to the newest release on GitHub. Two ways 
 - **On your computer:** `npm run release -- patch` (or `minor`, `major`, `1.2.3`), then
   `git push && git push origin v<version>`.
 
-Both run every check, test and the mutation check first. Then they raise the version in
+Both run every check and test first (about 2 minutes). Then they raise the version in
 `extension/manifest.json`, add an entry to `CHANGELOG.md`, build `VHL-Text-Overlay.zip`,
 write release notes from the commit messages (grouped into New, Fixes, Look and feel,
 Docs, Maintenance) and publish the release.

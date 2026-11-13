@@ -5,9 +5,10 @@
 #      version (patch / minor / major), or "none" to release the current version.
 #   2. Locally: `npm run release -- patch`, then push the commit and the tag.
 #
-# Either way it runs every check and test, then the mutation check (which plants
-# bugs and makes sure the tests catch them), builds VHL-Text-Overlay.zip, writes
-# the release notes from the git history and publishes the release.
+# Either way it runs every check and test (about 2 minutes), builds
+# VHL-Text-Overlay.zip, writes the release notes from the git history and
+# publishes the release. The slower mutation check runs on pull requests instead
+# (see ci.yml), before changes reach main.
 name: Publish release
 
 on:
@@ -29,7 +30,7 @@ concurrency: release
 jobs:
   release:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
         with:
@@ -49,9 +50,6 @@ jobs:
           npm run check
           npm run test:unit
           npm run test:e2e
-
-      - name: Make sure the tests catch planted bugs
-        run: node scripts/mutation-check.mjs
 
       - name: Bump the version, update CHANGELOG.md, commit and tag
         if: github.event_name == 'workflow_dispatch' && inputs.bump != 'none'
