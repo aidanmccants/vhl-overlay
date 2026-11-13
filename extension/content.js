@@ -131,8 +131,8 @@
       --ink-soft: rgba(11, 11, 18, .55);
       --chip: rgba(255, 255, 255, .55);
       --chip-hover: rgba(255, 255, 255, .85);
-      --accent: #0a84ff;
-      --shadow: 0 10px 40px rgba(17, 12, 46, .22), 0 2px 8px rgba(17, 12, 46, .12);
+      --accent: #c60e30;
+      --shadow: 0 10px 40px rgba(40, 10, 16, .22), 0 2px 8px rgba(40, 10, 16, .12);
       --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, system-ui, sans-serif;
     }
     @media (prefers-color-scheme: dark) {
@@ -165,8 +165,8 @@
       transition: color .35s var(--ease), font-size .25s var(--ease), box-shadow .25s var(--ease), text-shadow .35s var(--ease);
     }
     @keyframes pop { from { opacity: 0; transform: scale(.85); filter: blur(3px); } }
-    .typing .note:hover .text { box-shadow: 0 0 0 1px rgba(10, 132, 255, .45); }
-    .note.selected .text { box-shadow: 0 0 0 1.5px var(--accent), 0 0 0 4px rgba(255, 255, 255, .7), 0 4px 14px rgba(10, 132, 255, .25); }
+    .typing .note:hover .text { box-shadow: 0 0 0 1px rgba(198, 14, 48, .45); }
+    .note.selected .text { box-shadow: 0 0 0 1.5px var(--accent), 0 0 0 4px rgba(255, 255, 255, .7), 0 4px 14px rgba(198, 14, 48, .25); }
     .note.probing { opacity: 0 !important; }
     .grip, .del {
       position: absolute; top: -24px; width: 20px; height: 20px; display: grid; place-items: center;
@@ -177,7 +177,7 @@
       opacity: 0; transform: scale(.4) translateY(6px); pointer-events: none;
       transition: opacity .2s var(--ease), transform .4s var(--spring);
     }
-    .grip { left: 0; background: rgba(10, 132, 255, .85); cursor: grab; }
+    .grip { left: 0; background: rgba(44, 44, 50, .85); cursor: grab; }
     .grip:active { cursor: grabbing; }
     .del { left: 24px; background: rgba(255, 59, 48, .88); cursor: pointer; font-size: 13px; }
     .typing .note.selected .grip, .typing .note.selected .del { opacity: 1; transform: none; pointer-events: auto; }
@@ -228,8 +228,8 @@
     .toolbar .drag { cursor: grab; color: var(--ink-soft); padding: 0 3px 0 5px; font-size: 14px; letter-spacing: -2px; }
     .toolbar button { padding: 8px 13px; white-space: nowrap; font-weight: 500; }
     .toolbar button.on {
-      background: linear-gradient(180deg, #3b9bff, #0a7aff); color: #fff;
-      box-shadow: inset 0 1px 0 rgba(255, 255, 255, .45), 0 4px 14px rgba(10, 132, 255, .45);
+      background: linear-gradient(180deg, #e0294b, #b00c2b); color: #fff;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, .45), 0 4px 14px rgba(198, 14, 48, .45);
     }
     .toolbar button.icon { width: 32px; height: 32px; padding: 0; }
     .toolbar .sep { width: 1px; height: 20px; background: var(--ink-soft); opacity: .25; margin: 0 2px; }
@@ -257,7 +257,7 @@
     .panel .swatch:hover { transform: scale(1.12); }
     .panel .swatch.active {
       transform: scale(1.12);
-      box-shadow: 0 0 0 2px rgba(255, 255, 255, .95), 0 0 0 4.5px var(--accent), 0 4px 12px rgba(10, 132, 255, .35);
+      box-shadow: 0 0 0 2px rgba(255, 255, 255, .95), 0 0 0 4.5px var(--accent), 0 4px 12px rgba(198, 14, 48, .35);
     }
     .panel .flip { width: 36px; height: 28px; font-size: 14px; color: var(--ink-soft); }
 
@@ -288,8 +288,8 @@
     .shotcard .title button { width: 28px; height: 28px; padding: 0; font-size: 12px; }
     .shotcard .actions { display: flex; gap: 8px; margin-top: 12px; }
     .shotcard .actions button { flex: 1; padding: 10px 12px; font-weight: 600; font-size: 13.5px; }
-    .shotcard .actions button.primary { background: linear-gradient(180deg, #3b9bff, #0a7aff); color: #fff;
-      box-shadow: inset 0 1px 0 rgba(255, 255, 255, .45), 0 4px 14px rgba(10, 132, 255, .4); }
+    .shotcard .actions button.primary { background: linear-gradient(180deg, #e0294b, #b00c2b); color: #fff;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, .45), 0 4px 14px rgba(198, 14, 48, .4); }
     .shotcard .actions button.done { background: rgba(52, 199, 89, .9); color: #fff; }
     .shotcard .status { margin: 10px 4px 0; min-height: 1.3em; font: 13px/1.35 var(--font); color: var(--ink-soft); }
     .shotcard .status:empty { display: none; }
@@ -298,12 +298,12 @@
     /* ---------- first-time tour ---------- */
     .tour-ring {
       position: fixed; pointer-events: none; border-radius: 18px;
-      box-shadow: 0 0 0 3px rgba(10, 132, 255, .95), 0 0 0 9px rgba(10, 132, 255, .25), 0 0 34px 8px rgba(10, 132, 255, .35);
+      box-shadow: 0 0 0 3px rgba(198, 14, 48, .95), 0 0 0 9px rgba(198, 14, 48, .25), 0 0 34px 8px rgba(198, 14, 48, .35);
       transition: left .55s var(--spring), top .55s var(--spring), width .55s var(--spring), height .55s var(--spring),
         opacity .3s var(--ease), border-radius .4s var(--ease);
       animation: breathe 2.2s ease-in-out infinite;
     }
-    @keyframes breathe { 50% { box-shadow: 0 0 0 3px rgba(10, 132, 255, .95), 0 0 0 13px rgba(10, 132, 255, .12), 0 0 44px 12px rgba(10, 132, 255, .28); } }
+    @keyframes breathe { 50% { box-shadow: 0 0 0 3px rgba(198, 14, 48, .95), 0 0 0 13px rgba(198, 14, 48, .12), 0 0 44px 12px rgba(198, 14, 48, .28); } }
     .tour-ring.off { opacity: 0; }
     .tour-pop {
       width: min(320px, calc(100vw - 24px)); box-sizing: border-box; padding: 16px 16px 14px;
@@ -319,7 +319,7 @@
     .tour-pop p { margin: 0; font: 14px/1.45 var(--font); }
     .tour-pop p + p { margin-top: 8px; }
     .tour-pop .try { margin-top: 10px; padding: 8px 11px; border-radius: 14px; font: 500 13px/1.4 var(--font);
-      background: rgba(10, 132, 255, .12); color: var(--ink); }
+      background: rgba(198, 14, 48, .12); color: var(--ink); }
     .tour-pop kbd { font: 600 11.5px/1 var(--font); padding: 2px 6px; border-radius: 6px; background: var(--chip);
       box-shadow: inset 0 -1px 0 rgba(0, 0, 0, .15); }
     .tour-pop .dots { display: flex; gap: 5px; margin: 14px 0 12px; }
@@ -329,8 +329,8 @@
     .tour-pop .row { display: flex; align-items: center; gap: 8px; }
     .tour-pop .row .grow { flex: 1; }
     .tour-pop .row button { padding: 8px 14px; font-weight: 600; }
-    .tour-pop .row button.primary { background: linear-gradient(180deg, #3b9bff, #0a7aff); color: #fff;
-      box-shadow: inset 0 1px 0 rgba(255, 255, 255, .45), 0 4px 14px rgba(10, 132, 255, .4); }
+    .tour-pop .row button.primary { background: linear-gradient(180deg, #e0294b, #b00c2b); color: #fff;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, .45), 0 4px 14px rgba(198, 14, 48, .4); }
     .tour-pop .row button.link { background: none; box-shadow: none; color: var(--ink-soft); padding: 8px 6px; font-weight: 500; }
     .tour-pop .row button.link:hover { color: var(--ink); transform: none; }
 
@@ -542,8 +542,8 @@
       place: 'bottom',
       title: L('Edit, move or delete', 'Editar, mover o borrar'),
       body: L(
-        '<p>Click your text to change it.</p><p>Drag the blue <b>✥</b> handle to move it, or click the red <b>×</b> to delete it.</p><p>Your text sticks to the page when you scroll or zoom.</p>',
-        '<p>Haga clic en su texto para cambiarlo.</p><p>Arrastre el círculo azul <b>✥</b> para moverlo, o pulse la <b>×</b> roja para borrarlo.</p><p>El texto se queda pegado a la página al desplazarse o ampliar.</p>'
+        '<p>Click your text to change it.</p><p>Drag the dark gray <b>✥</b> handle to move it, or click the red <b>×</b> to delete it.</p><p>Your text sticks to the page when you scroll or zoom.</p>',
+        '<p>Haga clic en su texto para cambiarlo.</p><p>Arrastre el círculo gris oscuro <b>✥</b> para moverlo, o pulse la <b>×</b> roja para borrarlo.</p><p>El texto se queda pegado a la página al desplazarse o ampliar.</p>'
       ),
     },
     {

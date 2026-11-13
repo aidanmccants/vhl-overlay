@@ -107,10 +107,10 @@ To see it again later, click the **?** button on the top bar.
 - Press **Enter** to start a new line in the same spot.
 - Press **Esc** (top-left key on your keyboard) when you're done with a piece of writing.
 - **To fix something:** click your writing and type or delete.
-- **To move it:** click your writing, then drag the small blue **✥** tab just above it.
+- **To move it:** click your writing, then drag the small dark gray **✥** tab just above it.
 - **To erase it:** click your writing, then click the small red **×** above it.
 
-<img src="docs/images/use-3-move-delete-en.png" width="420" alt="The blue move tab and red delete button above a piece of writing">
+<img src="docs/images/use-3-move-delete-en.png" width="420" alt="The gray move tab and red delete button above a piece of writing">
 
 Your writing stays in place on the page, even if you scroll up and down or zoom in.
 
@@ -166,7 +166,7 @@ You can move the top bar by dragging the dots **⋮⋮** at its left end.
 
    Click **✕** to close the card.
 
-The toolbars and the small blue and red tabs are left out of the picture. The picture only
+The toolbars and the small gray and red tabs are left out of the picture. The picture only
 includes what you can see on the screen, so scroll first to show the part you want.
 
 ---
@@ -329,11 +329,11 @@ recorrido aparece en español si Chrome está en español.)
 - Pulse **Intro** para empezar una línea nueva en el mismo sitio.
 - Pulse **Esc** (tecla de arriba a la izquierda) al terminar un texto.
 - **Para corregir:** haga clic en su texto y escriba o borre.
-- **Para moverlo:** haga clic en su texto y arrastre la pequeña pestaña azul **✥** que
+- **Para moverlo:** haga clic en su texto y arrastre la pequeña pestaña gris oscuro **✥** que
   aparece encima.
 - **Para borrarlo:** haga clic en su texto y luego en la pequeña **×** roja de encima.
 
-<img src="docs/images/use-3-move-delete-es.png" width="420" alt="La pestaña azul para mover y el botón rojo para borrar encima de un texto">
+<img src="docs/images/use-3-move-delete-es.png" width="420" alt="La pestaña gris para mover y el botón rojo para borrar encima de un texto">
 
 El texto se queda en su sitio en la página, aunque se desplace hacia arriba o abajo o
 amplíe la página.
@@ -390,7 +390,7 @@ Puede mover la barra de arriba arrastrando los puntos **⋮⋮** de su lado izqu
 
    Pulse **✕** para cerrar la tarjeta.
 
-Las barras de botones y las pestañas azules y rojas no salen en la imagen. La imagen solo
+Las barras de botones y las pestañas grises y rojas no salen en la imagen. La imagen solo
 incluye lo que se ve en la pantalla, así que desplácese primero hasta la parte que quiera.
 
 ---
