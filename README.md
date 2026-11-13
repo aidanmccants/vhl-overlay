@@ -105,7 +105,7 @@ To see it again later, click the **?** button on the top bar.
 
 <img src="docs/images/tour-1-welcome-en.png" width="600" alt="The start of the tour, with Skip tour and Start the tour buttons">
 
-<img src="docs/images/tour-2-step-en.png" width="480" alt="A tour step pointing at the Typing button">
+<img src="docs/images/tour-2-step-en.png" width="480" alt="A tour step pointing at the Off, Pen and Typing buttons">
 
 ### 3. Write on the page
 
@@ -132,9 +132,9 @@ your writing gets a thin outline so you can still read it.
 
 | | Button | What it does |
 |---|---|---|
-| **1** | **✏️ Typing: on / off** | While it's **on**, clicking the page adds writing. Turn it **off** to use the textbook normally (turn pages, click buttons). Your writing stays on the page. |
+| **1** | **Off · 🖊️ Pen · ✏️ Typing** | Chooses what clicking the page does. **✏️ Typing**: clicking adds writing. **🖊️ Pen**: you draw (see below). **Off**: use the textbook normally (turn pages, click buttons). Your work stays on the page in every mode. |
 | **2** | **📷 Screenshot** | Takes a picture of the page with your writing, to copy or download (see below). |
-| **3** | **🗑 Clear** | Erases all of your writing on the page. |
+| **3** | **🗑 Clear** | Erases all of your writing and drawings on the page. |
 | **4** | **?** | Shows the tour of every feature again. |
 | **5** | **✕** | Hides both toolbars. Your writing stays. Click the **T** button to bring them back. |
 
@@ -148,7 +148,7 @@ You can move the top bar by dragging the dots **⋮⋮** at its left end.
 - The **colored dots** pick the color of your writing. Each dot shows two shades: the
   darker one is used on light backgrounds and the lighter one on dark backgrounds.
   The black dot turns white on dark backgrounds.
-- **🖍** is the highlighter for marking letters (see the next section).
+- **🖍** is the highlighter for marking letters, and **🧽** is the eraser for drawings (see below).
 - **⇄** moves this toolbar to the other side of the screen if it's in your way.
 
 > **Tip:** To change the size or color of something you already wrote, click it first,
@@ -174,6 +174,27 @@ There are three ways to do it. Use whichever you like:
   several letters. Click a marked letter again to unmark it. While 🖍 is on, the color dots
   choose the marker color (red at first). Click **🖍** again (or **✏️ Typing**) to go back
   to typing.
+
+### Draw with a pen (or a mouse, or your finger)
+
+Click **🖊️ Pen** on the top bar, then draw on the page: circle an answer, underline a
+word, cross out a mistake. It works with a pen like a **Surface Pen**, a mouse, or a finger
+on a touch screen.
+
+<img src="docs/images/use-8-pen-en.png" width="520" alt="Answers circled and underlined in pen on the textbook page">
+
+- **Press harder for a thicker line** (with a pen).
+- **To erase,** flip a Surface Pen over and rub with its eraser end, or click **🧽** on the
+  side toolbar and touch the lines you want to erase. Each touch erases a whole line.
+- **Ctrl + Z** undoes the last line (or erase), and **Ctrl + Shift + Z** brings it back.
+- The **color dots** and **A+ / A−** set the color and thickness for new lines. Lines stay
+  readable on dark boxes, like your writing.
+- Drawings stay in place on the page when you scroll or zoom, and they're in your
+  screenshots.
+- The mouse wheel still scrolls the page. Once you've used a pen, a finger on the screen
+  scrolls instead of drawing, so your hand resting on the screen doesn't leave marks.
+
+Click **Off** when you want to use the textbook again, or **✏️ Typing** to write.
 
 ### 6. Keep your work: take a picture
 
@@ -219,8 +240,8 @@ Make sure the **Copy** button turned green and says **✓ Copied**, then paste w
 **Ctrl + V** (**⌘ Command + V** on a Mac) right away, before copying anything else.
 
 **I can't click the textbook's buttons or turn the page.**
-Typing is on, so your clicks add writing instead. Click **✏️ Typing: on** to turn it
-off. Click it again when you want to write.
+Typing or Pen is on, so your clicks add writing or drawing instead. Click **Off** on the
+top bar. Click **✏️ Typing** or **🖊️ Pen** again when you want to write or draw.
 
 **My writing disappeared.**
 Refreshing the page or closing the tab erases your writing. Sometimes turning to a new
@@ -358,7 +379,7 @@ recorrido aparece en español si Chrome está en español.)
 
 <img src="docs/images/tour-1-welcome-es.png" width="600" alt="El comienzo del recorrido, con los botones Saltar y Empezar">
 
-<img src="docs/images/tour-2-step-es.png" width="480" alt="Un paso del recorrido que señala el botón Typing">
+<img src="docs/images/tour-2-step-es.png" width="480" alt="Un paso del recorrido que señala los botones Apagado, Lápiz y Typing">
 
 ### 3. Escriba sobre la página
 
@@ -388,9 +409,9 @@ muchos colores, el texto lleva un contorno fino para que se pueda leer.
 
 | | Botón | Qué hace |
 |---|---|---|
-| **1** | **✏️ Typing: on / off** | Cuando está en **on** (activado), al hacer clic en la página se añade texto. Póngalo en **off** (desactivado) para usar el libro con normalidad (pasar páginas, pulsar botones). Su texto sigue en la página. |
+| **1** | **Apagado · 🖊️ Lápiz · ✏️ Typing** | Elige qué pasa al hacer clic en la página. **✏️ Typing**: el clic añade texto. **🖊️ Lápiz**: usted dibuja (vea abajo). **Apagado**: use el libro con normalidad (pasar páginas, pulsar botones). Su trabajo se queda en la página en todos los modos. |
 | **2** | **📷 Screenshot** | Saca una imagen de la página con su texto para copiarla o descargarla (vea abajo). |
-| **3** | **🗑 Clear** | Borra todo lo que escribió en la página. |
+| **3** | **🗑 Clear** | Borra todo lo que escribió y dibujó en la página. |
 | **4** | **?** | Vuelve a mostrar el recorrido de todas las funciones. |
 | **5** | **✕** | Oculta las dos barras. Su texto se queda. Haga clic en el botón **T** para que vuelvan. |
 
@@ -404,7 +425,7 @@ Puede mover la barra de arriba arrastrando los puntos **⋮⋮** de su lado izqu
 - Los **puntos de colores** eligen el color del texto. Cada punto muestra dos tonos: el más
   oscuro se usa sobre fondos claros y el más claro sobre fondos oscuros. El punto negro
   se vuelve blanco sobre fondos oscuros.
-- **🖍** es el marcador para resaltar letras (vea la sección siguiente).
+- **🖍** es el marcador para resaltar letras y **🧽** es el borrador de dibujos (vea abajo).
 - **⇄** mueve esta barra al otro lado de la pantalla si le molesta.
 
 > **Consejo:** para cambiar el tamaño o el color de algo que ya escribió, haga clic en
@@ -431,6 +452,28 @@ Hay tres maneras. Use la que prefiera:
   sobre varias letras. Otro clic en una letra marcada la desmarca. Con 🖍 activado, los
   puntos de colores eligen el color del marcador (al principio, rojo). Pulse **🖍** otra vez
   (o **✏️ Typing**) para volver a escribir.
+
+### Dibujar con un lápiz (o con el ratón o el dedo)
+
+Pulse **🖊️ Lápiz** en la barra de arriba y dibuje en la página: rodee una respuesta,
+subraye una palabra, tache un error. Funciona con un lápiz como el **Surface Pen**, con el
+ratón o con el dedo en una pantalla táctil.
+
+<img src="docs/images/use-8-pen-es.png" width="520" alt="Respuestas rodeadas y subrayadas con el lápiz en la página del libro">
+
+- **Si aprieta más, la línea es más gruesa** (con un lápiz).
+- **Para borrar,** dé la vuelta al Surface Pen y frote con el extremo borrador, o pulse
+  **🧽** en la barra lateral y toque las líneas que quiere borrar. Cada toque borra una
+  línea entera.
+- **Ctrl + Z** deshace la última línea (o el último borrado) y **Ctrl + Mayús + Z** la
+  recupera.
+- Los **puntos de colores** y **A+ / A−** eligen el color y el grosor de las líneas nuevas.
+  Las líneas se leen bien sobre fondos oscuros, igual que el texto.
+- Los dibujos se quedan en su sitio al desplazarse o ampliar, y salen en las capturas.
+- La rueda del ratón sigue desplazando la página. Después de usar un lápiz, el dedo en la
+  pantalla desplaza en vez de dibujar, así que la mano apoyada no deja marcas.
+
+Pulse **Apagado** cuando quiera volver a usar el libro, o **✏️ Typing** para escribir.
 
 ### 6. Conserve su trabajo: saque una imagen
 
@@ -477,8 +520,8 @@ Compruebe que el botón **Copiar** se puso verde y dice **✓ Copiada**, y pegue
 **Ctrl + V** (**⌘ Comando + V** en un Mac) enseguida, antes de copiar otra cosa.
 
 **No puedo pulsar los botones del libro ni pasar de página.**
-La escritura está activada, así que sus clics añaden texto. Pulse **✏️ Typing: on** para
-desactivarla. Púlselo otra vez cuando quiera escribir.
+Está activado Typing o Lápiz, así que sus clics escriben o dibujan. Pulse **Apagado** en
+la barra de arriba. Pulse **✏️ Typing** o **🖊️ Lápiz** cuando quiera escribir o dibujar.
 
 **Mi texto ha desaparecido.**
 Recargar la página o cerrar la pestaña borra lo que escribió. A veces, al pasar de
@@ -518,7 +561,7 @@ Needs [Node.js](https://nodejs.org) 20 or newer. Run `npm install` once, then
 | `npm run test:unit` | Fast tests for the release tool (zip, version bumps, release notes) |
 | `npm run test:e2e` | Loads the real extension in Chromium and tests every feature on a sample page (`tests/fixtures`) |
 | `npm test` | All of the above |
-| `npm run test:mutations` | Plants 31 realistic bugs, one at a time, and fails if the tests miss any of them |
+| `npm run test:mutations` | Plants 40 realistic bugs, one at a time, and fails if the tests miss any of them |
 
 The mutation check is what keeps the tests honest: if a test stops really checking its
 feature, a planted bug gets through and the check fails. Each mutant is listed in

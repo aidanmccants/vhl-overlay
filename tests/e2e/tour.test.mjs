@@ -36,7 +36,7 @@ test('installing opens the welcome page and the tour runs through every feature 
       await page.waitForTimeout(250);
     }
     assert.deepEqual(titles, [
-      'Welcome to VHL Text Overlay 👋', 'Typing mode', 'Write anywhere', 'Edit, move or delete', 'Text size',
+      'Welcome to VHL Text Overlay 👋', 'Off, Pen or Typing', 'Write anywhere', 'Edit, move or delete', 'Text size',
       'Colors that stay readable', 'Highlight letters', 'Move this toolbar', 'Save a picture of your work', 'Clear', 'Hide the toolbars',
       'You’re all set! 🎉',
     ]);
@@ -70,7 +70,7 @@ test('Back goes to the previous step and Skip works from the middle', async () =
     assert.equal(await tourTitle(page), 'Write anywhere');
     await page.locator('vhl-text-overlay').locator('.tour-pop .row button', { hasText: 'Back' }).click();
     await page.waitForTimeout(200);
-    assert.equal(await tourTitle(page), 'Typing mode');
+    assert.equal(await tourTitle(page), 'Off, Pen or Typing');
     await ui(page, '.tour-pop .row button.link').click();
     assert.equal(await pending(sw), false);
   } finally {

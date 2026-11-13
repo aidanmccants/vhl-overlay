@@ -1,4 +1,4 @@
-// Layout stability: changing state (Typing on/off, Copy → Copied, tour steps, size
+// Layout stability: changing state (Off/Pen/Typing, Copy → Copied, tour steps, size
 // numbers) must never resize a container or move the buttons around it.
 import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
@@ -25,18 +25,18 @@ function assertSameBoxes(a, b, what) {
   });
 }
 
-test('turning Typing on and off does not resize the top bar or move its buttons', async () => {
+test('switching between Off, Pen and Typing does not resize the top bar or move its buttons', async () => {
   const { page, sw } = b;
   await gotoReader(page, sw);
   await settle(page);
-  const on = [await ui(page, '.toolbar').boundingBox(), ...(await boxes(ui(page, '.toolbar button')))];
-  await ui(page, '.toolbar button').first().click();
-  await settle(page);
-  assert.match(await ui(page, '.toolbar button').first().getAttribute('aria-label'), /off/);
-  const off = [await ui(page, '.toolbar').boundingBox(), ...(await boxes(ui(page, '.toolbar button')))];
-  assertSameBoxes(on, off, 'top bar');
-  await ui(page, '.toolbar button').first().click();
-  await settle(page);
+  const bar = async () => [await ui(page, '.toolbar').boundingBox(), ...(await boxes(ui(page, '.toolbar button')))];
+  const start = await bar();
+  for (const m of ['off', 'pen', 'typing']) {
+    await ui(page, `.modes button[data-mode="${m}"]`).click();
+    await settle(page);
+    assert.equal(await ui(page, `.modes button[data-mode="${m}"]`).getAttribute('aria-pressed'), 'true');
+    assertSameBoxes(start, await bar(), `top bar in ${m} mode`);
+  }
 });
 
 test('the size number keeps the same width from 10 to 48', async () => {

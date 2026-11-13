@@ -176,7 +176,7 @@ async function box(loc) { const b = await loc.boundingBox(); return { x: b.x, y:
 
   // Top bar close-up with numbers
   const tbtn = (i) => box(sr('.toolbar button').nth(i));
-  const typing = await tbtn(0), save = await tbtn(1), clear = await tbtn(2), help = await tbtn(3), close = await tbtn(4);
+  const typing = await box(sr('.toolbar .modes')), save = await tbtn(3), clear = await tbtn(4), help = await tbtn(5), close = await tbtn(6);
   await mark(page, [
     { ...typing, pad: 4, label: '1' },
     { ...save, pad: 4, label: '2' },
@@ -203,7 +203,7 @@ async function box(loc) { const b = await loc.boundingBox(); return { x: b.x, y:
   await unmark(page);
 
   // Tour: open with "?" and show the first two steps
-  await sr('.toolbar button').nth(3).click();
+  await sr('.toolbar button[title^="Show the tour"]').click();
   await page.waitForTimeout(900);
   await shot('tour-1-welcome', { x: 0, y: 0, width: 1000, height: 560 });
   await sr('.tour-pop .row button.primary').click();
@@ -244,6 +244,30 @@ async function box(loc) { const b = await loc.boundingBox(); return { x: b.x, y:
   await mark(page, [{ ...n0, pad: 5, label: L('typed:  habl>o', 'escrito:  habl>o'), labelPos: 'right' }]);
   await shot('use-7-highlight', { x: pageBox.x, y: blanks[0].y - 40, width: pageBox.w, height: blanks[4].y - blanks[0].y + 80 });
   await unmark(page);
+
+  // Pen: circle one answer, underline another, check mark next to a third (red ink)
+  await sr('.modes button[data-mode="pen"]').click();
+  await sr('.panel .swatch[data-color="red"]').click();
+  await page.waitForTimeout(400);
+  const cdp = await ctx.newCDPSession(page);
+  const penLine = async (pts) => {
+    const send = (type, [x, y], extra) => cdp.send('Input.dispatchMouseEvent', { type, x, y, button: 'left', pointerType: 'pen', ...extra });
+    await send('mousePressed', pts[0], { buttons: 1, clickCount: 1, force: 0.3 });
+    for (let i = 1; i < pts.length; i++) await send('mouseMoved', pts[i], { buttons: 1, force: 0.3 + 0.5 * Math.sin((i / pts.length) * Math.PI) });
+    await send('mouseReleased', pts.at(-1), { buttons: 0, clickCount: 1, force: 0 });
+  };
+  const n1 = await box(sr('.note .text').nth(1));
+  const ell = [];
+  for (let a = -0.4; a <= Math.PI * 2 + 0.3; a += 0.12) ell.push([n1.x + n1.w / 2 + Math.cos(a) * (n1.w / 2 + 16), n1.y + n1.h / 2 + Math.sin(a) * (n1.h / 2 + 9)]);
+  await penLine(ell);
+  const n2 = await box(sr('.note .text').nth(2));
+  await penLine(Array.from({ length: 24 }, (_, i) => [n2.x + i * ((n2.w + 8) / 23), n2.y + n2.h + 4 + Math.sin(i / 3) * 1.5]));
+  const n3 = await box(sr('.note .text').nth(3));
+  const cx = n3.x + n3.w + 150, cy = n3.y + n3.h / 2;
+  await penLine([...Array.from({ length: 6 }, (_, i) => [cx + i * 2, cy + i * 2.4]), ...Array.from({ length: 12 }, (_, i) => [cx + 12 + i * 2.4, cy + 12 - i * 3])]);
+  await page.mouse.move(5, 500);
+  await page.waitForTimeout(500);
+  await shot('use-8-pen', { x: pageBox.x, y: blanks[0].y - 40, width: pageBox.w, height: blanks[4].y - blanks[0].y + 80 });
 
   await ctx.close();
 }

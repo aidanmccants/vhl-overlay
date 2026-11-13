@@ -21,7 +21,7 @@
   const MIN_SIZE = 10;
   const MAX_SIZE = 48;
 
-  let state = { open: false, typing: false, mark: false, markColor: 'red', color: 'blue', size: 18, side: 'right' };
+  let state = { open: false, typing: false, pen: false, eraser: false, mark: false, markColor: 'red', color: 'blue', size: 18, side: 'right' };
   let host = null; // shadow host element
   let root = null; // shadow root
   let layer = null; // container for notes
@@ -33,6 +33,7 @@
   let refocusAfterCapture = null;
   let pendingFocus = null; // note created on pointerdown, focused on pointerup/click
   const notes = new Set();
+  const strokes = new Set(); // pen drawings (top page only)
 
   // ---------------------------------------------------------------------------
   // Event shielding. These listeners are registered at document_start, before any
@@ -50,7 +51,7 @@
         if (isOurs(e)) {
           return; // our own UI handles it; the host stops it from bubbling to the page
         }
-        if (!(state.typing || state.mark) || capturing) return;
+        if (!(state.typing || state.mark || state.pen) || capturing) return;
         if (e.button !== undefined && e.button !== 0) return; // only left clicks / taps
         if (onScrollbar(e)) return; // let scrollbars keep working
         // Typing mode: the page should not react to this click at all.
@@ -59,7 +60,7 @@
         e.stopImmediatePropagation();
         if (type === 'pointerdown') {
           if (state.mark) markHint(); // highlighter: only letters can be clicked
-          else onPageClick(e);
+          else if (state.typing) onPageClick(e);
         }
         // Focus the new note once the browser has finished its own mousedown focus handling.
         if ((type === 'pointerup' || type === 'click') && pendingFocus) {
@@ -89,6 +90,13 @@
     window.addEventListener(
       type,
       (e) => {
+        if (state.pen && IS_TOP && isUndoKey(e)) {
+          // Pen mode: Ctrl+Z / Ctrl+Shift+Z undo and redo drawing.
+          e.preventDefault();
+          e.stopImmediatePropagation();
+          if (type === 'keydown') inkUndoRedo(e.key.toLowerCase() === 'z' && !e.shiftKey);
+          return;
+        }
         if (!isOurs(e)) return;
         if (type === 'keydown') onOwnKey(e);
         // Keep the reader's keyboard shortcuts (arrow keys = page turn, etc.)
@@ -104,9 +112,17 @@
     window.addEventListener(type, (e) => {
       if (!isOurs(e)) return;
       if (type === 'beforeinput') onOwnBeforeInput(e);
+      // Pen mode covers the page with the drawing layer; pass mouse-wheel scrolling
+      // through to whatever is underneath.
+      if (type === 'wheel' && e.composedPath()[0] === layer) {
+        e.preventDefault();
+        scrollUnder(e.clientX, e.clientY, e.deltaX, e.deltaY);
+      }
       e.stopImmediatePropagation();
-    }, true);
+    }, { capture: true, passive: false });
   }
+
+  const isUndoKey = (e) => (e.ctrlKey || e.metaKey) && !e.altKey && /^[zy]$/i.test(e.key);
 
   function onScrollbar(e) {
     const t = e.composedPath()[0];
@@ -154,6 +170,12 @@
     }
 
     .layer { position: fixed; inset: 0; pointer-events: none; overflow: hidden; }
+    /* Pen mode: the layer takes the pen/mouse/finger, and dragging draws instead of
+       scrolling the page (touch-action: none). */
+    .layer.drawing { pointer-events: auto; touch-action: none; cursor: crosshair; }
+    .layer.drawing.erasing { cursor: cell; }
+    .ink { position: absolute; left: 0; top: 0; width: 1px; height: 1px; overflow: visible; transform-origin: 0 0; pointer-events: none; }
+    .ink path { paint-order: stroke; stroke-linejoin: round; }
 
     /* ---------- typed text ---------- */
     .note {
@@ -257,6 +279,15 @@
       box-shadow: inset 0 1px 0 rgba(255, 255, 255, .45), 0 4px 14px rgba(198, 14, 48, .45);
     }
     .toolbar button.icon { width: 32px; height: 32px; padding: 0; }
+    /* Off | Pen | Typing: one pill, the chosen mode lit up. Every segment keeps its
+       size, so switching never moves anything. */
+    .toolbar .modes { display: flex; gap: 2px; padding: 2px; border-radius: 999px; background: rgba(120, 120, 128, .14); }
+    .toolbar .modes button { padding: 7px 11px; background: transparent; box-shadow: none; }
+    .toolbar .modes button:hover { background: var(--chip); }
+    .toolbar .modes button.on, .toolbar .modes button.on:hover {
+      background: linear-gradient(180deg, #e0294b, #b00c2b); color: #fff;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, .45), 0 3px 10px rgba(198, 14, 48, .4);
+    }
     .toolbar .sep { width: 1px; height: 20px; background: var(--ink-soft); opacity: .25; margin: 0 2px; }
 
     .panel {
@@ -288,8 +319,9 @@
       box-shadow: 0 0 0 2px rgba(255, 255, 255, .95), 0 0 0 4px var(--accent), 0 3px 10px rgba(198, 14, 48, .3);
     }
     .panel .flip { width: 36px; height: 28px; font-size: 14px; color: var(--ink-soft); }
-    .panel button.markbtn { font-size: 17px; }
-    .panel button.markbtn.on {
+    .panel .tools { display: flex; gap: 8px; }
+    .panel button.markbtn, .panel button.erasebtn { font-size: 17px; }
+    .panel button.markbtn.on, .panel button.erasebtn.on {
       background: linear-gradient(180deg, #e0294b, #b00c2b);
       box-shadow: inset 0 1px 0 rgba(255, 255, 255, .45), 0 4px 14px rgba(198, 14, 48, .45);
     }
@@ -391,6 +423,7 @@
     layer = document.createElement('div');
     layer.className = 'layer';
     root.appendChild(layer);
+    layer.addEventListener('pointerdown', onLayerPointerDown);
 
     // Stop our UI's events from bubbling up into the reader's own handlers.
     for (const type of [...POINTER_EVENTS, 'pointermove', 'mousemove', 'contextmenu', 'touchstart', 'touchend']) {
@@ -453,22 +486,33 @@
     drag.title = 'Drag to move the toolbar';
     makeDraggable(drag, toolbar, null);
 
-    ui.typing = stack(
-      btn('✏️ Typing', 'Typing mode: click anywhere on the page to add text (Alt+Shift+T closes the toolbar)', () =>
-        sendState(state.typing ? { typing: false } : { typing: true, mark: false })
-      ),
-      ['✏️ Typing: on', '✏️ Typing: off']
-    );
+    // Mode selector: Off (use the textbook) | Pen (draw) | Typing (add text).
+    ui.modes = document.createElement('div');
+    ui.modes.className = 'modes';
+    ui.modes.setAttribute('role', 'group');
+    ui.modes.setAttribute('aria-label', L('Mode', 'Modo'));
+    ui.mode = {
+      off: btn(L('Off', 'Apagado'), L('Use the textbook normally (turn pages, click its buttons). Your work stays on the page.',
+        'Use el libro con normalidad (pasar páginas, pulsar botones). Su trabajo se queda en la página.'), () => setMode('off')),
+      pen: btn(L('🖊️ Pen', '🖊️ Lápiz'), L('Draw on the page with a pen, mouse or finger',
+        'Dibuje en la página con un lápiz, el ratón o el dedo'), () => setMode('pen')),
+      typing: btn('✏️ Typing', L('Click anywhere on the page to add text (Alt+Shift+T closes the toolbar)',
+        'Haga clic en cualquier lugar para añadir texto (Alt+Mayús+T cierra la barra)'), () => setMode('typing')),
+    };
+    for (const [m, b] of Object.entries(ui.mode)) {
+      b.dataset.mode = m;
+      ui.modes.append(b);
+    }
 
     ui.shot = btn('📷 Screenshot', 'Take a screenshot with your text, then copy or download it (Alt+Shift+S)', () => takeScreenshot());
     ui.clear = btn('🗑 Clear', 'Remove all text boxes', () => {
       if (confirm('Remove all of your typed text from this page?')) chrome.runtime.sendMessage({ cmd: 'clear-all' });
     });
-    ui.close = btn('✕', 'Hide toolbar (your text stays on the page)', () => sendState({ open: false, typing: false, mark: false }), 'icon');
+    ui.close = btn('✕', 'Hide toolbar (your text stays on the page)', () => sendState({ open: false, typing: false, pen: false, mark: false }), 'icon');
 
     const sep = () => Object.assign(document.createElement('span'), { className: 'sep' });
     ui.help = btn('?', 'Show the tour of every feature again', () => startTour(), 'icon');
-    toolbar.append(drag, ui.typing, sep(), ui.shot, ui.clear, ui.help, ui.close);
+    toolbar.append(drag, ui.modes, sep(), ui.shot, ui.clear, ui.help, ui.close);
     root.appendChild(toolbar);
 
     // Side toolbar: text size and color.
@@ -490,13 +534,19 @@
     });
     ui.mark = btn('🖍', L('Highlighter: click or drag across letters to mark them (click again to unmark)',
       'Marcador: haga clic o arrastre sobre las letras para marcarlas (otro clic las desmarca)'), () =>
-      sendState(state.mark ? { mark: false, typing: true } : { mark: true, typing: false }), 'markbtn');
+      sendState(state.mark ? { mark: false, typing: true } : { mark: true, typing: false, pen: false }), 'markbtn');
+    ui.eraser = btn('🧽', L('Eraser: touch a drawing to erase it (a Surface Pen’s eraser end works too)',
+      'Borrador: toque un dibujo para borrarlo (también funciona el extremo borrador del lápiz)'), () =>
+      sendState(state.pen && state.eraser ? { eraser: false } : { eraser: true, pen: true, typing: false, mark: false }), 'erasebtn');
+    const tools = document.createElement('div');
+    tools.className = 'tools';
+    tools.append(ui.mark, ui.eraser);
     ui.flip = btn('⇄', 'Move this toolbar to the other side of the screen', () =>
       sendState({ side: state.side === 'left' ? 'right' : 'left' }), 'flip');
     const swatchGroup = document.createElement('div');
     swatchGroup.className = 'swatches';
     swatchGroup.append(...ui.swatches);
-    panel.append(label('Size'), ui.bigger, ui.size, ui.smaller, hsep(), label(L('Mark', 'Marcar')), ui.mark, hsep(), label('Color'), swatchGroup, hsep(), ui.flip);
+    panel.append(label('Size'), ui.bigger, ui.size, ui.smaller, hsep(), label(L('Tools', 'Útiles')), tools, hsep(), label('Color'), swatchGroup, hsep(), ui.flip);
     root.appendChild(panel);
 
     toastEl = document.createElement('div');
@@ -520,6 +570,10 @@
     chrome.runtime.sendMessage({ cmd: 'pick-color', color: id });
   }
 
+  function setMode(m) {
+    sendState({ typing: m === 'typing', pen: m === 'pen', mark: false, eraser: false });
+  }
+
   function sendState(patch) {
     chrome.runtime.sendMessage({ cmd: 'set-state', patch });
   }
@@ -528,11 +582,19 @@
     if (!host) return;
     layer.classList.toggle('typing', state.typing && !capturing);
     layer.classList.toggle('marking', !!state.mark && !capturing);
+    // Drawing happens in the top page's layer, which covers frames too.
+    layer.classList.toggle('drawing', !!state.pen && IS_TOP && !capturing);
+    layer.classList.toggle('erasing', !!state.pen && !!state.eraser);
     if (!state.typing) selectNote(null);
     if (toolbar) {
       toolbar.classList.toggle('hidden', !state.open || capturing);
-      ui.typing.classList.toggle('on', state.typing);
-      setStack(ui.typing, state.typing ? 0 : 1);
+      const mode = state.pen ? 'pen' : state.typing ? 'typing' : state.mark ? null : 'off';
+      for (const [m, b] of Object.entries(ui.mode)) {
+        b.classList.toggle('on', m === mode);
+        b.setAttribute('aria-pressed', String(m === mode));
+      }
+      ui.eraser.classList.toggle('on', !!state.pen && !!state.eraser);
+      ui.eraser.setAttribute('aria-pressed', String(!!state.pen && !!state.eraser));
       panel.classList.toggle('hidden', !state.open || capturing);
       panel.classList.toggle('left', state.side === 'left');
       const sizeText = String(selected ? selected.size : state.size);
@@ -594,11 +656,11 @@
       next: L('Start the tour', 'Empezar'),
     },
     {
-      target: () => [ui.typing],
-      title: L('Typing mode', 'Modo de escritura'),
+      target: () => [ui.modes],
+      title: L('Off, Pen or Typing', 'Apagado, Lápiz o Typing'),
       body: L(
-        '<p>While <b>Typing</b> is on, clicking the page adds text instead of using the textbook.</p><p>Turn it off to turn pages or click the textbook’s buttons. Your text stays put.</p>',
-        '<p>Con <b>Typing</b> activado, al hacer clic en la página se añade texto en lugar de usar el libro.</p><p>Desactívelo para pasar páginas o pulsar los botones del libro. Su texto se queda.</p>'
+        '<p><b>✏️ Typing</b>: click the page to add text.</p><p><b>🖊️ Pen</b>: draw with a pen, mouse or finger. Press harder for thicker lines. Flip a Surface Pen over to erase.</p><p><b>Off</b>: use the textbook normally. Your work stays on the page.</p>',
+        '<p><b>✏️ Typing</b>: haga clic en la página para añadir texto.</p><p><b>🖊️ Lápiz</b>: dibuje con un lápiz, el ratón o el dedo. Si aprieta más, la línea es más gruesa. Dé la vuelta al lápiz de Surface para borrar.</p><p><b>Apagado</b>: use el libro con normalidad. Su trabajo se queda en la página.</p>'
       ),
     },
     {
@@ -716,7 +778,7 @@
     ensureUI();
     buildTour();
     tour = { i: 0 };
-    if (!state.open || !state.typing) sendState({ open: true, typing: true });
+    if (!state.open || !state.typing) sendState({ open: true, typing: true, pen: false, mark: false });
     showTourStep();
   }
 
@@ -1034,7 +1096,7 @@
   // Find a reasonably large, stable page element under the click to pin the note to,
   // so the note scrolls and zooms together with the textbook page.
   function findAnchor(x, y, fallbackTarget) {
-    let el = document.elementFromPoint(x, y) || fallbackTarget;
+    let el = document.elementsFromPoint(x, y).find((e) => e !== host) || fallbackTarget;
     if (!el || el === host) el = document.documentElement;
     while (el && el !== document.documentElement) {
       const r = el.getBoundingClientRect();
@@ -1129,6 +1191,7 @@
     halo ? [[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [-1, -1], [1, -1], [-1, 1]].map(([a, b]) => `${a}px ${b}px 1px ${halo}`).join(',') : 'none';
 
   function applyStyle(note) {
+    if (note.path) return styleStroke(note);
     const { color, halo } = readableColor(note.color, note.bg);
     note.textEl.style.color = color;
     note.textEl.style.textShadow = haloShadow(halo);
@@ -1264,29 +1327,285 @@
 
   function clearAll() {
     for (const n of [...notes]) removeNote(n);
+    for (const st of [...strokes]) removeStroke(st);
+    inkHistory.length = inkRedo.length = 0;
   }
 
-  // Keep every note glued to its page element (handles scrolling, zoom, resizing).
-  function tick() {
-    for (const n of notes) {
-      const a = n.anchor;
-      if (!a.isConnected) {
-        n.el.style.display = 'none'; // page changed; note belonged to the old page
-        continue;
-      }
-      const r = a.getBoundingClientRect();
-      if (!r.width && !r.height) {
-        n.el.style.display = 'none';
-        continue;
-      }
-      n.el.style.display = '';
-      const scale = r.width / n.baseW;
-      const x = r.left + n.fx * r.width - (scrollX0(a) - n.sx) * scale;
-      const y = r.top + n.fy * r.height - (scrollY0(a) - n.sy) * scale;
-      n.el.style.transform = `translate(${x}px, ${y}px) scale(${scale})`;
+  // Keep every note and drawing glued to its page element (handles scrolling, zoom, resizing).
+  function place(n) {
+    const a = n.anchor;
+    if (!a.isConnected) {
+      n.el.style.display = 'none'; // page changed; it belonged to the old page
+      return;
     }
+    const r = a.getBoundingClientRect();
+    if (!r.width && !r.height) {
+      n.el.style.display = 'none';
+      return;
+    }
+    n.el.style.display = '';
+    const scale = r.width / n.baseW;
+    const x = r.left + n.fx * r.width - (scrollX0(a) - n.sx) * scale;
+    const y = r.top + n.fy * r.height - (scrollY0(a) - n.sy) * scale;
+    n.tx = x;
+    n.ty = y;
+    n.scale = scale;
+    n.el.style.transform = `translate(${x}px, ${y}px) scale(${scale})`;
+  }
+
+  function tick() {
+    for (const n of notes) place(n);
+    for (const st of strokes) place(st);
     if (tour) positionTour();
     requestAnimationFrame(tick);
+  }
+
+  // ---------------------------------------------------------------------------
+  // Pen mode: drawing with a pen, mouse or finger (Pointer Events). Strokes are SVG
+  // shapes whose width follows the pen pressure, pinned to the page like notes.
+  // ---------------------------------------------------------------------------
+
+  const SVGNS = 'http://www.w3.org/2000/svg';
+  const inkHistory = []; // [{ add: [strokes] } | { erase: [strokes] }]
+  const inkRedo = [];
+  let penSeen = false; // once a pen is used, fingers scroll instead of drawing (palm rejection)
+  let inkPresenter = null; // Chrome's Ink API, if available: the system draws the newest bit of the line
+
+  const isEraserEvent = (e) => e.pointerType === 'pen' && ((e.buttons & 32) !== 0 || e.button === 5);
+
+  function onLayerPointerDown(e) {
+    if (!state.pen || capturing || e.composedPath()[0] !== layer) return;
+    if (e.pointerType === 'pen') penSeen = true;
+    if (e.pointerType === 'touch' && penSeen) return touchScroll(e);
+    if (e.button !== 0 && !isEraserEvent(e)) return;
+    e.preventDefault();
+    try {
+      layer.setPointerCapture(e.pointerId);
+    } catch {
+      /* not critical */
+    }
+    if (state.eraser || isEraserEvent(e)) return eraseDrag(e);
+    drawStroke(e);
+  }
+
+  function drawStroke(e) {
+    const anchor = findAnchor(e.clientX, e.clientY, null);
+    const st = { el: null, path: null, anchor, fx: 0, fy: 0, baseW: 1, sx: 0, sy: 0, pts: [], color: state.color, size: state.size, bg: null, pen: e.pointerType === 'pen' };
+    st.el = document.createElementNS(SVGNS, 'svg');
+    st.el.setAttribute('class', 'ink');
+    st.path = document.createElementNS(SVGNS, 'path');
+    st.el.append(st.path);
+    layer.insertBefore(st.el, layer.firstChild); // drawings sit under text boxes
+    setNoteAnchor(st, anchor, e.clientX, e.clientY);
+    place(st);
+    st.bg = cssBackground(e.clientX, e.clientY);
+    strokes.add(st);
+    styleStroke(st);
+    const base = Math.max(1.5, st.size / 6);
+    const addPoint = (ev) => {
+      const s = st.scale || 1;
+      const x = (ev.clientX - st.tx) / s;
+      const y = (ev.clientY - st.ty) / s;
+      const last = st.pts[st.pts.length - 1];
+      if (last && Math.hypot(x - last.x, y - last.y) < 0.75) return;
+      // Pens report pressure (press harder = thicker); a mouse reports 0.5 while pressed.
+      const p = ev.pointerType === 'pen' ? ev.pressure : 0.5;
+      const raw = base * (0.35 + 1.3 * p);
+      const w = last ? last.w * 0.6 + raw * 0.4 : raw; // smooth out sudden jumps
+      st.pts.push({ x, y, w });
+    };
+    addPoint(e);
+    st.path.setAttribute('d', strokePath(st.pts));
+    let inkStyle = null;
+    if (navigator.ink && !inkPresenter) {
+      navigator.ink.requestPresenter({ presentationArea: layer }).then((p) => (inkPresenter = p)).catch(() => {});
+    }
+    const move = (ev) => {
+      // Pens send many more positions than the screen shows; use them all for smooth lines.
+      const all = ev.getCoalescedEvents ? ev.getCoalescedEvents() : [];
+      for (const c of all.length ? all : [ev]) addPoint(c);
+      st.path.setAttribute('d', strokePath(st.pts));
+      if (inkPresenter) {
+        try {
+          inkStyle = inkStyle || { color: st.path.getAttribute('fill'), diameter: base * (st.scale || 1) };
+          inkPresenter.updateInkTrailStartPoint(ev, inkStyle);
+        } catch {
+          /* best effort */
+        }
+      }
+    };
+    const up = () => {
+      layer.removeEventListener('pointermove', move);
+      layer.removeEventListener('pointerup', up);
+      layer.removeEventListener('pointercancel', up);
+      inkHistory.push({ add: [st] });
+      inkRedo.length = 0;
+      const b = st.el.getBoundingClientRect();
+      if (b.width || b.height) probeBackground(st, b.left + 2, b.top + b.height / 2);
+    };
+    layer.addEventListener('pointermove', move);
+    layer.addEventListener('pointerup', up);
+    layer.addEventListener('pointercancel', up);
+  }
+
+  // The outline of a line whose width changes along the way, with round ends.
+  function strokePath(pts) {
+    const f = (n) => Math.round(n * 100) / 100;
+    if (pts.length === 1) {
+      const { x, y, w } = pts[0];
+      const r = w / 2;
+      return `M${f(x - r)} ${f(y)}a${f(r)} ${f(r)} 0 1 0 ${f(2 * r)} 0a${f(r)} ${f(r)} 0 1 0 ${f(-2 * r)} 0Z`;
+    }
+    const left = [];
+    const right = [];
+    for (let i = 0; i < pts.length; i++) {
+      const a = pts[Math.max(0, i - 1)];
+      const b = pts[Math.min(pts.length - 1, i + 1)];
+      let dx = b.x - a.x;
+      let dy = b.y - a.y;
+      const len = Math.hypot(dx, dy) || 1;
+      dx /= len;
+      dy /= len;
+      const r = pts[i].w / 2;
+      left.push([pts[i].x - dy * r, pts[i].y + dx * r]);
+      right.push([pts[i].x + dy * r, pts[i].y - dx * r]);
+    }
+    // Smooth curves through the midpoints of each side.
+    const side = (ps) => {
+      let d = '';
+      for (let i = 1; i < ps.length - 1; i++) {
+        const mx = (ps[i][0] + ps[i + 1][0]) / 2;
+        const my = (ps[i][1] + ps[i + 1][1]) / 2;
+        d += `Q${f(ps[i][0])} ${f(ps[i][1])} ${f(mx)} ${f(my)}`;
+      }
+      const l = ps[ps.length - 1];
+      return d + `L${f(l[0])} ${f(l[1])}`;
+    };
+    const rEnd = f(pts[pts.length - 1].w / 2);
+    const rStart = f(pts[0].w / 2);
+    const rr = right.slice().reverse();
+    return `M${f(left[0][0])} ${f(left[0][1])}${side(left)}A${rEnd} ${rEnd} 0 0 1 ${f(rr[0][0])} ${f(rr[0][1])}${side(rr)}A${rStart} ${rStart} 0 0 1 ${f(left[0][0])} ${f(left[0][1])}Z`;
+  }
+
+  // Same readability check as text: the shade of the color that stands out, plus a
+  // thin outline on pictures.
+  function styleStroke(st) {
+    const { color, halo } = readableColor(st.color, st.bg);
+    st.path.setAttribute('fill', color);
+    st.path.setAttribute('stroke', halo || 'none');
+    st.path.setAttribute('stroke-width', halo ? '1.6' : '0');
+  }
+
+  function removeStroke(st) {
+    strokes.delete(st);
+    st.el.remove();
+  }
+
+  // Erase whole lines the pointer touches.
+  function eraseDrag(e) {
+    const erased = [];
+    const at = (ev) => {
+      for (const st of [...strokes]) {
+        if (st.el.style.display === 'none' || !touches(st, ev.clientX, ev.clientY)) continue;
+        removeStroke(st);
+        erased.push(st);
+      }
+    };
+    at(e);
+    const move = (ev) => at(ev);
+    const up = () => {
+      layer.removeEventListener('pointermove', move);
+      layer.removeEventListener('pointerup', up);
+      layer.removeEventListener('pointercancel', up);
+      if (erased.length) {
+        inkHistory.push({ erase: erased });
+        inkRedo.length = 0;
+      }
+    };
+    layer.addEventListener('pointermove', move);
+    layer.addEventListener('pointerup', up);
+    layer.addEventListener('pointercancel', up);
+  }
+
+  function touches(st, cx, cy) {
+    const s = st.scale || 1;
+    const x = (cx - st.tx) / s;
+    const y = (cy - st.ty) / s;
+    const reach = 8 / s; // a little slack around the line
+    for (let i = 0; i < st.pts.length; i++) {
+      const a = st.pts[i];
+      const b = st.pts[i + 1] || a;
+      const vx = b.x - a.x;
+      const vy = b.y - a.y;
+      const t = Math.max(0, Math.min(1, ((x - a.x) * vx + (y - a.y) * vy) / (vx * vx + vy * vy || 1)));
+      if (Math.hypot(x - (a.x + t * vx), y - (a.y + t * vy)) <= a.w / 2 + reach) return true;
+    }
+    return false;
+  }
+
+  function inkUndoRedo(undo) {
+    const from = undo ? inkHistory : inkRedo;
+    const step = from.pop();
+    if (!step) return;
+    const show = (list) => list.forEach((st) => {
+      strokes.add(st);
+      layer.insertBefore(st.el, layer.firstChild);
+    });
+    const hide = (list) => list.forEach(removeStroke);
+    if (step.add) (undo ? hide : show)(step.add);
+    else (undo ? show : hide)(step.erase);
+    (undo ? inkRedo : inkHistory).push(step);
+  }
+
+  // Scroll whatever page element is under (x, y), including inside frames.
+  function scrollUnder(x, y, dx, dy, doc = document) {
+    let el = doc.elementsFromPoint(x, y).find((e) => e !== host);
+    while (el) {
+      if (el.tagName === 'IFRAME') {
+        try {
+          const r = el.getBoundingClientRect();
+          if (scrollUnder(x - r.left, y - r.top, dx, dy, el.contentDocument)) return true;
+        } catch {
+          /* a frame from another site: scroll around it instead */
+        }
+      }
+      const cs = getComputedStyle(el);
+      const canY = dy && el.scrollHeight > el.clientHeight && /(auto|scroll)/.test(cs.overflowY);
+      const canX = dx && el.scrollWidth > el.clientWidth && /(auto|scroll)/.test(cs.overflowX);
+      if (canY || canX) {
+        el.scrollBy(dx, dy);
+        return true;
+      }
+      el = el.parentElement;
+    }
+    // Nothing scrollable inside: the frame's own page, if it can move (otherwise the
+    // page around the frame scrolls).
+    const se = doc.scrollingElement;
+    if (!se) return false;
+    const before = se.scrollTop + se.scrollLeft;
+    se.scrollBy(dx, dy);
+    return se.scrollTop + se.scrollLeft !== before || doc === document;
+  }
+
+  // After a pen has been used, a finger drag scrolls the page instead of drawing.
+  function touchScroll(e) {
+    let lx = e.clientX;
+    let ly = e.clientY;
+    const move = (ev) => {
+      if (ev.pointerId !== e.pointerId) return;
+      scrollUnder(e.clientX, e.clientY, lx - ev.clientX, ly - ev.clientY);
+      lx = ev.clientX;
+      ly = ev.clientY;
+    };
+    const up = (ev) => {
+      if (ev.pointerId !== e.pointerId) return;
+      layer.removeEventListener('pointermove', move);
+      layer.removeEventListener('pointerup', up);
+      layer.removeEventListener('pointercancel', up);
+    };
+    layer.addEventListener('pointermove', move);
+    layer.addEventListener('pointerup', up);
+    layer.addEventListener('pointercancel', up);
   }
 
   // ---------------------------------------------------------------------------

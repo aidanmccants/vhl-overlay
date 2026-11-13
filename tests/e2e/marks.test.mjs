@@ -140,12 +140,13 @@ test('highlighter: clicking the page does not add text or reach the reader', asy
   assert.equal(await page.evaluate(() => window.readerClicks), 0);
 });
 
-test('turning Typing back on ends the highlighter', async () => {
+test('choosing Typing ends the highlighter', async () => {
   const { page } = b;
-  await ui(page, '.toolbar button').first().click(); // Typing (off -> on)
+  assert.equal(await ui(page, '.modes button.on').count(), 0, 'no mode is lit while the highlighter is on');
+  await ui(page, '.modes button[data-mode="typing"]').click();
   await page.waitForTimeout(150);
   assert.equal(await ui(page, '.panel .markbtn').getAttribute('aria-pressed'), 'false');
-  assert.match(await ui(page, '.toolbar button').first().getAttribute('aria-label'), /on/);
+  assert.equal(await ui(page, '.modes button[data-mode="typing"]').getAttribute('aria-pressed'), 'true');
   const p = await letter(page, 2, 0);
   await page.mouse.click(p.x, p.y); // clicking text edits it again
   await page.keyboard.press('End');

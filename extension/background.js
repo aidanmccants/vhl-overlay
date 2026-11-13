@@ -1,8 +1,8 @@
 // VHL Text Overlay - background service worker.
-// Holds the per-tab UI state (toolbar open, typing/highlighter on, colors, size, side), relays it
+// Holds the per-tab UI state (toolbar open, mode: off/pen/typing/highlighter, colors, size, side), relays it
 // to every frame in the tab, and samples screen pixels for the contrast check.
 
-const DEFAULT_STATE = { open: false, typing: false, mark: false, markColor: 'red', color: 'blue', size: 18, side: 'right' };
+const DEFAULT_STATE = { open: false, typing: false, pen: false, eraser: false, mark: false, markColor: 'red', color: 'blue', size: 18, side: 'right' };
 
 async function getState(tabId) {
   const key = 'tab:' + tabId;
@@ -105,8 +105,8 @@ chrome.action.onClicked.addListener(async (tab) => {
   if (!isVhl(tab.url)) return;
   const s = await getState(tab.id);
   // Clicking the icon opens the toolbar with typing on; clicking again closes it.
-  if (s.open) await setState(tab.id, { open: false, typing: false, mark: false });
-  else await setState(tab.id, { open: true, typing: true });
+  if (s.open) await setState(tab.id, { open: false, typing: false, pen: false, mark: false });
+  else await setState(tab.id, { open: true, typing: true, pen: false });
 });
 
 
