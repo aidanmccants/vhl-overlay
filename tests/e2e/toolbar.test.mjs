@@ -43,9 +43,13 @@ test('picking a color recolors the selected box', async () => {
 test('the selection ring around a color dot does not overlap its neighbors', async () => {
   const { page } = b;
   const boxes = await ui(page, '.panel .swatch').evaluateAll((els) => els.map((e) => e.getBoundingClientRect().toJSON()));
-  for (let i = 1; i < boxes.length; i++) {
-    const gap = boxes[i].top - boxes[i - 1].bottom;
-    assert.ok(gap >= 10, `gap between dots ${i - 1} and ${i} is ${gap}px`); // ring is about 4px each side
+  // Every pair of dots is at least 10px apart across or down (the ring is about 4px each side).
+  for (let i = 0; i < boxes.length; i++) {
+    for (let j = i + 1; j < boxes.length; j++) {
+      const [p, q] = [boxes[i], boxes[j]];
+      const gap = Math.max(q.left - p.right, p.left - q.right, q.top - p.bottom, p.top - q.bottom);
+      assert.ok(gap >= 10, `gap between dots ${i} and ${j} is ${gap}px`);
+    }
   }
 });
 
@@ -84,4 +88,19 @@ test('text color adapts to the background so it stays readable', async () => {
   assert.deepEqual(by.dark, { text: 'dark', color: 'rgb(147, 197, 253)', halo: false }, 'light blue on dark');
   assert.equal(by.gray.halo, true, 'outline on mid-gray');
   assert.equal(by.photo.halo, true, 'outline on a busy picture');
+});
+
+test('A+ and A− sit in the middle of their buttons, by the letters themselves', async () => {
+  const { page } = b;
+  for (const sel of ['.panel .big', '.panel .small']) {
+    const m = await ui(page, sel).evaluate((btn) => {
+      const r = btn.getBoundingClientRect();
+      const s = btn.querySelector('.cap').getBoundingClientRect();
+      return { above: s.top - r.top, below: r.bottom - s.bottom, h: s.height, font: parseFloat(getComputedStyle(btn).fontSize) };
+    });
+    // Trimmed to the capital letters (not the font's extra space above and below them),
+    // which is what keeps it centered with every computer's font.
+    assert.ok(m.h < m.font * 0.8, `${sel} label is trimmed to the letters (${m.h}px for ${m.font}px text)`);
+    assert.ok(Math.abs(m.above - m.below) < 1, `${sel} centered: ${m.above.toFixed(1)}px above, ${m.below.toFixed(1)}px below`);
+  }
 });

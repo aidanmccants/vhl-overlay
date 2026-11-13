@@ -1,8 +1,8 @@
 // VHL Text Overlay - background service worker.
-// Holds the per-tab UI state (toolbar open, typing on, color, size, side), relays it
+// Holds the per-tab UI state (toolbar open, mode: off/pen/typing/highlighter, colors, size, side), relays it
 // to every frame in the tab, and samples screen pixels for the contrast check.
 
-const DEFAULT_STATE = { open: false, typing: false, color: 'blue', size: 18, side: 'right' };
+const DEFAULT_STATE = { open: false, typing: false, pen: false, eraser: false, mark: false, markColor: 'red', color: 'blue', size: 18, side: 'right' };
 
 async function getState(tabId) {
   const key = 'tab:' + tabId;
@@ -105,8 +105,8 @@ chrome.action.onClicked.addListener(async (tab) => {
   if (!isVhl(tab.url)) return;
   const s = await getState(tab.id);
   // Clicking the icon opens the toolbar with typing on; clicking again closes it.
-  if (s.open) await setState(tab.id, { open: false, typing: false });
-  else await setState(tab.id, { open: true, typing: true });
+  if (s.open) await setState(tab.id, { open: false, typing: false, pen: false, mark: false });
+  else await setState(tab.id, { open: true, typing: true, pen: false });
 });
 
 
@@ -121,6 +121,20 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
       case 'set-state':
         sendResponse(await setState(tab.id, msg.patch));
         break;
+      case 'pick-color': {
+        // A color dot was clicked. The frame where letters are selected colors just
+        // those letters and answers; if no frame answers, it's the color for the box.
+        const painted = await chrome.tabs.sendMessage(tab.id, { type: 'paint', color: msg.color }).catch(() => false);
+        sendResponse(painted ? null : await setState(tab.id, { color: msg.color }));
+        break;
+      }
+      case 'highlight': {
+        // The highlighter button: selected letters get marked (the frame holding them
+        // answers); with nothing selected, highlighter mode turns on.
+        const marked = await chrome.tabs.sendMessage(tab.id, { type: 'paint', color: msg.color, highlighter: true }).catch(() => false);
+        sendResponse(marked ? null : await setState(tab.id, { mark: true, typing: false, pen: false }));
+        break;
+      }
       case 'clear-all':
         broadcast(tab.id, { type: 'clear-all' });
         sendResponse(true);

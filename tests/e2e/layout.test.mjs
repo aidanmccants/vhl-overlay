@@ -1,4 +1,4 @@
-// Layout stability: changing state (Typing on/off, Copy → Copied, tour steps, size
+// Layout stability: changing state (Off/Pen/Typing, Copy → Copied, tour steps, size
 // numbers) must never resize a container or move the buttons around it.
 import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
@@ -25,18 +25,18 @@ function assertSameBoxes(a, b, what) {
   });
 }
 
-test('turning Typing on and off does not resize the top bar or move its buttons', async () => {
+test('switching between Off, Pen and Typing does not resize the top bar or move its buttons', async () => {
   const { page, sw } = b;
   await gotoReader(page, sw);
   await settle(page);
-  const on = [await ui(page, '.toolbar').boundingBox(), ...(await boxes(ui(page, '.toolbar button')))];
-  await ui(page, '.toolbar button').first().click();
-  await settle(page);
-  assert.match(await ui(page, '.toolbar button').first().getAttribute('aria-label'), /off/);
-  const off = [await ui(page, '.toolbar').boundingBox(), ...(await boxes(ui(page, '.toolbar button')))];
-  assertSameBoxes(on, off, 'top bar');
-  await ui(page, '.toolbar button').first().click();
-  await settle(page);
+  const bar = async () => [await ui(page, '.toolbar').boundingBox(), ...(await boxes(ui(page, '.toolbar button')))];
+  const start = await bar();
+  for (const m of ['off', 'pen', 'typing']) {
+    await ui(page, `.modes button[data-mode="${m}"]`).click();
+    await settle(page);
+    assert.equal(await ui(page, `.modes button[data-mode="${m}"]`).getAttribute('aria-pressed'), 'true');
+    assertSameBoxes(start, await bar(), `top bar in ${m} mode`);
+  }
 });
 
 test('the size number keeps the same width from 10 to 48', async () => {
@@ -53,6 +53,23 @@ test('the size number keeps the same width from 10 to 48', async () => {
   widths.add((await ui(page, '.panel .size').boundingBox()).width);
   assert.equal(widths.size, 1, `size number width changed: ${[...widths]}`);
   assertSameBoxes([panel10], [await ui(page, '.panel').boundingBox()], 'side toolbar');
+});
+
+test('turning the 🖍 highlighter on and off does not move the side toolbar, which fits the screen', async () => {
+  const { page } = b;
+  await settle(page);
+  // (The color dots are left out: the selected dot grows 4% with a transform, which moves nothing.)
+  const parts = async () => [await ui(page, '.panel').boundingBox(), ...(await boxes(ui(page, '.panel button:not(.swatch)')))];
+  const off = await parts();
+  await ui(page, '.panel .markbtn').click();
+  await settle(page);
+  assert.equal(await ui(page, '.panel .markbtn').getAttribute('aria-pressed'), 'true');
+  assertSameBoxes(off, await parts(), 'side toolbar with the highlighter on');
+  await ui(page, '.panel .markbtn').click();
+  await settle(page);
+  // A 700px-tall window still shows the whole side toolbar.
+  const panel = off[0];
+  assert.ok(panel.y >= 0 && panel.y + panel.height <= 700, `side toolbar ${panel.y}..${panel.y + panel.height} fits`);
 });
 
 test('the screenshot card does not change size when you Copy or Download', async () => {
@@ -90,11 +107,11 @@ test('tour buttons stay in the same place on every step', async () => {
   };
   const first = await rowOf();
   assert.equal(first.length, 3, 'Skip, Back and Next are always laid out');
-  for (let i = 1; i < 11; i++) {
+  for (let i = 1; i < 12; i++) {
     await ui(page, '.tour-pop .row button.primary').click();
     await settle(page);
     const now = await rowOf();
-    if (i < 10) assertSameBoxes(first, now, `tour step ${i} buttons`);
+    if (i < 11) assertSameBoxes(first, now, `tour step ${i} buttons`);
     else assertSameBoxes(first.slice(1), now.slice(1), 'last step Back/Done'); // Skip is hidden on the last step
   }
 });

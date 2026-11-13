@@ -72,9 +72,9 @@ test('a box can be moved with its ✥ handle and deleted with ×', async () => {
   assert.equal((await noteTexts(page)).length, 2);
 });
 
-test('with typing off, clicks go to the reader and text stays', async () => {
+test('with the mode set to Off, clicks go to the reader and text stays', async () => {
   const { page } = b;
-  await ui(page, '.toolbar button.on').click(); // "Typing: on" -> off
+  await ui(page, '.modes button[data-mode="off"]').click();
   await page.waitForTimeout(200);
   await page.locator('#next').click();
   assert.equal(await page.evaluate(() => window.nextClicks), 1);
@@ -98,7 +98,7 @@ test('Clear removes all text after confirming', async () => {
   await page.mouse.click(400, 300);
   await page.keyboard.type('borrar');
   page.once('dialog', (d) => d.accept());
-  await ui(page, '.toolbar button[title="Remove all text boxes"]').click();
+  await ui(page, '.toolbar button[title^="Remove all"]').click();
   await page.waitForTimeout(200);
   assert.equal((await noteTexts(page)).length, 0);
 });

@@ -6,6 +6,12 @@
   window.__vhlOverlayLoaded = true;
 
   const IS_TOP = window === window.top;
+  // Icons come from Lucide (see icons.js, built by scripts/icons.mjs).
+  const ICONS = globalThis.VHL_ICONS || {};
+  const ic = (name) =>
+    `<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[name] || ''}</svg>`;
+  // Tour and tip text writes {{icon-name}} where an icon goes.
+  const withIcons = (html) => html.replace(/\{\{([\w-]+)\}\}/g, (_, n) => ic(n));
   // Each color has a shade for light backgrounds and a shade for dark backgrounds.
   // When a text box starts, the shade that's easiest to read there is used.
   const COLORS = [
@@ -21,7 +27,7 @@
   const MIN_SIZE = 10;
   const MAX_SIZE = 48;
 
-  let state = { open: false, typing: false, color: 'blue', size: 18, side: 'right' };
+  let state = { open: false, typing: false, pen: false, eraser: false, mark: false, markColor: 'red', color: 'blue', size: 18, side: 'right' };
   let host = null; // shadow host element
   let root = null; // shadow root
   let layer = null; // container for notes
@@ -33,6 +39,7 @@
   let refocusAfterCapture = null;
   let pendingFocus = null; // note created on pointerdown, focused on pointerup/click
   const notes = new Set();
+  const strokes = new Set(); // pen drawings (top page only)
 
   // ---------------------------------------------------------------------------
   // Event shielding. These listeners are registered at document_start, before any
@@ -50,14 +57,17 @@
         if (isOurs(e)) {
           return; // our own UI handles it; the host stops it from bubbling to the page
         }
-        if (!state.typing || capturing) return;
+        if (!(state.typing || state.mark || state.pen) || capturing) return;
         if (e.button !== undefined && e.button !== 0) return; // only left clicks / taps
         if (onScrollbar(e)) return; // let scrollbars keep working
         // Typing mode: the page should not react to this click at all.
         // (pointerdown/mousedown keep their default so the frame still gets focus.)
         if (type !== 'pointerdown' && type !== 'mousedown') e.preventDefault();
         e.stopImmediatePropagation();
-        if (type === 'pointerdown') onPageClick(e);
+        if (type === 'pointerdown') {
+          if (state.mark) markHint(); // highlighter: only letters can be clicked
+          else if (state.typing) onPageClick(e);
+        }
         // Focus the new note once the browser has finished its own mousedown focus handling.
         if ((type === 'pointerup' || type === 'click') && pendingFocus) {
           const n = pendingFocus;
@@ -86,6 +96,13 @@
     window.addEventListener(
       type,
       (e) => {
+        if (state.pen && IS_TOP && isUndoKey(e)) {
+          // Pen mode: Ctrl+Z / Ctrl+Shift+Z undo and redo drawing.
+          e.preventDefault();
+          e.stopImmediatePropagation();
+          if (type === 'keydown') inkUndoRedo(e.key.toLowerCase() === 'z' && !e.shiftKey);
+          return;
+        }
         if (!isOurs(e)) return;
         if (type === 'keydown') onOwnKey(e);
         // Keep the reader's keyboard shortcuts (arrow keys = page turn, etc.)
@@ -99,9 +116,19 @@
   // Other input-ish events that the page shouldn't react to when they come from us.
   for (const type of ['input', 'beforeinput', 'paste', 'copy', 'cut', 'focusin', 'focusout', 'wheel']) {
     window.addEventListener(type, (e) => {
-      if (isOurs(e)) e.stopImmediatePropagation();
-    }, true);
+      if (!isOurs(e)) return;
+      if (type === 'beforeinput') onOwnBeforeInput(e);
+      // Pen mode covers the page with the drawing layer; pass mouse-wheel scrolling
+      // through to whatever is underneath.
+      if (type === 'wheel' && e.composedPath()[0] === layer) {
+        e.preventDefault();
+        scrollUnder(e.clientX, e.clientY, e.deltaX, e.deltaY);
+      }
+      e.stopImmediatePropagation();
+    }, { capture: true, passive: false });
   }
+
+  const isUndoKey = (e) => (e.ctrlKey || e.metaKey) && !e.altKey && /^[zy]$/i.test(e.key);
 
   function onScrollbar(e) {
     const t = e.composedPath()[0];
@@ -128,10 +155,11 @@
       --glass-strong: rgba(255, 255, 255, .78);
       --glass-edge: rgba(255, 255, 255, .7);
       --ink: #0b0b12;
-      --ink-soft: rgba(11, 11, 18, .55);
+      --ink-soft: rgba(11, 11, 18, .62);
       --chip: rgba(255, 255, 255, .55);
       --chip-hover: rgba(255, 255, 255, .85);
       --accent: #c60e30;
+      --mark: #b91c1c; /* marked-letter examples in the tour: red's shade for light backgrounds */
       --shadow: 0 10px 40px rgba(40, 10, 16, .22), 0 2px 8px rgba(40, 10, 16, .12);
       --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, system-ui, sans-serif;
     }
@@ -141,21 +169,40 @@
         --glass-strong: rgba(36, 36, 44, .8);
         --glass-edge: rgba(255, 255, 255, .22);
         --ink: #f5f5f7;
-        --ink-soft: rgba(245, 245, 247, .6);
+        --ink-soft: rgba(245, 245, 247, .7);
         --chip: rgba(255, 255, 255, .12);
         --chip-hover: rgba(255, 255, 255, .24);
         --shadow: 0 10px 40px rgba(0, 0, 0, .5), 0 2px 8px rgba(0, 0, 0, .3);
+        --mark: #fca5a5; /* red's shade for dark backgrounds, like real marked text */
       }
     }
 
     .layer { position: fixed; inset: 0; pointer-events: none; overflow: hidden; }
+    /* Pen mode: the layer takes the pen/mouse/finger, and dragging draws instead of
+       scrolling the page (touch-action: none). */
+    .layer.drawing { pointer-events: auto; touch-action: none; cursor: crosshair; }
+    .layer.drawing.erasing { cursor: cell; }
+    .ink { position: absolute; left: 0; top: 0; width: 1px; height: 1px; overflow: visible; transform-origin: 0 0; pointer-events: none; }
+    .ink path { paint-order: stroke; stroke-linejoin: round; }
 
     /* ---------- typed text ---------- */
     .note {
       position: absolute; left: 0; top: 0; transform-origin: 0 0;
       pointer-events: none; min-width: 12px;
     }
-    .typing .note { pointer-events: auto; }
+    .typing .note, .marking .note { pointer-events: auto; }
+    /* Highlighter mode: a marker-shaped cursor over the letters */
+    .marking .text {
+      cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24'%3E%3Cpath d='M4 20l3-1 11-11-2-2L5 17z' fill='%23c60e30' stroke='white' stroke-width='1.2'/%3E%3Cpath d='M3 22h8' stroke='%23c60e30' stroke-width='2.4'/%3E%3C/svg%3E") 3 21, crosshair;
+      user-select: none;
+    }
+    .marking .note:hover .text { box-shadow: 0 0 0 1px rgba(198, 14, 48, .45); }
+    /* Marked letters: their own color, bold, and underlined (so they also show in
+       black-and-white printouts). */
+    .text .mark {
+      font-weight: 800; text-decoration: underline; text-decoration-thickness: .1em;
+      text-underline-offset: .16em; transition: color .25s var(--ease);
+    }
     .text {
       font-family: "Segoe Print", "Bradley Hand", "Comic Sans MS", Arial, sans-serif;
       line-height: 1.2; white-space: pre; outline: none; padding: 1px 4px;
@@ -178,6 +225,7 @@
       transition: opacity .2s var(--ease), transform .4s var(--spring);
     }
     .grip { left: 0; background: rgba(44, 44, 50, .85); cursor: grab; }
+    .grip .ico, .del .ico { width: 12px; height: 12px; }
     .grip:active { cursor: grabbing; }
     .del { left: 24px; background: rgba(255, 59, 48, .88); cursor: pointer; font-size: 13px; }
     .typing .note.selected .grip, .typing .note.selected .del { opacity: 1; transform: none; pointer-events: auto; }
@@ -213,13 +261,16 @@
     /* Zero layout shift: labels that change (on/off, Copy/Copied, Next/Done) are all
        stacked in one grid cell, so a button is always as wide as its longest label. */
     .stack { display: inline-grid; place-items: center; }
-    .stack > span { grid-area: 1 / 1; white-space: nowrap; }
+    .stack > span { grid-area: 1 / 1; white-space: nowrap; display: inline-flex; align-items: center; gap: 6px; }
+    /* Lucide icons */
+    .ico { display: block; flex: none; width: 16px; height: 16px; }
     .stack > span.off { visibility: hidden; }
     /* Kept in the layout but invisible, so nothing moves when it's not needed. */
     .reserve { visibility: hidden !important; pointer-events: none !important; }
 
     .glass button {
       position: relative; font: inherit; color: var(--ink); cursor: pointer; white-space: nowrap;
+      display: inline-flex; align-items: center; justify-content: center; gap: 6px;
       border: 0; background: var(--chip); border-radius: 999px;
       box-shadow: inset 0 1px 0 rgba(255, 255, 255, .6), 0 1px 2px rgba(0, 0, 0, .08);
       transition: transform .35s var(--spring), background .2s var(--ease), box-shadow .25s var(--ease), color .2s var(--ease);
@@ -233,17 +284,28 @@
       padding: 6px 7px; border-radius: 999px;
     }
     .toolbar.hidden { transform: translateY(-14px) scale(.94); }
-    .toolbar .drag { cursor: grab; color: var(--ink-soft); padding: 0 3px 0 5px; font-size: 14px; letter-spacing: -2px; }
+    .toolbar .drag { cursor: grab; color: var(--ink-soft); padding: 0 1px 0 3px; display: flex; }
+    .toolbar .drag .ico { width: 18px; height: 18px; }
+    .toolbar button.icon .ico { width: 17px; height: 17px; }
     .toolbar button { padding: 8px 13px; white-space: nowrap; font-weight: 500; }
     .toolbar button.on {
       background: linear-gradient(180deg, #e0294b, #b00c2b); color: #fff;
       box-shadow: inset 0 1px 0 rgba(255, 255, 255, .45), 0 4px 14px rgba(198, 14, 48, .45);
     }
     .toolbar button.icon { width: 32px; height: 32px; padding: 0; }
+    /* Off | Pen | Typing: one pill, the chosen mode lit up. Every segment keeps its
+       size, so switching never moves anything. */
+    .toolbar .modes { display: flex; gap: 2px; padding: 2px; border-radius: 999px; background: rgba(120, 120, 128, .14); }
+    .toolbar .modes button { padding: 7px 11px; background: transparent; box-shadow: none; }
+    .toolbar .modes button:hover { background: var(--chip); }
+    .toolbar .modes button.on, .toolbar .modes button.on:hover {
+      background: linear-gradient(180deg, #e0294b, #b00c2b); color: #fff;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, .45), 0 3px 10px rgba(198, 14, 48, .4);
+    }
     .toolbar .sep { width: 1px; height: 20px; background: var(--ink-soft); opacity: .25; margin: 0 2px; }
 
     .panel {
-      top: max(64px, calc(50vh - 215px)); left: calc(100% - 72px); width: 58px; box-sizing: border-box;
+      top: max(64px, calc(50vh - 215px)); left: calc(100% - 108px); width: 94px; box-sizing: border-box;
       display: flex; flex-direction: column; align-items: center; gap: 7px;
       padding: 12px 0; border-radius: 26px;
     }
@@ -253,6 +315,9 @@
     .panel button { width: 36px; height: 36px; padding: 0; }
     .panel .big { font-size: 16px; font-weight: 700; }
     .panel .small { font-size: 11px; font-weight: 700; }
+    /* Center A+ / A− by the letters themselves (cap height to baseline), not by the
+       font's built-in spacing, which differs between Windows, Mac and Linux fonts. */
+    .panel .cap { display: block; line-height: 1; text-box: trim-both cap alphabetic; }
     .panel .size { width: 3ch; text-align: center; font-weight: 600; font-variant-numeric: tabular-nums; padding: 1px 0; white-space: nowrap; }
     .panel .size.bump { animation: bump .35s var(--spring); }
     @keyframes bump { 40% { transform: scale(1.3); } }
@@ -262,14 +327,24 @@
       width: 28px; height: 28px; border-radius: 50%;
       box-shadow: 0 0 0 1.5px rgba(255, 255, 255, .85), 0 2px 6px rgba(0, 0, 0, .2), inset 0 1px 1px rgba(255, 255, 255, .5);
     }
-    /* room for the selection ring (about 4px around a dot) without touching neighbors */
-    .panel .swatches { display: flex; flex-direction: column; align-items: center; gap: 14px; padding: 6px 0 4px; }
+    /* Two columns of dots (keeps the toolbar short enough for small laptop screens),
+       with room for the selection ring (about 4px around a dot) without touching neighbors. */
+    .panel .swatches { display: grid; grid-template-columns: repeat(2, 28px); gap: 14px; padding: 6px 0 4px; }
     .panel .swatch:hover { transform: scale(1.08); }
     .panel .swatch.active {
       transform: scale(1.04);
       box-shadow: 0 0 0 2px rgba(255, 255, 255, .95), 0 0 0 4px var(--accent), 0 3px 10px rgba(198, 14, 48, .3);
     }
     .panel .flip { width: 36px; height: 28px; font-size: 14px; color: var(--ink-soft); }
+    .panel .tools { display: flex; gap: 8px; }
+    .panel button .ico { width: 18px; height: 18px; }
+    .panel .flip .ico { width: 16px; height: 16px; }
+    .panel button.markbtn, .panel button.erasebtn { font-size: 17px; }
+    .panel button.markbtn.on, .panel button.erasebtn.on {
+      color: #fff;
+      background: linear-gradient(180deg, #e0294b, #b00c2b);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, .45), 0 4px 14px rgba(198, 14, 48, .45);
+    }
 
     .toast {
       left: 50%; bottom: 28px; transform: translateX(-50%);
@@ -293,6 +368,7 @@
     }
     .shotcard:not(.hidden) img { animation: develop .6s var(--ease) both; }
     @keyframes develop { from { opacity: 0; transform: scale(1.04); filter: brightness(1.6) blur(4px); } }
+    .shotcard .title .ico { width: 18px; height: 18px; }
     .shotcard .title { display: flex; align-items: center; gap: 8px; margin: 2px 4px 10px; font: 600 14px/1.2 var(--font); }
     .shotcard .title .grow { flex: 1; }
     .shotcard .title button { width: 28px; height: 28px; padding: 0; font-size: 12px; }
@@ -306,6 +382,7 @@
       margin: 10px 4px 0; height: 2.7em; font: 13px/1.35 var(--font); color: var(--ink-soft);
       display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; overflow-wrap: anywhere;
     }
+    .toast .ico { width: 16px; height: 16px; }
     .toast button { padding: 6px 12px; font-weight: 600; background: var(--accent); color: #fff; }
 
     /* ---------- first-time tour ---------- */
@@ -331,6 +408,12 @@
     .tour-pop h3 { margin: 6px 0 6px; font: 700 17px/1.25 var(--font); }
     .tour-pop p { margin: 0; font: 14px/1.45 var(--font); }
     .tour-pop p + p { margin-top: 8px; }
+    .tour-pop u.ex { color: var(--mark); text-decoration-thickness: .1em; text-underline-offset: .14em; }
+    .tour-pop .content .ico { display: inline-block; width: 1.05em; height: 1.05em; vertical-align: -.17em; }
+    /* Small and quiet: an optional way to support the project (last step only). */
+    .tour-pop p.support { margin-top: 12px; font-size: 12px; }
+    .tour-pop .support a { color: var(--ink-soft); text-decoration: none; }
+    .tour-pop .support a:hover { color: var(--ink); text-decoration: underline; }
     .tour-pop .try { margin-top: 10px; padding: 8px 11px; border-radius: 14px; font: 500 13px/1.4 var(--font);
       background: rgba(198, 14, 48, .12); color: var(--ink); }
     .tour-pop kbd { font: 600 11.5px/1 var(--font); padding: 2px 6px; border-radius: 6px; background: var(--chip);
@@ -368,6 +451,7 @@
     layer = document.createElement('div');
     layer.className = 'layer';
     root.appendChild(layer);
+    layer.addEventListener('pointerdown', onLayerPointerDown);
 
     // Stop our UI's events from bubbling up into the reader's own handlers.
     for (const type of [...POINTER_EVENTS, 'pointermove', 'mousemove', 'contextmenu', 'touchstart', 'touchend']) {
@@ -387,10 +471,17 @@
     }).observe(document.documentElement, { childList: true, subtree: true });
   }
 
-  function btn(label, title, onClick, cls) {
+  // A button with an optional Lucide icon in front of its label (or alone).
+  function btn(label, title, onClick, cls, icon) {
     const b = document.createElement('button');
     b.type = 'button';
-    b.textContent = label;
+    if (icon) {
+      b.innerHTML = ic(icon);
+      if (label) b.append(Object.assign(document.createElement('span'), { textContent: label }));
+      else b.setAttribute('aria-label', title);
+    } else {
+      b.textContent = label;
+    }
     b.title = title;
     if (cls) b.className = cls;
     // pointerdown default would steal focus from the note being edited
@@ -402,13 +493,21 @@
 
   // Give a button several labels stacked in one spot (see .stack in the CSS); only
   // one is visible, but the button is always sized for the longest.
+  // A label is text, or [icon, text].
   function stack(b, labels) {
     b.textContent = '';
-    b.classList.add('stack');
-    b._labels = labels.map((t) => {
+    const box = document.createElement('span');
+    box.className = 'stack';
+    b.append(box);
+    b._labels = labels.map((l) => {
       const span = document.createElement('span');
-      span.textContent = t;
-      b.append(span);
+      if (Array.isArray(l)) {
+        span.innerHTML = ic(l[0]);
+        span.append(l[1]);
+      } else {
+        span.textContent = l;
+      }
+      box.append(span);
       return span;
     });
     setStack(b, 0);
@@ -426,26 +525,37 @@
 
     const drag = document.createElement('span');
     drag.className = 'drag';
-    drag.textContent = '⋮⋮';
+    drag.innerHTML = ic('grip-vertical');
     drag.title = 'Drag to move the toolbar';
     makeDraggable(drag, toolbar, null);
 
-    ui.typing = stack(
-      btn('✏️ Typing', 'Typing mode: click anywhere on the page to add text (Alt+Shift+T closes the toolbar)', () =>
-        sendState({ typing: !state.typing })
-      ),
-      ['✏️ Typing: on', '✏️ Typing: off']
-    );
+    // Mode selector: Off (use the textbook) | Pen (draw) | Typing (add text).
+    ui.modes = document.createElement('div');
+    ui.modes.className = 'modes';
+    ui.modes.setAttribute('role', 'group');
+    ui.modes.setAttribute('aria-label', L('Mode', 'Modo'));
+    ui.mode = {
+      off: btn(L('Off', 'Apagado'), L('Use the textbook normally (turn pages, click its buttons). Your work stays on the page.',
+        'Use el libro con normalidad (pasar páginas, pulsar botones). Su trabajo se queda en la página.'), () => setMode('off'), '', 'mouse-pointer-2'),
+      pen: btn(L('Pen', 'Lápiz'), L('Draw on the page with a pen, mouse or finger',
+        'Dibuje en la página con un lápiz, el ratón o el dedo'), () => setMode('pen'), '', 'pen-line'),
+      typing: btn('Typing', L('Click anywhere on the page to add text (Alt+Shift+T closes the toolbar)',
+        'Haga clic en cualquier lugar para añadir texto (Alt+Mayús+T cierra la barra)'), () => setMode('typing'), '', 'type'),
+    };
+    for (const [m, b] of Object.entries(ui.mode)) {
+      b.dataset.mode = m;
+      ui.modes.append(b);
+    }
 
-    ui.shot = btn('📷 Screenshot', 'Take a screenshot with your text, then copy or download it (Alt+Shift+S)', () => takeScreenshot());
-    ui.clear = btn('🗑 Clear', 'Remove all text boxes', () => {
-      if (confirm('Remove all of your typed text from this page?')) chrome.runtime.sendMessage({ cmd: 'clear-all' });
-    });
-    ui.close = btn('✕', 'Hide toolbar (your text stays on the page)', () => sendState({ open: false, typing: false }), 'icon');
+    ui.shot = btn('Screenshot', 'Take a screenshot with your text, then copy or download it (Alt+Shift+S)', () => takeScreenshot(), '', 'camera');
+    ui.clear = btn('Clear', 'Remove all text boxes and drawings', () => {
+      if (confirm('Remove all of your typed text and drawings from this page?')) chrome.runtime.sendMessage({ cmd: 'clear-all' });
+    }, '', 'trash-2');
+    ui.close = btn('', 'Hide toolbar (your text stays on the page)', () => sendState({ open: false, typing: false, pen: false, mark: false }), 'icon', 'x');
 
     const sep = () => Object.assign(document.createElement('span'), { className: 'sep' });
-    ui.help = btn('?', 'Show the tour of every feature again', () => startTour(), 'icon');
-    toolbar.append(drag, ui.typing, sep(), ui.shot, ui.clear, ui.help, ui.close);
+    ui.help = btn('', 'Show the tour of every feature again', () => startTour(), 'icon', 'circle-help');
+    toolbar.append(drag, ui.modes, sep(), ui.shot, ui.clear, ui.help, ui.close);
     root.appendChild(toolbar);
 
     // Side toolbar: text size and color.
@@ -453,24 +563,41 @@
     panel.className = 'glass panel hidden';
     const label = (t) => Object.assign(document.createElement('div'), { className: 'label', textContent: t });
     const hsep = () => Object.assign(document.createElement('div'), { className: 'sep' });
-    ui.bigger = btn('A+', 'Bigger text', () => changeSize(2), 'big');
+    const capLabel = (b, t) => {
+      b.textContent = '';
+      b.append(Object.assign(document.createElement('span'), { className: 'cap', textContent: t }));
+      b.setAttribute('aria-label', t);
+      return b;
+    };
+    ui.bigger = capLabel(btn('', 'Bigger text', () => changeSize(2), 'big'), 'A+');
     ui.size = document.createElement('div');
     ui.size.className = 'size';
     ui.size.title = 'Text size';
-    ui.smaller = btn('A−', 'Smaller text', () => changeSize(-2), 'small');
+    ui.smaller = capLabel(btn('', 'Smaller text', () => changeSize(-2), 'small'), 'A−');
     ui.swatches = COLORS.map((c) => {
-      const sw = btn('', c.name + ' (switches to a lighter or darker shade automatically so it stays readable)', () => sendState({ color: c.id }), 'swatch');
+      const sw = btn('', c.name + ' (switches to a lighter or darker shade automatically so it stays readable)', () => pickColor(c.id), 'swatch');
       // left half: shade used on light backgrounds; right half: shade used on dark ones
       sw.style.background = `linear-gradient(135deg, ${c.light} 0 55%, ${c.dark} 55% 100%)`;
       sw.dataset.color = c.id;
       return sw;
     });
-    ui.flip = btn('⇄', 'Move this toolbar to the other side of the screen', () =>
-      sendState({ side: state.side === 'left' ? 'right' : 'left' }), 'flip');
+    ui.mark = btn('', L('Highlighter: click or drag across letters to mark them (click again to unmark)',
+      'Marcador: haga clic o arrastre sobre las letras para marcarlas (otro clic las desmarca)'), () =>
+      // With letters selected it marks them; otherwise it turns highlighter mode on/off.
+      state.mark ? sendState({ mark: false, typing: true }) : chrome.runtime.sendMessage({ cmd: 'highlight', color: markColor() }),
+    'markbtn', 'highlighter');
+    ui.eraser = btn('', L('Eraser: touch a drawing to erase it (a Surface Pen’s eraser end works too)',
+      'Borrador: toque un dibujo para borrarlo (también funciona el extremo borrador del lápiz)'), () =>
+      sendState(state.pen && state.eraser ? { eraser: false } : { eraser: true, pen: true, typing: false, mark: false }), 'erasebtn', 'eraser');
+    const tools = document.createElement('div');
+    tools.className = 'tools';
+    tools.append(ui.mark, ui.eraser);
+    ui.flip = btn('', 'Move this toolbar to the other side of the screen', () =>
+      sendState({ side: state.side === 'left' ? 'right' : 'left' }), 'flip', 'arrow-left-right');
     const swatchGroup = document.createElement('div');
     swatchGroup.className = 'swatches';
     swatchGroup.append(...ui.swatches);
-    panel.append(label('Size'), ui.bigger, ui.size, ui.smaller, hsep(), label('Color'), swatchGroup, hsep(), ui.flip);
+    panel.append(label('Size'), ui.bigger, ui.size, ui.smaller, hsep(), label(L('Tools', 'Útiles')), tools, hsep(), label('Color'), swatchGroup, hsep(), ui.flip);
     root.appendChild(panel);
 
     toastEl = document.createElement('div');
@@ -484,6 +611,20 @@
     sendState({ size });
   }
 
+  // A color dot was clicked. If letters are selected in a text box, only those
+  // letters change (like Word). In highlighter mode it picks the marker color.
+  // Otherwise it's the color for the whole box and for new text.
+  const markColor = () => state.markColor || 'red';
+
+  function pickColor(id) {
+    if (state.mark) return sendState({ markColor: id });
+    chrome.runtime.sendMessage({ cmd: 'pick-color', color: id });
+  }
+
+  function setMode(m) {
+    sendState({ typing: m === 'typing', pen: m === 'pen', mark: false, eraser: false });
+  }
+
   function sendState(patch) {
     chrome.runtime.sendMessage({ cmd: 'set-state', patch });
   }
@@ -491,11 +632,20 @@
   function render() {
     if (!host) return;
     layer.classList.toggle('typing', state.typing && !capturing);
+    layer.classList.toggle('marking', !!state.mark && !capturing);
+    // Drawing happens in the top page's layer, which covers frames too.
+    layer.classList.toggle('drawing', !!state.pen && IS_TOP && !capturing);
+    layer.classList.toggle('erasing', !!state.pen && !!state.eraser);
     if (!state.typing) selectNote(null);
     if (toolbar) {
       toolbar.classList.toggle('hidden', !state.open || capturing);
-      ui.typing.classList.toggle('on', state.typing);
-      setStack(ui.typing, state.typing ? 0 : 1);
+      const mode = state.pen ? 'pen' : state.typing ? 'typing' : state.mark ? null : 'off';
+      for (const [m, b] of Object.entries(ui.mode)) {
+        b.classList.toggle('on', m === mode);
+        b.setAttribute('aria-pressed', String(m === mode));
+      }
+      ui.eraser.classList.toggle('on', !!state.pen && !!state.eraser);
+      ui.eraser.setAttribute('aria-pressed', String(!!state.pen && !!state.eraser));
       panel.classList.toggle('hidden', !state.open || capturing);
       panel.classList.toggle('left', state.side === 'left');
       const sizeText = String(selected ? selected.size : state.size);
@@ -505,7 +655,9 @@
         ui.size.classList.add('bump');
       }
       ui.size.textContent = sizeText;
-      const cur = family(selected ? selected.color : state.color).id;
+      ui.mark.classList.toggle('on', !!state.mark);
+      ui.mark.setAttribute('aria-pressed', String(!!state.mark));
+      const cur = family(state.mark ? markColor() : selected ? selected.color : state.color).id;
       for (const s of ui.swatches) s.classList.toggle('active', s.dataset.color === cur);
       if (tour && (!state.open || capturing)) hideTour(!state.open);
       else if (tour) showTourEls();
@@ -547,7 +699,7 @@
   const TOUR_STEPS = [
     {
       place: 'center',
-      title: L('Welcome to VHL Text Overlay 👋', 'Bienvenido a VHL Text Overlay 👋'),
+      title: L('Welcome to VHL Text Overlay', 'Bienvenido a VHL Text Overlay'),
       body: L(
         '<p>Here’s a one-minute tour of everything it can do. You can try each thing as you go.</p><p>You can skip the tour now, or any time.</p>',
         '<p>Este es un recorrido de un minuto por todo lo que puede hacer. Puede probar cada cosa sobre la marcha.</p><p>Puede saltarse el recorrido ahora o en cualquier momento.</p>'
@@ -555,19 +707,19 @@
       next: L('Start the tour', 'Empezar'),
     },
     {
-      target: () => [ui.typing],
-      title: L('Typing mode', 'Modo de escritura'),
+      target: () => [ui.modes],
+      title: L('Off, Pen or Typing', 'Apagado, Lápiz o Typing'),
       body: L(
-        '<p>While <b>Typing</b> is on, clicking the page adds text instead of using the textbook.</p><p>Turn it off to turn pages or click the textbook’s buttons. Your text stays put.</p>',
-        '<p>Con <b>Typing</b> activado, al hacer clic en la página se añade texto en lugar de usar el libro.</p><p>Desactívelo para pasar páginas o pulsar los botones del libro. Su texto se queda.</p>'
+        '<p><b>{{type}} Typing</b>: click the page to add text.</p><p><b>{{pen-line}} Pen</b>: draw with a pen, mouse or finger. Press harder for thicker lines. Flip a Surface Pen over to erase.</p><p><b>{{mouse-pointer-2}} Off</b>: use the textbook normally. Your work stays on the page.</p>',
+        '<p><b>{{type}} Typing</b>: haga clic en la página para añadir texto.</p><p><b>{{pen-line}} Lápiz</b>: dibuje con un lápiz, el ratón o el dedo. Si aprieta más, la línea es más gruesa. Dé la vuelta al lápiz de Surface para borrar.</p><p><b>{{mouse-pointer-2}} Apagado</b>: use el libro con normalidad. Su trabajo se queda en la página.</p>'
       ),
     },
     {
       place: 'bottom',
       title: L('Write anywhere', 'Escriba donde quiera'),
       body: L(
-        `<p>Click any spot on the page and type. Click somewhere else to start another piece of text.</p><p>${kbd('Enter')} starts a new line. ${kbd('Esc')} finishes.</p><div class="try">👉 Try it now: click a blank on the page and type a word.</div>`,
-        `<p>Haga clic en cualquier lugar de la página y escriba. Haga clic en otro sitio para empezar otro texto.</p><p>${kbd('Intro')} empieza una línea nueva. ${kbd('Esc')} termina.</p><div class="try">👉 Pruébelo: haga clic en un espacio en blanco y escriba una palabra.</div>`
+        `<p>Click any spot on the page and type. Click somewhere else to start another piece of text.</p><p>${kbd('Enter')} starts a new line. ${kbd('Esc')} finishes.</p><div class="try">Try it now: click a blank on the page and type a word.</div>`,
+        `<p>Haga clic en cualquier lugar de la página y escriba. Haga clic en otro sitio para empezar otro texto.</p><p>${kbd('Intro')} empieza una línea nueva. ${kbd('Esc')} termina.</p><div class="try">Pruébelo: haga clic en un espacio en blanco y escriba una palabra.</div>`
       ),
     },
     {
@@ -580,8 +732,8 @@
       place: 'bottom',
       title: L('Edit, move or delete', 'Editar, mover o borrar'),
       body: L(
-        '<p>Click your text to change it.</p><p>Drag the dark gray <b>✥</b> handle to move it, or click the red <b>×</b> to delete it.</p><p>Your text sticks to the page when you scroll or zoom.</p>',
-        '<p>Haga clic en su texto para cambiarlo.</p><p>Arrastre el círculo gris oscuro <b>✥</b> para moverlo, o pulse la <b>×</b> roja para borrarlo.</p><p>El texto se queda pegado a la página al desplazarse o ampliar.</p>'
+        '<p>Click your text to change it.</p><p>Drag the dark gray <b>{{move}}</b> handle to move it, or click the red <b>{{x}}</b> to delete it.</p><p>Your text sticks to the page when you scroll or zoom.</p>',
+        '<p>Haga clic en su texto para cambiarlo.</p><p>Arrastre el círculo gris oscuro <b>{{move}}</b> para moverlo, o pulse la <b>{{x}}</b> roja para borrarlo.</p><p>El texto se queda pegado a la página al desplazarse o ampliar.</p>'
       ),
     },
     {
@@ -601,43 +753,51 @@
       ),
     },
     {
+      target: () => [ui.mark],
+      title: L('Highlight letters', 'Resaltar letras'),
+      body: L(
+        `<p>Show a verb ending in another color, like <b>limpi<u class="ex">e</u></b>. Three ways:</p><p>• Type ${kbd('&gt;')} before the letters: <b>hac&gt;er</b> gives <b>hac<u class="ex">er</u></b>. A space ends it (${kbd('&gt;&gt;')} types a real &gt;).<br>• Select letters in your text, then click a color dot.<br>• Click <b>{{highlighter}}</b>, then click or drag across letters (or select letters first, then click it). Click again to unmark.</p>`,
+        `<p>Muestre una terminación verbal en otro color, como <b>limpi<u class="ex">e</u></b>. Tres maneras:</p><p>• Escriba ${kbd('&gt;')} antes de las letras: <b>hac&gt;er</b> da <b>hac<u class="ex">er</u></b>. Un espacio lo termina (${kbd('&gt;&gt;')} escribe un &gt; de verdad).<br>• Seleccione letras de su texto y pulse un punto de color.<br>• Pulse <b>{{highlighter}}</b> y haga clic o arrastre sobre las letras (o seleccione letras y luego púlselo). Otro clic las desmarca.</p>`
+      ),
+    },
+    {
       target: () => [ui.flip],
       title: L('Move this toolbar', 'Mover esta barra'),
       body: L(
-        '<p><b>⇄</b> moves the size and color toolbar to the other side of the screen if it’s in your way.</p>',
-        '<p><b>⇄</b> mueve la barra de tamaño y color al otro lado de la pantalla si le molesta.</p>'
+        '<p><b>{{arrow-left-right}}</b> moves the size and color toolbar to the other side of the screen if it’s in your way.</p>',
+        '<p><b>{{arrow-left-right}}</b> mueve la barra de tamaño y color al otro lado de la pantalla si le molesta.</p>'
       ),
     },
     {
       target: () => [ui.shot],
       title: L('Save a picture of your work', 'Guardar una imagen de su trabajo'),
       body: L(
-        `<p>Click <b>📷 Screenshot</b>. Chrome asks to <b>share this tab</b>: click <b>Share</b>. Nothing is recorded or sent anywhere.</p><p>Then choose <b>Copy</b> (paste it anywhere with ${kbd(MOD + '+V')}) or <b>Download</b> (saves a picture file).</p><p>Shortcut: ${kbd('Alt+Shift+S')}</p>`,
-        `<p>Pulse <b>📷 Screenshot</b>. Chrome pregunta si quiere <b>compartir esta pestaña</b>: pulse <b>Compartir</b>. No se graba ni se envía nada.</p><p>Luego elija <b>Copiar</b> (péguela donde quiera con ${kbd(MOD + '+V')}) o <b>Descargar</b> (guarda un archivo de imagen).</p><p>Atajo: ${kbd('Alt+Mayús+S')}</p>`
+        `<p>Click <b>{{camera}} Screenshot</b>. Chrome asks to <b>share this tab</b>: click <b>Share</b>. Nothing is recorded or sent anywhere.</p><p>Then choose <b>Copy</b> (paste it anywhere with ${kbd(MOD + '+V')}) or <b>Download</b> (saves a picture file).</p><p>Shortcut: ${kbd('Alt+Shift+S')}</p>`,
+        `<p>Pulse <b>{{camera}} Screenshot</b>. Chrome pregunta si quiere <b>compartir esta pestaña</b>: pulse <b>Compartir</b>. No se graba ni se envía nada.</p><p>Luego elija <b>Copiar</b> (péguela donde quiera con ${kbd(MOD + '+V')}) o <b>Descargar</b> (guarda un archivo de imagen).</p><p>Atajo: ${kbd('Alt+Mayús+S')}</p>`
       ),
     },
     {
       target: () => [ui.clear],
       title: L('Clear', 'Borrar todo'),
       body: L(
-        '<p><b>🗑 Clear</b> erases all of your text on the page.</p><p>Remember: text is never saved. Refreshing the page erases it too, so copy a picture first.</p>',
-        '<p><b>🗑 Clear</b> borra todo su texto de la página.</p><p>Recuerde: el texto nunca se guarda. Al recargar la página también se borra, así que copie una imagen antes.</p>'
+        '<p><b>{{trash-2}} Clear</b> erases all of your text on the page.</p><p>Remember: text is never saved. Refreshing the page erases it too, so copy a picture first.</p>',
+        '<p><b>{{trash-2}} Clear</b> borra todo su texto de la página.</p><p>Recuerde: el texto nunca se guarda. Al recargar la página también se borra, así que copie una imagen antes.</p>'
       ),
     },
     {
       target: () => [ui.close],
       title: L('Hide the toolbars', 'Ocultar las barras'),
       body: L(
-        `<p><b>✕</b> hides both toolbars. Your text stays on the page.</p><p>To bring them back, click the <b>T</b> button at the top right of Chrome, or press ${kbd('Alt+Shift+T')}.</p>`,
-        `<p><b>✕</b> oculta las dos barras. Su texto se queda en la página.</p><p>Para que vuelvan, pulse el botón <b>T</b> arriba a la derecha de Chrome o ${kbd('Alt+Mayús+T')}.</p>`
+        `<p><b>{{x}}</b> hides both toolbars. Your text stays on the page.</p><p>To bring them back, click the <b>T</b> button at the top right of Chrome, or press ${kbd('Alt+Shift+T')}.</p>`,
+        `<p><b>{{x}}</b> oculta las dos barras. Su texto se queda en la página.</p><p>Para que vuelvan, pulse el botón <b>T</b> arriba a la derecha de Chrome o ${kbd('Alt+Mayús+T')}.</p>`
       ),
     },
     {
       target: () => [ui.help],
-      title: L('You’re all set! 🎉', '¡Todo listo! 🎉'),
+      title: L('You’re all set!', '¡Todo listo!'),
       body: L(
-        '<p>Want to see this tour again? Click <b>?</b> any time.</p>',
-        '<p>¿Quiere ver este recorrido otra vez? Pulse <b>?</b> cuando quiera.</p>'
+        '<p>Want to see this tour again? Click <b>{{circle-help}}</b> any time.</p><p class="support"><a href="https://buymeacoffee.com/aidanmccants" target="_blank" rel="noopener">Enjoying it? {{coffee}} Buy me a coffee</a></p>',
+        '<p>¿Quiere ver este recorrido otra vez? Pulse <b>{{circle-help}}</b> cuando quiera.</p><p class="support"><a href="https://buymeacoffee.com/aidanmccants" target="_blank" rel="noopener">¿Le resulta útil? {{coffee}} Invíteme a un café</a></p>'
       ),
       next: L('Done', 'Terminar'),
     },
@@ -669,7 +829,7 @@
     ensureUI();
     buildTour();
     tour = { i: 0 };
-    if (!state.open || !state.typing) sendState({ open: true, typing: true });
+    if (!state.open || !state.typing) sendState({ open: true, typing: true, pen: false, mark: false });
     showTourStep();
   }
 
@@ -702,7 +862,7 @@
     content.innerHTML =
       // The step counter keeps its line on the first step too (hidden), so nothing jumps.
       `<div class="count${tour.i > 0 ? '' : ' reserve'}">${L('Step', 'Paso')} ${Math.max(1, tour.i)} ${L('of', 'de')} ${n - 1}</div>` +
-      `<h3>${step.title}</h3>${step.body}` +
+      `<h3>${step.title}</h3>${withIcons(step.body)}` +
       `<div class="dots">${TOUR_STEPS.map((_, j) => `<span class="dot${j === tour.i ? ' on' : ''}"></span>`).join('')}</div>`;
     const row = document.createElement('div');
     row.className = 'row';
@@ -938,8 +1098,8 @@
     shotCard.innerHTML = '';
     const title = document.createElement('div');
     title.className = 'title';
-    title.innerHTML = `<span>${L('📷 Screenshot ready', '📷 Captura lista')}</span><span class="grow"></span>`;
-    title.append(btn('✕', L('Close', 'Cerrar'), hideShotCard));
+    title.innerHTML = `${ic('camera')}<span>${L('Screenshot ready', 'Captura lista')}</span><span class="grow"></span>`;
+    title.append(btn('', L('Close', 'Cerrar'), hideShotCard, '', 'x'));
     const img = document.createElement('img');
     img.src = shotUrl;
     img.alt = L('Screenshot preview', 'Vista previa de la captura');
@@ -973,8 +1133,8 @@
       a.remove();
       done(dlBtn, L(`Saved to your Downloads folder as ${name}`, `Guardada en Descargas como ${name}`));
     });
-    stack(copyBtn, [L('Copy', 'Copiar'), L('✓ Copied', '✓ Copiada')]);
-    stack(dlBtn, [L('Download', 'Descargar'), L('✓ Downloaded', '✓ Descargada')]);
+    stack(copyBtn, [['copy', L('Copy', 'Copiar')], ['check', L('Copied', 'Copiada')]]);
+    stack(dlBtn, [['download', L('Download', 'Descargar')], ['check', L('Downloaded', 'Descargada')]]);
     actions.append(copyBtn, dlBtn);
     shotCard.append(title, img, actions, status);
     shotCard.classList.remove('hidden');
@@ -987,7 +1147,7 @@
   // Find a reasonably large, stable page element under the click to pin the note to,
   // so the note scrolls and zooms together with the textbook page.
   function findAnchor(x, y, fallbackTarget) {
-    let el = document.elementFromPoint(x, y) || fallbackTarget;
+    let el = document.elementsFromPoint(x, y).find((e) => e !== host) || fallbackTarget;
     if (!el || el === host) el = document.documentElement;
     while (el && el !== document.documentElement) {
       const r = el.getBoundingClientRect();
@@ -1019,11 +1179,12 @@
     el.className = 'note';
     const grip = document.createElement('div');
     grip.className = 'grip';
-    grip.textContent = '✥';
+    grip.innerHTML = ic('move');
     grip.title = 'Drag to move';
     const del = document.createElement('button');
     del.className = 'del';
-    del.textContent = '×';
+    del.innerHTML = ic('x');
+    del.setAttribute('aria-label', 'Delete');
     del.title = 'Delete';
     const text = document.createElement('div');
     text.className = 'text';
@@ -1039,6 +1200,7 @@
 
     text.addEventListener('focus', () => selectNote(note));
     text.addEventListener('blur', () => {
+      endMarkTyping(note);
       if (capturing) return;
       setTimeout(() => {
         if (pendingFocus !== note && root.activeElement !== text && text.textContent.trim() === '') removeNote(note);
@@ -1048,7 +1210,11 @@
     del.addEventListener('click', () => removeNote(note));
     makeDraggable(grip, el, note);
     // Clicking the note's border/grip area shouldn't create a new note.
-    el.addEventListener('pointerdown', () => selectNote(note));
+    el.addEventListener('pointerdown', () => !state.mark && selectNote(note));
+    text.addEventListener('pointerdown', (e) => {
+      if (state.mark) startMarking(note, e);
+      else endMarkTyping(note); // clicking moves the caret: stop marking while typing
+    });
     return note;
   }
 
@@ -1072,14 +1238,27 @@
   const scrollX0 = (el) => (isRootScroller(el) ? 0 : el.scrollLeft);
   const scrollY0 = (el) => (isRootScroller(el) ? 0 : el.scrollTop);
 
+  // A thin outline in the opposite color keeps text readable on busy pictures.
+  const haloShadow = (halo) =>
+    halo ? [[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [-1, -1], [1, -1], [-1, 1]].map(([a, b]) => `${a}px ${b}px 1px ${halo}`).join(',') : 'none';
+
   function applyStyle(note) {
+    if (note.path) return styleStroke(note);
     const { color, halo } = readableColor(note.color, note.bg);
     note.textEl.style.color = color;
-    // A thin outline in the opposite color keeps text readable on busy pictures.
-    note.textEl.style.textShadow = halo
-      ? [[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [-1, -1], [1, -1], [-1, 1]].map(([a, b]) => `${a}px ${b}px 1px ${halo}`).join(',')
-      : 'none';
+    note.textEl.style.textShadow = haloShadow(halo);
     note.textEl.style.fontSize = note.size + 'px';
+    styleMarks(note);
+  }
+
+  // Marked letters get the readable shade of their own color, checked against the
+  // same background as the rest of the box.
+  function styleMarks(note) {
+    for (const span of note.textEl.querySelectorAll('.mark')) {
+      const { color, halo } = readableColor(span.dataset.c, note.bg);
+      span.style.color = color;
+      span.style.textShadow = haloShadow(halo);
+    }
   }
 
   // ---------------------------------------------------------------------------
@@ -1200,29 +1379,285 @@
 
   function clearAll() {
     for (const n of [...notes]) removeNote(n);
+    for (const st of [...strokes]) removeStroke(st);
+    inkHistory.length = inkRedo.length = 0;
   }
 
-  // Keep every note glued to its page element (handles scrolling, zoom, resizing).
-  function tick() {
-    for (const n of notes) {
-      const a = n.anchor;
-      if (!a.isConnected) {
-        n.el.style.display = 'none'; // page changed; note belonged to the old page
-        continue;
-      }
-      const r = a.getBoundingClientRect();
-      if (!r.width && !r.height) {
-        n.el.style.display = 'none';
-        continue;
-      }
-      n.el.style.display = '';
-      const scale = r.width / n.baseW;
-      const x = r.left + n.fx * r.width - (scrollX0(a) - n.sx) * scale;
-      const y = r.top + n.fy * r.height - (scrollY0(a) - n.sy) * scale;
-      n.el.style.transform = `translate(${x}px, ${y}px) scale(${scale})`;
+  // Keep every note and drawing glued to its page element (handles scrolling, zoom, resizing).
+  function place(n) {
+    const a = n.anchor;
+    if (!a.isConnected) {
+      n.el.style.display = 'none'; // page changed; it belonged to the old page
+      return;
     }
+    const r = a.getBoundingClientRect();
+    if (!r.width && !r.height) {
+      n.el.style.display = 'none';
+      return;
+    }
+    n.el.style.display = '';
+    const scale = r.width / n.baseW;
+    const x = r.left + n.fx * r.width - (scrollX0(a) - n.sx) * scale;
+    const y = r.top + n.fy * r.height - (scrollY0(a) - n.sy) * scale;
+    n.tx = x;
+    n.ty = y;
+    n.scale = scale;
+    n.el.style.transform = `translate(${x}px, ${y}px) scale(${scale})`;
+  }
+
+  function tick() {
+    for (const n of notes) place(n);
+    for (const st of strokes) place(st);
     if (tour) positionTour();
     requestAnimationFrame(tick);
+  }
+
+  // ---------------------------------------------------------------------------
+  // Pen mode: drawing with a pen, mouse or finger (Pointer Events). Strokes are SVG
+  // shapes whose width follows the pen pressure, pinned to the page like notes.
+  // ---------------------------------------------------------------------------
+
+  const SVGNS = 'http://www.w3.org/2000/svg';
+  const inkHistory = []; // [{ add: [strokes] } | { erase: [strokes] }]
+  const inkRedo = [];
+  let penSeen = false; // once a pen is used, fingers scroll instead of drawing (palm rejection)
+  let inkPresenter = null; // Chrome's Ink API, if available: the system draws the newest bit of the line
+
+  const isEraserEvent = (e) => e.pointerType === 'pen' && ((e.buttons & 32) !== 0 || e.button === 5);
+
+  function onLayerPointerDown(e) {
+    if (!state.pen || capturing || e.composedPath()[0] !== layer) return;
+    if (e.pointerType === 'pen') penSeen = true;
+    if (e.pointerType === 'touch' && penSeen) return touchScroll(e);
+    if (e.button !== 0 && !isEraserEvent(e)) return;
+    e.preventDefault();
+    try {
+      layer.setPointerCapture(e.pointerId);
+    } catch {
+      /* not critical */
+    }
+    if (state.eraser || isEraserEvent(e)) return eraseDrag(e);
+    drawStroke(e);
+  }
+
+  function drawStroke(e) {
+    const anchor = findAnchor(e.clientX, e.clientY, null);
+    const st = { el: null, path: null, anchor, fx: 0, fy: 0, baseW: 1, sx: 0, sy: 0, pts: [], color: state.color, size: state.size, bg: null, pen: e.pointerType === 'pen' };
+    st.el = document.createElementNS(SVGNS, 'svg');
+    st.el.setAttribute('class', 'ink');
+    st.path = document.createElementNS(SVGNS, 'path');
+    st.el.append(st.path);
+    layer.insertBefore(st.el, layer.firstChild); // drawings sit under text boxes
+    setNoteAnchor(st, anchor, e.clientX, e.clientY);
+    place(st);
+    st.bg = cssBackground(e.clientX, e.clientY);
+    strokes.add(st);
+    styleStroke(st);
+    const base = Math.max(1.5, st.size / 6);
+    const addPoint = (ev) => {
+      const s = st.scale || 1;
+      const x = (ev.clientX - st.tx) / s;
+      const y = (ev.clientY - st.ty) / s;
+      const last = st.pts[st.pts.length - 1];
+      if (last && Math.hypot(x - last.x, y - last.y) < 0.75) return;
+      // Pens report pressure (press harder = thicker); a mouse reports 0.5 while pressed.
+      const p = ev.pointerType === 'pen' ? ev.pressure : 0.5;
+      const raw = base * (0.35 + 1.3 * p);
+      const w = last ? last.w * 0.6 + raw * 0.4 : raw; // smooth out sudden jumps
+      st.pts.push({ x, y, w });
+    };
+    addPoint(e);
+    st.path.setAttribute('d', strokePath(st.pts));
+    let inkStyle = null;
+    if (navigator.ink && !inkPresenter) {
+      navigator.ink.requestPresenter({ presentationArea: layer }).then((p) => (inkPresenter = p)).catch(() => {});
+    }
+    const move = (ev) => {
+      // Pens send many more positions than the screen shows; use them all for smooth lines.
+      const all = ev.getCoalescedEvents ? ev.getCoalescedEvents() : [];
+      for (const c of all.length ? all : [ev]) addPoint(c);
+      st.path.setAttribute('d', strokePath(st.pts));
+      if (inkPresenter) {
+        try {
+          inkStyle = inkStyle || { color: st.path.getAttribute('fill'), diameter: base * (st.scale || 1) };
+          inkPresenter.updateInkTrailStartPoint(ev, inkStyle);
+        } catch {
+          /* best effort */
+        }
+      }
+    };
+    const up = () => {
+      layer.removeEventListener('pointermove', move);
+      layer.removeEventListener('pointerup', up);
+      layer.removeEventListener('pointercancel', up);
+      inkHistory.push({ add: [st] });
+      inkRedo.length = 0;
+      const b = st.el.getBoundingClientRect();
+      if (b.width || b.height) probeBackground(st, b.left + 2, b.top + b.height / 2);
+    };
+    layer.addEventListener('pointermove', move);
+    layer.addEventListener('pointerup', up);
+    layer.addEventListener('pointercancel', up);
+  }
+
+  // The outline of a line whose width changes along the way, with round ends.
+  function strokePath(pts) {
+    const f = (n) => Math.round(n * 100) / 100;
+    if (pts.length === 1) {
+      const { x, y, w } = pts[0];
+      const r = w / 2;
+      return `M${f(x - r)} ${f(y)}a${f(r)} ${f(r)} 0 1 0 ${f(2 * r)} 0a${f(r)} ${f(r)} 0 1 0 ${f(-2 * r)} 0Z`;
+    }
+    const left = [];
+    const right = [];
+    for (let i = 0; i < pts.length; i++) {
+      const a = pts[Math.max(0, i - 1)];
+      const b = pts[Math.min(pts.length - 1, i + 1)];
+      let dx = b.x - a.x;
+      let dy = b.y - a.y;
+      const len = Math.hypot(dx, dy) || 1;
+      dx /= len;
+      dy /= len;
+      const r = pts[i].w / 2;
+      left.push([pts[i].x - dy * r, pts[i].y + dx * r]);
+      right.push([pts[i].x + dy * r, pts[i].y - dx * r]);
+    }
+    // Smooth curves through the midpoints of each side.
+    const side = (ps) => {
+      let d = '';
+      for (let i = 1; i < ps.length - 1; i++) {
+        const mx = (ps[i][0] + ps[i + 1][0]) / 2;
+        const my = (ps[i][1] + ps[i + 1][1]) / 2;
+        d += `Q${f(ps[i][0])} ${f(ps[i][1])} ${f(mx)} ${f(my)}`;
+      }
+      const l = ps[ps.length - 1];
+      return d + `L${f(l[0])} ${f(l[1])}`;
+    };
+    const rEnd = f(pts[pts.length - 1].w / 2);
+    const rStart = f(pts[0].w / 2);
+    const rr = right.slice().reverse();
+    return `M${f(left[0][0])} ${f(left[0][1])}${side(left)}A${rEnd} ${rEnd} 0 0 1 ${f(rr[0][0])} ${f(rr[0][1])}${side(rr)}A${rStart} ${rStart} 0 0 1 ${f(left[0][0])} ${f(left[0][1])}Z`;
+  }
+
+  // Same readability check as text: the shade of the color that stands out, plus a
+  // thin outline on pictures.
+  function styleStroke(st) {
+    const { color, halo } = readableColor(st.color, st.bg);
+    st.path.setAttribute('fill', color);
+    st.path.setAttribute('stroke', halo || 'none');
+    st.path.setAttribute('stroke-width', halo ? '1.6' : '0');
+  }
+
+  function removeStroke(st) {
+    strokes.delete(st);
+    st.el.remove();
+  }
+
+  // Erase whole lines the pointer touches.
+  function eraseDrag(e) {
+    const erased = [];
+    const at = (ev) => {
+      for (const st of [...strokes]) {
+        if (st.el.style.display === 'none' || !touches(st, ev.clientX, ev.clientY)) continue;
+        removeStroke(st);
+        erased.push(st);
+      }
+    };
+    at(e);
+    const move = (ev) => at(ev);
+    const up = () => {
+      layer.removeEventListener('pointermove', move);
+      layer.removeEventListener('pointerup', up);
+      layer.removeEventListener('pointercancel', up);
+      if (erased.length) {
+        inkHistory.push({ erase: erased });
+        inkRedo.length = 0;
+      }
+    };
+    layer.addEventListener('pointermove', move);
+    layer.addEventListener('pointerup', up);
+    layer.addEventListener('pointercancel', up);
+  }
+
+  function touches(st, cx, cy) {
+    const s = st.scale || 1;
+    const x = (cx - st.tx) / s;
+    const y = (cy - st.ty) / s;
+    const reach = 8 / s; // a little slack around the line
+    for (let i = 0; i < st.pts.length; i++) {
+      const a = st.pts[i];
+      const b = st.pts[i + 1] || a;
+      const vx = b.x - a.x;
+      const vy = b.y - a.y;
+      const t = Math.max(0, Math.min(1, ((x - a.x) * vx + (y - a.y) * vy) / (vx * vx + vy * vy || 1)));
+      if (Math.hypot(x - (a.x + t * vx), y - (a.y + t * vy)) <= a.w / 2 + reach) return true;
+    }
+    return false;
+  }
+
+  function inkUndoRedo(undo) {
+    const from = undo ? inkHistory : inkRedo;
+    const step = from.pop();
+    if (!step) return;
+    const show = (list) => list.forEach((st) => {
+      strokes.add(st);
+      layer.insertBefore(st.el, layer.firstChild);
+    });
+    const hide = (list) => list.forEach(removeStroke);
+    if (step.add) (undo ? hide : show)(step.add);
+    else (undo ? show : hide)(step.erase);
+    (undo ? inkRedo : inkHistory).push(step);
+  }
+
+  // Scroll whatever page element is under (x, y), including inside frames.
+  function scrollUnder(x, y, dx, dy, doc = document) {
+    let el = doc.elementsFromPoint(x, y).find((e) => e !== host);
+    while (el) {
+      if (el.tagName === 'IFRAME') {
+        try {
+          const r = el.getBoundingClientRect();
+          if (scrollUnder(x - r.left, y - r.top, dx, dy, el.contentDocument)) return true;
+        } catch {
+          /* a frame from another site: scroll around it instead */
+        }
+      }
+      const cs = getComputedStyle(el);
+      const canY = dy && el.scrollHeight > el.clientHeight && /(auto|scroll)/.test(cs.overflowY);
+      const canX = dx && el.scrollWidth > el.clientWidth && /(auto|scroll)/.test(cs.overflowX);
+      if (canY || canX) {
+        el.scrollBy(dx, dy);
+        return true;
+      }
+      el = el.parentElement;
+    }
+    // Nothing scrollable inside: the frame's own page, if it can move (otherwise the
+    // page around the frame scrolls).
+    const se = doc.scrollingElement;
+    if (!se) return false;
+    const before = se.scrollTop + se.scrollLeft;
+    se.scrollBy(dx, dy);
+    return se.scrollTop + se.scrollLeft !== before || doc === document;
+  }
+
+  // After a pen has been used, a finger drag scrolls the page instead of drawing.
+  function touchScroll(e) {
+    let lx = e.clientX;
+    let ly = e.clientY;
+    const move = (ev) => {
+      if (ev.pointerId !== e.pointerId) return;
+      scrollUnder(e.clientX, e.clientY, lx - ev.clientX, ly - ev.clientY);
+      lx = ev.clientX;
+      ly = ev.clientY;
+    };
+    const up = (ev) => {
+      if (ev.pointerId !== e.pointerId) return;
+      layer.removeEventListener('pointermove', move);
+      layer.removeEventListener('pointerup', up);
+      layer.removeEventListener('pointercancel', up);
+    };
+    layer.addEventListener('pointermove', move);
+    layer.addEventListener('pointerup', up);
+    layer.addEventListener('pointercancel', up);
   }
 
   // ---------------------------------------------------------------------------
@@ -1270,15 +1705,304 @@
   // Keyboard inside a note
   // ---------------------------------------------------------------------------
 
-  function onOwnKey(e) {
+  const noteOf = (e) => {
     const path = e.composedPath();
-    const note = [...notes].find((n) => path.includes(n.textEl));
+    return [...notes].find((n) => path.includes(n.textEl));
+  };
+
+  function onOwnKey(e) {
+    const note = noteOf(e);
     if (!note) return;
     if (e.key === 'Escape') {
       e.preventDefault();
       note.textEl.blur();
       selectNote(null);
+      return;
     }
+    // Undo / redo (Ctrl+Z, Ctrl+Shift+Z, Ctrl+Y; ⌘ on a Mac) use the box's own history.
+    const k = e.key.toLowerCase();
+    if ((e.ctrlKey || e.metaKey) && !e.altKey && (k === 'z' || k === 'y')) {
+      e.preventDefault();
+      undoRedo(note, k === 'z' && !e.shiftKey);
+      return;
+    }
+    if (e.key === '>' && !e.ctrlKey && !e.metaKey && !e.altKey && !e.isComposing) {
+      // ">" starts marking the letters you type next: hac>er gives hac + marked "er".
+      // ">>" types a real ">", and ">" while marking stops early.
+      e.preventDefault();
+      if (note.markTyping && note.markFresh) {
+        endMarkTyping(note);
+        remember(note);
+        typeText(note, '>', null);
+      } else if (note.markTyping) {
+        endMarkTyping(note);
+      } else {
+        note.markTyping = true;
+        note.markFresh = true;
+        note.textEl.style.caretColor = readableColor(markColor(), note.bg).color;
+      }
+      return;
+    }
+    // Moving the caret or starting a new line also ends the mark.
+    if (/^(Enter|Arrow|Home|End|Page|Tab)/.test(e.key)) endMarkTyping(note);
+  }
+
+  function endMarkTyping(note) {
+    if (!note.markTyping) return;
+    note.markTyping = false;
+    note.markFresh = false;
+    note.textEl.style.caretColor = '';
+  }
+
+  // Typing a letter. We only step in when the browser would get the color wrong:
+  // while marking, and right after a mark (the browser would keep typing inside it).
+  function onOwnBeforeInput(e) {
+    const note = noteOf(e);
+    if (!note) return;
+    // Our own undo history: Chrome's can't follow the marks we add (Ctrl+Z would stop working).
+    if (e.inputType === 'historyUndo' || e.inputType === 'historyRedo') {
+      e.preventDefault();
+      undoRedo(note, e.inputType === 'historyUndo');
+      return;
+    }
+    if (e.inputType !== 'insertCompositionText') remember(note);
+    if (e.inputType !== 'insertText' || e.isComposing || e.data == null) {
+      if (e.inputType !== 'insertCompositionText') endMarkTyping(note);
+      return;
+    }
+    const sel = getSel();
+    if (!sel || !sel.rangeCount) return;
+    const [a, b] = selOffsets(note.textEl, sel);
+    if (a < 0) return;
+    const chars = getChars(note.textEl);
+    let color;
+    if (note.markTyping) {
+      if (/^[\p{L}\p{N}\p{M}]+$/u.test(e.data)) {
+        color = markColor();
+        note.markFresh = false;
+      } else {
+        endMarkTyping(note); // a space or punctuation ends the mark
+        color = null;
+      }
+    } else {
+      const left = a > 0 ? chars[a - 1].c : null;
+      const right = b < chars.length ? chars[b].c : null;
+      if (!left || left === right) return; // the browser gets this right on its own
+      color = null; // just after a mark: new letters are plain again
+    }
+    e.preventDefault();
+    typeText(note, e.data, color, [a, b]);
+  }
+
+  // ---------------------------------------------------------------------------
+  // Marked letters. A text box holds plain text plus <span class="mark" data-c="red">
+  // pieces. To change them we read the box as a list of letters with a color each,
+  // change that list, and rebuild the box.
+  // ---------------------------------------------------------------------------
+
+  // Undo/redo: a copy of the box's letters (and the caret) before each change.
+  function snapshot(note) {
+    const sel = getSel();
+    const at = sel && sel.rangeCount ? selOffsets(note.textEl, sel) : [-1, -1];
+    return { chars: getChars(note.textEl), sel: at[0] < 0 ? null : at };
+  }
+  function remember(note) {
+    note.undo = note.undo || [];
+    note.undo.push(snapshot(note));
+    if (note.undo.length > 300) note.undo.shift();
+    note.redo = [];
+  }
+  function undoRedo(note, undo) {
+    const from = undo ? note.undo : note.redo;
+    if (!from || !from.length) return;
+    const to = undo ? (note.redo = note.redo || []) : note.undo;
+    to.push(snapshot(note));
+    const snap = from.pop();
+    endMarkTyping(note);
+    const [a, b] = snap.sel || [snap.chars.length, snap.chars.length];
+    setChars(note, snap.chars, a, b);
+  }
+
+  const getSel = () => (root && root.getSelection ? root.getSelection() : window.getSelection());
+
+  function getChars(textEl) {
+    const out = [];
+    for (const node of textEl.childNodes) {
+      const c = node.nodeType === 1 ? node.dataset.c || null : null;
+      const t = node.nodeType === 1 && node.tagName === 'BR' ? '\n' : node.textContent;
+      for (const ch of t) out.push({ ch, c });
+    }
+    return out;
+  }
+
+  // Letter position of a (node, offset) point inside the box, or -1.
+  function offsetOf(textEl, node, off) {
+    if (!node || (node !== textEl && !textEl.contains(node))) return -1;
+    const r = document.createRange();
+    r.setStart(textEl, 0);
+    r.setEnd(node, off);
+    return [...r.toString()].length;
+  }
+
+  function selOffsets(textEl, sel) {
+    const r = sel.getRangeAt(0);
+    const a = offsetOf(textEl, r.startContainer, r.startOffset);
+    const b = offsetOf(textEl, r.endContainer, r.endOffset);
+    return a < 0 || b < 0 ? [-1, -1] : [a, b];
+  }
+
+  // The DOM point for letter position `pos`, staying with the letter on its left
+  // (so a caret right after plain text is in the plain text, not in the next mark).
+  function pointAt(textEl, pos) {
+    let n = 0;
+    let last = null;
+    for (const node of textEl.childNodes) {
+      const t = node.nodeType === 3 ? node : node.firstChild;
+      if (!t) continue;
+      const len = [...t.textContent].length;
+      if (pos <= n + len && (pos > n || n === 0)) return [t, [...t.textContent].slice(0, pos - n).join('').length];
+      n += len;
+      last = t;
+    }
+    return last ? [last, last.textContent.length] : [textEl, 0];
+  }
+
+  function setChars(note, chars, selA, selB = selA) {
+    const el = note.textEl;
+    el.textContent = '';
+    let i = 0;
+    while (i < chars.length) {
+      const c = chars[i].c;
+      let t = '';
+      while (i < chars.length && chars[i].c === c) t += chars[i++].ch;
+      if (c) {
+        const span = document.createElement('span');
+        span.className = 'mark';
+        span.dataset.c = c;
+        span.textContent = t;
+        el.append(span);
+      } else {
+        el.append(t);
+      }
+    }
+    styleMarks(note);
+    if (selA != null && root.activeElement === el) {
+      try {
+        getSel().setBaseAndExtent(...pointAt(el, selA), ...pointAt(el, selB));
+      } catch {
+        /* best effort */
+      }
+    }
+  }
+
+  // Replace letters a..b with `text` in one color (null = the box's own color).
+  function typeText(note, text, color, range) {
+    const sel = getSel();
+    const [a, b] = range || (sel && sel.rangeCount ? selOffsets(note.textEl, sel) : [-1, -1]);
+    const chars = getChars(note.textEl);
+    const at = a < 0 ? chars.length : a;
+    const ins = [...text].map((ch) => ({ ch, c: color }));
+    chars.splice(at, a < 0 ? 0 : b - a, ...ins);
+    setChars(note, chars, at + ins.length);
+  }
+
+  // Color letters a..b-1 (null = back to the box's own color).
+  function colorRange(note, a, b, color, keepSel) {
+    const chars = getChars(note.textEl);
+    for (let i = Math.max(0, a); i < Math.min(b, chars.length); i++) chars[i].c = chars[i].ch === '\n' ? null : color;
+    if (keepSel) setChars(note, chars, a, b);
+    else setChars(note, chars);
+  }
+
+  // Word-style: letters selected in the box you're editing take the clicked color.
+  // highlighter = true: the highlighter button with letters selected marks them in the marker
+  // color, or unmarks them if they already have it (like Word's highlighter button).
+  function paintSelection(colorId, highlighter) {
+    const note = selected;
+    if (!note || !notes.has(note) || !root || root.activeElement !== note.textEl) return false;
+    const sel = getSel();
+    if (!sel || !sel.rangeCount || sel.isCollapsed) return false;
+    const [a, b] = selOffsets(note.textEl, sel);
+    if (a < 0 || b <= a) return false;
+    remember(note);
+    let color = colorId === note.color ? null : colorId;
+    if (highlighter) {
+      const chars = getChars(note.textEl).slice(a, b).filter((c) => c.ch !== '\n');
+      color = chars.every((c) => c.c === colorId) ? null : colorId;
+    }
+    colorRange(note, a, b, color, true);
+    return true;
+  }
+
+  // Which letter is under the pointer? Returns its position, or -1. With `nearest`,
+  // the closest letter on the same line (for dragging past the ends).
+  function letterAt(textEl, x, y, nearest) {
+    let best = -1;
+    let bestD = Infinity;
+    let i = 0;
+    const r = document.createRange();
+    for (const node of textEl.childNodes) {
+      const t = node.nodeType === 3 ? node : node.firstChild;
+      if (!t) continue;
+      let off = 0;
+      for (const ch of t.textContent) {
+        if (ch !== '\n') {
+          r.setStart(t, off);
+          r.setEnd(t, off + ch.length);
+          const b = r.getBoundingClientRect();
+          if (x >= b.left && x <= b.right && y >= b.top && y <= b.bottom) return i;
+          const dy = y < b.top ? b.top - y : y > b.bottom ? y - b.bottom : 0;
+          const dx = x < b.left ? b.left - x : x > b.right ? x - b.right : 0;
+          const d = dy * 1000 + dx;
+          if (d < bestD) [bestD, best] = [d, i];
+        }
+        off += ch.length;
+        i++;
+      }
+    }
+    return nearest ? best : -1;
+  }
+
+  // Highlighter: click a letter to mark it (or unmark it), or drag across letters.
+  function startMarking(note, e) {
+    if (e.button !== 0) return;
+    e.preventDefault(); // no caret, no text selection
+    const first = letterAt(note.textEl, e.clientX, e.clientY, true);
+    if (first < 0) return;
+    remember(note);
+    const start = getChars(note.textEl);
+    const mc = markColor();
+    // Clicking a letter that already has this marker color takes the mark off.
+    const color = start[first].c === mc ? null : mc;
+    const paint = (i) => {
+      const [a, b] = i < first ? [i, first + 1] : [first, i + 1];
+      const chars = start.map((ch, k) => (k >= a && k < b && ch.ch !== '\n' ? { ...ch, c: color } : ch));
+      setChars(note, chars);
+    };
+    paint(first);
+    const t = note.textEl;
+    try {
+      t.setPointerCapture(e.pointerId);
+    } catch {
+      /* not critical */
+    }
+    const move = (ev) => paint(Math.max(0, letterAt(t, ev.clientX, ev.clientY, true)));
+    const up = () => {
+      t.removeEventListener('pointermove', move);
+      t.removeEventListener('pointerup', up);
+      t.removeEventListener('pointercancel', up);
+    };
+    t.addEventListener('pointermove', move);
+    t.addEventListener('pointerup', up);
+    t.addEventListener('pointercancel', up);
+  }
+
+  let hintShown = 0;
+  function markHint() {
+    if (!IS_TOP || Date.now() - hintShown < 4000) return;
+    hintShown = Date.now();
+    toast(L('Highlighter is on: click or drag across letters in your text. Click the highlighter button again to go back to typing.',
+      'El marcador está activado: haga clic o arrastre sobre las letras de su texto. Pulse otra vez el botón del marcador para volver a escribir.'));
   }
 
   // ---------------------------------------------------------------------------
@@ -1312,8 +2036,13 @@
   // Messages from the background worker
   // ---------------------------------------------------------------------------
 
-  chrome.runtime.onMessage.addListener((msg) => {
+  chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     switch (msg.type) {
+      case 'paint':
+        // Only the frame holding selected letters answers; if none does, the
+        // background makes it the color for the whole box instead.
+        if (paintSelection(msg.color, msg.highlighter)) sendResponse(true);
+        break;
       case 'state': {
         state = msg.state;
         if (state.open || state.typing || notes.size) ensureUI();

@@ -105,7 +105,7 @@ To see it again later, click the **?** button on the top bar.
 
 <img src="docs/images/tour-1-welcome-en.png" width="600" alt="The start of the tour, with Skip tour and Start the tour buttons">
 
-<img src="docs/images/tour-2-step-en.png" width="480" alt="A tour step pointing at the Typing button">
+<img src="docs/images/tour-2-step-en.png" width="480" alt="A tour step pointing at the Off, Pen and Typing buttons">
 
 ### 3. Write on the page
 
@@ -114,8 +114,8 @@ To see it again later, click the **?** button on the top bar.
 - Press **Enter** to start a new line in the same spot.
 - Press **Esc** (top-left key on your keyboard) when you're done with a piece of writing.
 - **To fix something:** click your writing and type or delete.
-- **To move it:** click your writing, then drag the small dark gray **✥** tab just above it.
-- **To erase it:** click your writing, then click the small red **×** above it.
+- **To move it:** click your writing, then drag the small dark gray **move** tab (four arrows) just above it.
+- **To erase it:** click your writing, then click the small red **X** above it.
 
 <img src="docs/images/use-3-move-delete-en.png" width="420" alt="The gray move tab and red delete button above a piece of writing">
 
@@ -132,30 +132,77 @@ your writing gets a thin outline so you can still read it.
 
 | | Button | What it does |
 |---|---|---|
-| **1** | **✏️ Typing: on / off** | While it's **on**, clicking the page adds writing. Turn it **off** to use the textbook normally (turn pages, click buttons). Your writing stays on the page. |
-| **2** | **📷 Screenshot** | Takes a picture of the page with your writing, to copy or download (see below). |
-| **3** | **🗑 Clear** | Erases all of your writing on the page. |
+| **1** | **Off · Pen · Typing** | Chooses what clicking the page does. **Typing**: clicking adds writing. **Pen**: you draw (see below). **Off**: use the textbook normally (turn pages, click buttons). Your work stays on the page in every mode. |
+| **2** | **Screenshot** | Takes a picture of the page with your writing, to copy or download (see below). |
+| **3** | **Clear** | Erases all of your writing and drawings on the page. |
 | **4** | **?** | Shows the tour of every feature again. |
-| **5** | **✕** | Hides both toolbars. Your writing stays. Click the **T** button to bring them back. |
+| **5** | **X** | Hides both toolbars. Your writing stays. Click the **T** button to bring them back. |
 
-You can move the top bar by dragging the dots **⋮⋮** at its left end.
+You can move the top bar by dragging the six dots at its left end.
 
 ### 5. Text size and color (the toolbar on the side)
 
-<img src="docs/images/use-5-side-bar-en.png" width="260" alt="The side toolbar with text size buttons, color dots, and a button to move it">
+<img src="docs/images/use-5-side-bar-en.png" width="260" alt="The side toolbar with text size buttons, the highlighter, color dots, and a button to move it">
 
 - **A+** makes the writing bigger and **A−** makes it smaller. The number shows the size.
 - The **colored dots** pick the color of your writing. Each dot shows two shades: the
   darker one is used on light backgrounds and the lighter one on dark backgrounds.
   The black dot turns white on dark backgrounds.
-- **⇄** moves this toolbar to the other side of the screen if it's in your way.
+- The **highlighter** (marker icon) marks letters, and the **eraser** erases drawings (see below).
+- The **two arrows** button at the bottom moves this toolbar to the other side of the screen if it's in your way.
 
 > **Tip:** To change the size or color of something you already wrote, click it first,
 > then click **A+**, **A−**, or a color.
 
+### Highlight part of a word (for example a verb ending)
+
+You can show some letters in a different color, like the ending in **habl<u>o</u>** or
+**limpi<u>e</u>**. Marked letters are also **bold and underlined**, so they still stand
+out in a black-and-white printout.
+
+<img src="docs/images/use-7-highlight-en.png" width="520" alt="Answers with their verb endings marked in red: hablo, comes, bailan">
+
+There are three ways to do it. Use whichever you like:
+
+- **Type `>` while you write.** Type `>` right before the letters you want marked:
+  typing `hac>er` gives hac**er** with "er" marked. The mark ends when you type a space,
+  so you can keep writing normally. (To type a real `>`, press it twice: `>>`.)
+- **Select and click a color, like in Word.** In something you already wrote, select the
+  letters (drag across them, or hold **Shift** and press the arrow keys), then click a color
+  dot. Only those letters change. Click the box's own color to take the mark off.
+- **Use the highlighter.** Click the **highlighter** button on the side toolbar, then click a
+  letter to mark it, or drag across several letters. Click a marked letter again to unmark
+  it. While the highlighter is on, the color dots choose the marker color (red at first).
+  Click the **highlighter** button again (or **Typing**) to go back
+  to typing.
+
+  **Shortcut:** select letters first, then click the **highlighter** button. Just those
+  letters get marked in the marker color, and you can keep typing. Do it again to unmark them.
+
+### Draw with a pen (or a mouse, or your finger)
+
+Click **Pen** on the top bar, then draw on the page: circle an answer, underline a
+word, cross out a mistake. It works with a pen like a **Surface Pen**, a mouse, or a finger
+on a touch screen.
+
+<img src="docs/images/use-8-pen-en.png" width="520" alt="Answers circled and underlined in pen on the textbook page">
+
+- **Press harder for a thicker line** (with a pen).
+- **To erase,** flip a Surface Pen over and rub with its eraser end, or click the **eraser** on the
+  side toolbar and touch the lines you want to erase. Each touch erases a whole line.
+- **Ctrl + Z** undoes the last line (or erase), and **Ctrl + Shift + Z** brings it back.
+- The **color dots** and **A+ / A−** set the color and thickness for new lines. Lines stay
+  readable on dark boxes, like your writing.
+- Drawings stay in place on the page when you scroll or zoom, and they're in your
+  screenshots.
+- The mouse wheel still scrolls the page. Once you've used a pen, a finger on the screen
+  scrolls instead of drawing, so your hand resting on the screen doesn't leave marks.
+
+Click **Off** when you want to use the textbook again, or **Typing** to write.
+
 ### 6. Keep your work: take a picture
 
-1. Click **📷 Screenshot** (or press **Alt + Shift + S**).
+1. Click **Screenshot** (or press **Alt + Shift + S**).
 2. Chrome asks if you want to **share this tab**. Click **Share** (or **Allow**).
    Nothing is recorded or sent anywhere: the tool takes one picture and stops sharing
    right away.
@@ -171,7 +218,7 @@ You can move the top bar by dragging the dots **⋮⋮** at its left end.
    - **Download**: saves the picture as a file in your **Downloads** folder. It's named
      with the date and time, for example `vhl-2026-11-13_14-55-02.png`.
 
-   Click **✕** to close the card.
+   Click **X** to close the card.
 
 The toolbars and the small gray and red tabs are left out of the picture. The picture only
 includes what you can see on the screen, so scroll first to show the part you want.
@@ -186,23 +233,23 @@ that has **manifest.json** directly inside it. That's the **VHL-Text-Overlay** f
 Step 1. (If you downloaded an older version, the right folder may be one level deeper,
 named **VHL Text Overlay**.)
 
-**I clicked 📷 Screenshot but nothing happened, or it says "Screenshot cancelled."**
+**I clicked Screenshot but nothing happened, or it says "Screenshot cancelled."**
 When Chrome asks to share this tab, click **Share** (or **Allow**), not **Cancel**.
 
 **It says "Couldn't copy."**
 Click **Copy** again. If it still doesn't work, click **Download** instead.
 
 **Nothing appears when I paste.**
-Make sure the **Copy** button turned green and says **✓ Copied**, then paste with
+Make sure the **Copy** button turned green and says **Copied**, then paste with
 **Ctrl + V** (**⌘ Command + V** on a Mac) right away, before copying anything else.
 
 **I can't click the textbook's buttons or turn the page.**
-Typing is on, so your clicks add writing instead. Click **✏️ Typing: on** to turn it
-off. Click it again when you want to write.
+Typing or Pen is on, so your clicks add writing or drawing instead. Click **Off** on the
+top bar. Click **Typing** or **Pen** again when you want to write or draw.
 
 **My writing disappeared.**
 Refreshing the page or closing the tab erases your writing. Sometimes turning to a new
-page also hides the writing from the old page. Remember to take a picture with **📷 Screenshot** before you
+page also hides the writing from the old page. Remember to take a picture with **Screenshot** before you
 move on.
 
 **The T button does nothing.**
@@ -213,7 +260,7 @@ This is normal for tools added this way. You can close the message.
 
 **Keyboard shortcuts (optional)**
 - **Alt + Shift + T**: turn the tool on or off (same as the **T** button)
-- **Alt + Shift + S**: take a picture (same as **📷 Screenshot**)
+- **Alt + Shift + S**: take a picture (same as **Screenshot**)
 
 On a Mac, **Alt** is the **Option** key.
 
@@ -336,7 +383,7 @@ recorrido aparece en español si Chrome está en español.)
 
 <img src="docs/images/tour-1-welcome-es.png" width="600" alt="El comienzo del recorrido, con los botones Saltar y Empezar">
 
-<img src="docs/images/tour-2-step-es.png" width="480" alt="Un paso del recorrido que señala el botón Typing">
+<img src="docs/images/tour-2-step-es.png" width="480" alt="Un paso del recorrido que señala los botones Apagado, Lápiz y Typing">
 
 ### 3. Escriba sobre la página
 
@@ -346,9 +393,9 @@ recorrido aparece en español si Chrome está en español.)
 - Pulse **Intro** para empezar una línea nueva en el mismo sitio.
 - Pulse **Esc** (tecla de arriba a la izquierda) al terminar un texto.
 - **Para corregir:** haga clic en su texto y escriba o borre.
-- **Para moverlo:** haga clic en su texto y arrastre la pequeña pestaña gris oscuro **✥** que
+- **Para moverlo:** haga clic en su texto y arrastre la pequeña pestaña gris oscuro de **mover** (cuatro flechas) que
   aparece encima.
-- **Para borrarlo:** haga clic en su texto y luego en la pequeña **×** roja de encima.
+- **Para borrarlo:** haga clic en su texto y luego en la pequeña **X** roja de encima.
 
 <img src="docs/images/use-3-move-delete-es.png" width="420" alt="La pestaña gris para mover y el botón rojo para borrar encima de un texto">
 
@@ -366,30 +413,79 @@ muchos colores, el texto lleva un contorno fino para que se pueda leer.
 
 | | Botón | Qué hace |
 |---|---|---|
-| **1** | **✏️ Typing: on / off** | Cuando está en **on** (activado), al hacer clic en la página se añade texto. Póngalo en **off** (desactivado) para usar el libro con normalidad (pasar páginas, pulsar botones). Su texto sigue en la página. |
-| **2** | **📷 Screenshot** | Saca una imagen de la página con su texto para copiarla o descargarla (vea abajo). |
-| **3** | **🗑 Clear** | Borra todo lo que escribió en la página. |
+| **1** | **Apagado · Lápiz · Typing** | Elige qué pasa al hacer clic en la página. **Typing**: el clic añade texto. **Lápiz**: usted dibuja (vea abajo). **Apagado**: use el libro con normalidad (pasar páginas, pulsar botones). Su trabajo se queda en la página en todos los modos. |
+| **2** | **Screenshot** | Saca una imagen de la página con su texto para copiarla o descargarla (vea abajo). |
+| **3** | **Clear** | Borra todo lo que escribió y dibujó en la página. |
 | **4** | **?** | Vuelve a mostrar el recorrido de todas las funciones. |
-| **5** | **✕** | Oculta las dos barras. Su texto se queda. Haga clic en el botón **T** para que vuelvan. |
+| **5** | **X** | Oculta las dos barras. Su texto se queda. Haga clic en el botón **T** para que vuelvan. |
 
-Puede mover la barra de arriba arrastrando los puntos **⋮⋮** de su lado izquierdo.
+Puede mover la barra de arriba arrastrando los seis puntos de su lado izquierdo.
 
 ### 5. Tamaño y color del texto (la barra del lateral)
 
-<img src="docs/images/use-5-side-bar-es.png" width="260" alt="La barra lateral con los botones de tamaño, los puntos de colores y un botón para moverla">
+<img src="docs/images/use-5-side-bar-es.png" width="260" alt="La barra lateral con los botones de tamaño, el marcador, los puntos de colores y un botón para moverla">
 
 - **A+** agranda el texto y **A−** lo hace más pequeño. El número indica el tamaño.
 - Los **puntos de colores** eligen el color del texto. Cada punto muestra dos tonos: el más
   oscuro se usa sobre fondos claros y el más claro sobre fondos oscuros. El punto negro
   se vuelve blanco sobre fondos oscuros.
-- **⇄** mueve esta barra al otro lado de la pantalla si le molesta.
+- El **marcador** resalta letras y el **borrador** borra dibujos (vea abajo).
+- El botón de **dos flechas** de abajo mueve esta barra al otro lado de la pantalla si le molesta.
 
 > **Consejo:** para cambiar el tamaño o el color de algo que ya escribió, haga clic en
 > ello primero y luego en **A+**, **A−** o un color.
 
+### Resaltar parte de una palabra (por ejemplo, la terminación verbal)
+
+Puede mostrar algunas letras en otro color, como la terminación de **habl<u>o</u>** o
+**limpi<u>e</u>**. Las letras marcadas también van en **negrita y subrayadas**, así que se
+siguen viendo en una copia impresa en blanco y negro.
+
+<img src="docs/images/use-7-highlight-es.png" width="520" alt="Respuestas con la terminación verbal marcada en rojo: hablo, comes, bailan">
+
+Hay tres maneras. Use la que prefiera:
+
+- **Escriba `>` mientras escribe.** Escriba `>` justo antes de las letras que quiere
+  marcar: al escribir `hac>er` sale hac**er** con "er" marcado. La marca termina al
+  escribir un espacio, así que puede seguir escribiendo con normalidad. (Para escribir un
+  `>` de verdad, púlselo dos veces: `>>`.)
+- **Seleccione y pulse un color, como en Word.** En algo que ya escribió, seleccione las
+  letras (arrastre sobre ellas o mantenga **Mayús** y pulse las flechas) y pulse un punto de
+  color. Solo cambian esas letras. Pulse el color propio del texto para quitar la marca.
+- **Use el marcador.** Pulse el botón del **marcador** en la barra lateral y haga clic en una
+  letra para marcarla, o arrastre sobre varias letras. Otro clic en una letra marcada la
+  desmarca. Con el marcador activado, los puntos de colores eligen el color del marcador (al
+  principio, rojo). Pulse el **marcador** otra vez
+  (o **Typing**) para volver a escribir.
+
+  **Atajo:** seleccione primero las letras y luego pulse el **marcador**. Solo esas letras se
+  marcan con el color del marcador, y puede seguir escribiendo. Repítalo para desmarcarlas.
+
+### Dibujar con un lápiz (o con el ratón o el dedo)
+
+Pulse **Lápiz** en la barra de arriba y dibuje en la página: rodee una respuesta,
+subraye una palabra, tache un error. Funciona con un lápiz como el **Surface Pen**, con el
+ratón o con el dedo en una pantalla táctil.
+
+<img src="docs/images/use-8-pen-es.png" width="520" alt="Respuestas rodeadas y subrayadas con el lápiz en la página del libro">
+
+- **Si aprieta más, la línea es más gruesa** (con un lápiz).
+- **Para borrar,** dé la vuelta al Surface Pen y frote con el extremo borrador, o pulse
+  el **borrador** en la barra lateral y toque las líneas que quiere borrar. Cada toque borra una
+  línea entera.
+- **Ctrl + Z** deshace la última línea (o el último borrado) y **Ctrl + Mayús + Z** la
+  recupera.
+- Los **puntos de colores** y **A+ / A−** eligen el color y el grosor de las líneas nuevas.
+  Las líneas se leen bien sobre fondos oscuros, igual que el texto.
+- Los dibujos se quedan en su sitio al desplazarse o ampliar, y salen en las capturas.
+- La rueda del ratón sigue desplazando la página. Después de usar un lápiz, el dedo en la
+  pantalla desplaza en vez de dibujar, así que la mano apoyada no deja marcas.
+
+Pulse **Apagado** cuando quiera volver a usar el libro, o **Typing** para escribir.
+
 ### 6. Conserve su trabajo: saque una imagen
 
-1. Haga clic en **📷 Screenshot** (o pulse **Alt + Mayús + S**).
+1. Haga clic en **Screenshot** (o pulse **Alt + Mayús + S**).
 2. Chrome pregunta si quiere **compartir esta pestaña**. Haga clic en **Compartir** (o
    **Permitir**). No se graba ni se envía nada: la herramienta toma una sola imagen y deja
    de compartir enseguida.
@@ -405,7 +501,7 @@ Puede mover la barra de arriba arrastrando los puntos **⋮⋮** de su lado izqu
    - **Descargar**: guarda la imagen como archivo en su carpeta **Descargas**. Lleva la
      fecha y la hora en el nombre, por ejemplo `vhl-2026-11-13_14-55-02.png`.
 
-   Pulse **✕** para cerrar la tarjeta.
+   Pulse **X** para cerrar la tarjeta.
 
 Las barras de botones y las pestañas grises y rojas no salen en la imagen. La imagen solo
 incluye lo que se ve en la pantalla, así que desplácese primero hasta la parte que quiera.
@@ -420,7 +516,7 @@ elija la carpeta que tiene **manifest.json** directamente dentro: la carpeta
 **VHL-Text-Overlay** del Paso 1. (Si descargó una versión anterior, la carpeta correcta
 puede estar un nivel más adentro y llamarse **VHL Text Overlay**.)
 
-**Pulsé 📷 Screenshot y no pasó nada, o sale "Captura cancelada".**
+**Pulsé Screenshot y no pasó nada, o sale "Captura cancelada".**
 Cuando Chrome pregunte si quiere compartir esta pestaña, pulse **Compartir** (o
 **Permitir**), no **Cancelar**.
 
@@ -428,16 +524,16 @@ Cuando Chrome pregunte si quiere compartir esta pestaña, pulse **Compartir** (o
 Pulse **Copiar** otra vez. Si sigue sin funcionar, pulse **Descargar**.
 
 **Al pegar no aparece nada.**
-Compruebe que el botón **Copiar** se puso verde y dice **✓ Copiada**, y pegue con
+Compruebe que el botón **Copiar** se puso verde y dice **Copiada**, y pegue con
 **Ctrl + V** (**⌘ Comando + V** en un Mac) enseguida, antes de copiar otra cosa.
 
 **No puedo pulsar los botones del libro ni pasar de página.**
-La escritura está activada, así que sus clics añaden texto. Pulse **✏️ Typing: on** para
-desactivarla. Púlselo otra vez cuando quiera escribir.
+Está activado Typing o Lápiz, así que sus clics escriben o dibujan. Pulse **Apagado** en
+la barra de arriba. Pulse **Typing** o **Lápiz** cuando quiera escribir o dibujar.
 
 **Mi texto ha desaparecido.**
 Recargar la página o cerrar la pestaña borra lo que escribió. A veces, al pasar de
-página también se oculta el texto de la página anterior. Recuerde sacar una imagen con **📷 Screenshot**
+página también se oculta el texto de la página anterior. Recuerde sacar una imagen con **Screenshot**
 antes de seguir.
 
 **El botón T no hace nada.**
@@ -448,7 +544,7 @@ Es normal con las herramientas añadidas de esta forma. Puede cerrar el aviso.
 
 **Atajos de teclado (opcional)**
 - **Alt + Mayús + T**: activar o desactivar la herramienta (igual que el botón **T**)
-- **Alt + Mayús + S**: sacar una imagen (igual que **📷 Screenshot**)
+- **Alt + Mayús + S**: sacar una imagen (igual que **Screenshot**)
 
 En un Mac, **Alt** es la tecla **Opción**.
 
@@ -473,13 +569,21 @@ Needs [Node.js](https://nodejs.org) 20 or newer. Run `npm install` once, then
 | `npm run test:unit` | Fast tests for the release tool (zip, version bumps, release notes) |
 | `npm run test:e2e` | Loads the real extension in Chromium and tests every feature on a sample page (`tests/fixtures`) |
 | `npm test` | All of the above |
-| `npm run test:mutations` | Plants 21 realistic bugs, one at a time, and fails if the tests miss any of them |
+| `npm run test:mutations` | Plants 44 realistic bugs, one at a time, and fails if the tests miss any of them |
 
 The mutation check is what keeps the tests honest: if a test stops really checking its
 feature, a planted bug gets through and the check fails. Each mutant is listed in
 `scripts/mutation-check.mjs` with the bug it plants and the tests that must catch it.
 It runs automatically on every pull request (a few minutes).
 Add one whenever you add a feature.
+
+### Chrome Web Store
+
+[`docs/store/README.md`](docs/store/README.md) has everything for the store listing:
+copy-paste text, privacy answers, reviewer instructions and all the images.
+`npm run store-assets` remakes the images from the current extension, and
+`npm run icons` refreshes the Lucide icons. The privacy policy is
+[`docs/PRIVACY.md`](docs/PRIVACY.md).
 
 ### Publishing a release
 
