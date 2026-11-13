@@ -9,6 +9,8 @@ click anywhere on the page and type. You can use it to fill in blanks, add notes
 show answers. When you're finished, you can save a picture of the page with your
 writing on it.
 
+<img src="docs/images/use-2-type-en.png" width="600" alt="A textbook page with the blanks filled in using the tool">
+
 Your writing is **not saved** and doesn't change the real textbook. It sits on top of the
 page, like a clear sheet of plastic, and disappears when you close or refresh the page.
 To keep your work, save a picture (see step 5 below).
@@ -22,51 +24,64 @@ or tablets.
 
 This takes about 3 minutes.
 
-**Step 1: Download the files**
+### Step 1: Download it
 
-1. On this page, click the green **Code** button near the top.
-2. Click **Download ZIP**. A file called something like `vhl-overlay-main.zip` goes into
-   your **Downloads** folder.
-3. Open your **Downloads** folder and double-click that file. A normal folder with the same
-   name appears.
-   - On Windows, if you see an **Extract all** button, click it, then click **Extract**.
-4. **Don't delete this folder**, or the tool stops working. You may want to move it
-   somewhere safe, like your **Documents** folder.
+1. Click this link: **[Download VHL Text Overlay](https://github.com/aidanmccants/vhl-overlay/releases/latest/download/VHL-Text-Overlay.zip)**.
+   A file called **VHL-Text-Overlay.zip** goes into your **Downloads** folder.
+   - You can also find it on the **[Releases page](https://github.com/aidanmccants/vhl-overlay/releases/latest)**.
+     Scroll down to **Assets** and click **VHL-Text-Overlay.zip**.
+2. Open your **Downloads** folder and double-click **VHL-Text-Overlay.zip**.
+   - **On a Mac:** a folder called **VHL Text Overlay** appears next to it.
+   - **On Windows:** click **Extract all** at the top of the window, then click **Extract**.
+     A new window opens with a folder called **VHL Text Overlay** inside it.
+3. **Don't delete the VHL Text Overlay folder**, or the tool stops working. You may want
+   to move it somewhere safe, like your **Documents** folder.
 
-**Step 2: Add it to Chrome**
+### Step 2: Add it to Chrome
 
 1. Open Google Chrome.
 2. Click the address bar at the top (where you normally type a website), type
    `chrome://extensions` and press **Enter**.
-3. In the top-right corner of that page, turn on the switch labeled **Developer mode**.
+3. In the top-right corner, turn on the switch labeled **Developer mode**.
    (The name sounds technical, but turning it on just lets you add tools that aren't from
    Chrome's online store.)
+
+   <img src="docs/images/install-1-developer-mode-en.png" width="600" alt="The Developer mode switch at the top right of the Extensions page">
+
 4. Click the **Load unpacked** button that appears on the left.
-5. A window opens so you can choose a folder. Open the folder you unzipped in Step 1. Click
-   once on the folder named **extension** inside it, then click **Select** (or **Open**).
+
+   <img src="docs/images/install-2-load-unpacked-en.png" width="600" alt="The Load unpacked button at the top left of the Extensions page">
+
+5. A window opens so you can choose a folder. Find the **VHL Text Overlay** folder from
+   Step 1, click it **once**, and click **Select** (or **Open**).
 6. A box named **VHL Text Overlay** now appears on the page. That means it's installed.
 
-**Step 3: Put the button where you can see it**
+   <img src="docs/images/install-3-installed-en.png" width="600" alt="The VHL Text Overlay box on the Extensions page after installing">
 
-1. At the top right of Chrome, click the small **puzzle-piece** icon 🧩.
+### Step 3: Put the button where you can see it
+
+1. At the top right of Chrome, next to the address bar, click the small **puzzle-piece**
+   icon 🧩.
 2. Find **VHL Text Overlay** in the list and click the **pin** 📌 next to it.
-3. A small blue square with a white **T** now stays at the top right of Chrome. That's
-   your button.
+3. This blue button now stays at the top right of Chrome:
+   <img src="extension/icons/icon48.png" width="24" alt="The blue T button"> That's your button.
 
 ---
 
 ## Part 2: Use it
 
-**1. Open your textbook**
+### 1. Open your textbook
 
 Go to reader.vhlcentral.com and open the page you want, the same way you normally would.
 
-**2. Turn it on**
+### 2. Turn it on
 
 Click the blue **T** button at the top right of Chrome. A small white bar of buttons
 appears at the top right of the page. You're now ready to write.
 
-**3. Write on the page**
+<img src="docs/images/use-1-toolbar-appears-en.png" width="600" alt="The bar of buttons at the top right of the textbook page">
+
+### 3. Write on the page
 
 - **Click** anywhere on the page, for example on a blank line, and **type**.
 - To write somewhere else, just **click** in the new spot and type.
@@ -76,27 +91,33 @@ appears at the top right of the page. You're now ready to write.
 - **To move it:** click your writing, then drag the small blue **✥** tab just above it.
 - **To erase it:** click your writing, then click the small red **×** above it.
 
+<img src="docs/images/use-3-move-delete-en.png" width="420" alt="The blue move tab and red delete button above a piece of writing">
+
 Your writing stays in place on the page, even if you scroll up and down or zoom in.
 
-**4. The buttons on the bar**
+### 4. The buttons on the bar
 
-| Button | What it does |
-|---|---|
-| **✏️ Typing: on / off** | While it's **on**, clicking the page adds writing. Turn it **off** to use the textbook normally (turn pages, click buttons). Your writing stays on the page. |
-| **A−  A+** | Makes the writing smaller or bigger. |
-| **Colored dots** | Changes the color of the writing. |
-| **📷 Save** | Saves a picture of your screen with your writing (see below). |
-| **🗑 Clear** | Erases all of your writing on the page. |
-| **✕** | Hides the bar. Your writing stays. Click the blue **T** to bring the bar back. |
+<img src="docs/images/use-4-toolbar-buttons-en.png" width="500" alt="The bar of buttons, numbered 1 to 6">
+
+| | Button | What it does |
+|---|---|---|
+| **1** | **✏️ Typing: on / off** | While it's **on**, clicking the page adds writing. Turn it **off** to use the textbook normally (turn pages, click buttons). Your writing stays on the page. |
+| **2** | **A−  A+** | Makes the writing smaller or bigger. |
+| **3** | **Colored dots** | Changes the color of the writing. |
+| **4** | **📷 Save** | Saves a picture of your screen with your writing (see below). |
+| **5** | **🗑 Clear** | Erases all of your writing on the page. |
+| **6** | **✕** | Hides the bar. Your writing stays. Click the blue **T** to bring the bar back. |
 
 > **Tip:** To change the size or color of something you already wrote, click it first,
 > then click **A−**, **A+**, or a color.
 
-**5. Save your work**
+### 5. Save your work
 
 Click **📷 Save**. A picture of your screen is saved to your computer, with your
 writing on it. The bar of buttons and the small blue and red tabs are left out of the
-picture.
+picture. This message appears at the bottom of the page when it's done:
+
+<img src="docs/images/use-5-saved-en.png" width="300" alt="The message: Screenshot saved to Downloads/VHL Overlay">
 
 To find your pictures, open your **Downloads** folder and then the **VHL Overlay** folder
 inside it. Each picture is named with the date and time, for example
@@ -108,6 +129,10 @@ part you want.
 ---
 
 ## If something doesn't work
+
+**Chrome says "Manifest file is missing or unreadable."**
+You chose the wrong folder in Step 2. Click **Load unpacked** again and pick the folder
+named **VHL Text Overlay**. It has a folder named **icons** inside it.
 
 **"Couldn't take the screenshot."**
 Chrome only lets the tool take pictures after you've clicked the blue **T** button on
@@ -135,6 +160,12 @@ This is normal for tools added this way. You can close the message.
 
 On a Mac, **Alt** is the **Option** key.
 
+### Getting a newer version
+
+When a new version comes out, download it again (Step 1) and put the new **VHL Text
+Overlay** folder in place of the old one. Then go to `chrome://extensions` and click the
+round arrow ↻ on the **VHL Text Overlay** box.
+
 ---
 ---
 
@@ -149,6 +180,8 @@ en cualquier parte de la página y escribir. Sirve para completar espacios en bl
 añadir notas o mostrar respuestas. Al terminar, puede guardar una imagen de la página
 con lo que escribió.
 
+<img src="docs/images/use-2-type-es.png" width="600" alt="Una página del libro con los espacios en blanco completados con la herramienta">
+
 Lo que escribe **no se guarda** y no cambia el libro de verdad. Queda encima de la
 página, como una hoja de plástico transparente, y desaparece al cerrar o recargar la
 página. Para conservar su trabajo, guarde una imagen (vea el paso 5).
@@ -162,51 +195,64 @@ tabletas.
 
 Tarda unos 3 minutos.
 
-**Paso 1: Descargar los archivos**
+### Paso 1: Descargarla
 
-1. En esta página, haga clic en el botón verde **Code**, cerca de la parte de arriba.
-2. Haga clic en **Download ZIP**. Se descargará a su carpeta **Descargas** un archivo con
-   un nombre como `vhl-overlay-main.zip`.
-3. Abra la carpeta **Descargas** y haga doble clic en ese archivo. Aparecerá una carpeta
-   normal con el mismo nombre.
-   - En Windows, si ve un botón **Extraer todo**, haga clic en él y luego en **Extraer**.
-4. **No borre esta carpeta**, porque si no la herramienta deja de funcionar. Puede
-   moverla a un lugar seguro, como **Documentos**.
+1. Haga clic en este enlace: **[Descargar VHL Text Overlay](https://github.com/aidanmccants/vhl-overlay/releases/latest/download/VHL-Text-Overlay.zip)**.
+   Se descargará a su carpeta **Descargas** un archivo llamado **VHL-Text-Overlay.zip**.
+   - También está en la **[página de versiones (Releases)](https://github.com/aidanmccants/vhl-overlay/releases/latest)**.
+     Baje hasta **Assets** y haga clic en **VHL-Text-Overlay.zip**.
+2. Abra la carpeta **Descargas** y haga doble clic en **VHL-Text-Overlay.zip**.
+   - **En un Mac:** aparecerá al lado una carpeta llamada **VHL Text Overlay**.
+   - **En Windows:** haga clic en **Extraer todo** en la parte de arriba de la ventana y
+     luego en **Extraer**. Se abrirá una ventana con una carpeta llamada
+     **VHL Text Overlay** dentro.
+3. **No borre la carpeta VHL Text Overlay**, porque si no la herramienta deja de
+   funcionar. Puede moverla a un lugar seguro, como **Documentos**.
 
-**Paso 2: Añadirla a Chrome**
+### Paso 2: Añadirla a Chrome
 
 1. Abra Google Chrome.
 2. Haga clic en la barra de direcciones (donde normalmente escribe una página web),
    escriba `chrome://extensions` y pulse **Intro**.
-3. Arriba a la derecha, active el interruptor **Modo de desarrollador**. (El nombre suena
+3. Arriba a la derecha, active el interruptor **Modo Desarrollador**. (El nombre suena
    técnico, pero solo permite añadir herramientas que no vienen de la tienda de Chrome.)
+
+   <img src="docs/images/install-1-developer-mode-es.png" width="600" alt="El interruptor Modo Desarrollador arriba a la derecha de la página Extensiones">
+
 4. Haga clic en el botón **Cargar descomprimida** que aparece a la izquierda.
-5. Se abre una ventana para elegir una carpeta. Abra la carpeta que descomprimió en el
-   Paso 1. Haga un solo clic en la carpeta **extension** que está dentro y luego en
-   **Seleccionar** (o **Abrir**).
+
+   <img src="docs/images/install-2-load-unpacked-es.png" width="600" alt="El botón Cargar descomprimida arriba a la izquierda de la página Extensiones">
+
+5. Se abre una ventana para elegir una carpeta. Busque la carpeta **VHL Text Overlay** del
+   Paso 1, haga **un solo clic** en ella y luego en **Seleccionar** (o **Abrir**).
 6. Ahora aparece un recuadro llamado **VHL Text Overlay**. Eso significa que está instalada.
 
-**Paso 3: Poner el botón a la vista**
+   <img src="docs/images/install-3-installed-es.png" width="600" alt="El recuadro VHL Text Overlay en la página Extensiones después de instalarla">
 
-1. Arriba a la derecha de Chrome, haga clic en el icono de la **pieza de puzle** 🧩.
+### Paso 3: Poner el botón a la vista
+
+1. Arriba a la derecha de Chrome, junto a la barra de direcciones, haga clic en el icono
+   de la **pieza de puzle** 🧩.
 2. Busque **VHL Text Overlay** y haga clic en la **chincheta** 📌 que tiene al lado.
-3. Ahora un cuadrado azul con una **T** blanca queda arriba a la derecha de Chrome. Ese
-   es su botón.
+3. Este botón azul queda ahora arriba a la derecha de Chrome:
+   <img src="extension/icons/icon48.png" width="24" alt="El botón azul con la T"> Ese es su botón.
 
 ---
 
 ## Parte 2: Uso
 
-**1. Abra el libro**
+### 1. Abra el libro
 
 Entre en reader.vhlcentral.com y abra la página que quiera, como siempre.
 
-**2. Actívela**
+### 2. Actívela
 
 Haga clic en el botón azul **T**, arriba a la derecha de Chrome. Aparece una pequeña
 barra blanca de botones arriba a la derecha de la página. Ya puede escribir.
 
-**3. Escriba sobre la página**
+<img src="docs/images/use-1-toolbar-appears-es.png" width="600" alt="La barra de botones arriba a la derecha de la página del libro">
+
+### 3. Escriba sobre la página
 
 - **Haga clic** en cualquier parte de la página, por ejemplo en un espacio en blanco, y
   **escriba**.
@@ -218,27 +264,35 @@ barra blanca de botones arriba a la derecha de la página. Ya puede escribir.
   aparece encima.
 - **Para borrarlo:** haga clic en su texto y luego en la pequeña **×** roja de encima.
 
+<img src="docs/images/use-3-move-delete-es.png" width="420" alt="La pestaña azul para mover y el botón rojo para borrar encima de un texto">
+
 El texto se queda en su sitio en la página, aunque se desplace hacia arriba o abajo o
 amplíe la página.
 
-**4. Los botones de la barra**
+### 4. Los botones de la barra
 
-| Botón | Qué hace |
-|---|---|
-| **✏️ Typing: on / off** | Cuando está en **on** (activado), al hacer clic en la página se añade texto. Póngalo en **off** (desactivado) para usar el libro con normalidad (pasar páginas, pulsar botones). Su texto sigue en la página. |
-| **A−  A+** | Hace el texto más pequeño o más grande. |
-| **Puntos de colores** | Cambia el color del texto. |
-| **📷 Save** | Guarda una imagen de la pantalla con su texto (vea abajo). |
-| **🗑 Clear** | Borra todo lo que escribió en la página. |
-| **✕** | Oculta la barra. Su texto se queda. Haga clic en la **T** azul para que vuelva. |
+<img src="docs/images/use-4-toolbar-buttons-es.png" width="500" alt="La barra de botones, numerados del 1 al 6">
+
+| | Botón | Qué hace |
+|---|---|---|
+| **1** | **✏️ Typing: on / off** | Cuando está en **on** (activado), al hacer clic en la página se añade texto. Póngalo en **off** (desactivado) para usar el libro con normalidad (pasar páginas, pulsar botones). Su texto sigue en la página. |
+| **2** | **A−  A+** | Hace el texto más pequeño o más grande. |
+| **3** | **Puntos de colores** | Cambia el color del texto. |
+| **4** | **📷 Save** | Guarda una imagen de la pantalla con su texto (vea abajo). |
+| **5** | **🗑 Clear** | Borra todo lo que escribió en la página. |
+| **6** | **✕** | Oculta la barra. Su texto se queda. Haga clic en la **T** azul para que vuelva. |
 
 > **Consejo:** para cambiar el tamaño o el color de algo que ya escribió, haga clic en
 > ello primero y luego en **A−**, **A+** o un color.
 
-**5. Guarde su trabajo**
+### 5. Guarde su trabajo
 
 Haga clic en **📷 Save**. Se guarda en su ordenador una imagen de la pantalla con su
-texto. La barra de botones y las pestañas azules y rojas no salen en la imagen.
+texto. La barra de botones y las pestañas azules y rojas no salen en la imagen. Al
+terminar, aparece este mensaje abajo en la página ("Imagen guardada en
+Descargas/VHL Overlay"):
+
+<img src="docs/images/use-5-saved-es.png" width="300" alt="El mensaje: Screenshot saved to Downloads/VHL Overlay">
 
 Para encontrar las imágenes, abra la carpeta **Descargas** y dentro la carpeta
 **VHL Overlay**. Cada imagen lleva la fecha y la hora en el nombre, por ejemplo
@@ -251,6 +305,10 @@ parte que quiera guardar.
 ---
 
 ## Si algo no funciona
+
+**Chrome dice que falta el archivo de manifiesto ("Manifest file is missing").**
+Eligió una carpeta equivocada en el Paso 2. Pulse otra vez **Cargar descomprimida** y
+elija la carpeta llamada **VHL Text Overlay**. Dentro tiene una carpeta llamada **icons**.
 
 **Sale el mensaje "Couldn't take the screenshot" (no se pudo hacer la captura).**
 Chrome solo deja que la herramienta haga imágenes después de pulsar el botón azul **T**
@@ -277,3 +335,22 @@ Es normal con las herramientas añadidas de esta forma. Puede cerrar el aviso.
 - **Alt + Mayús + S**: guardar una imagen
 
 En un Mac, **Alt** es la tecla **Opción**.
+
+### Obtener una versión nueva
+
+Cuando salga una versión nueva, descárguela otra vez (Paso 1) y ponga la nueva carpeta
+**VHL Text Overlay** en lugar de la anterior. Luego vaya a `chrome://extensions` y haga
+clic en la flecha circular ↻ del recuadro **VHL Text Overlay**.
+
+---
+
+## For the maintainer: publishing a release
+
+The download link above always points to the newest release. To publish one:
+
+1. Raise `"version"` in `extension/manifest.json` (for example `1.0.0` → `1.0.1`).
+2. On GitHub, open **Actions** → **Publish release** → **Run workflow**.
+
+This builds `VHL-Text-Overlay.zip` and publishes it as release `v<version>`. Pushing a
+tag like `v1.0.1` does the same. Screenshots in `docs/images/` were taken in Chrome
+(English and Spanish) against a sample page.
