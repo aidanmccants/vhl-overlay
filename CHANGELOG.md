@@ -1,5 +1,29 @@
 # Changelog
 
+## 0.3.0 (2026-11-13)
+
+### ✨ New
+
+- Add a small support link to the welcome page and the tour's last step
+
+### 🎨 Look and feel
+
+- Highlight letters: ">" while typing, Word-style select + color, 🖍 highlighter
+
+### 📝 Docs
+
+- Store screenshot 2 shows all three ways to highlight
+- README: explain that the Load unpacked window only shows folders
+
+### 💅 Improvements
+
+- Readable tour text in dark mode; A+ / A- centered with any font
+- Highlighter button marks selected letters (like Word)
+- Chrome Web Store kit: publishing guide, privacy policy and all store images
+- Replace emoji with Lucide icons across the on-screen interface
+- Pen mode: Off | Pen | Typing selector and drawing with pen, mouse or finger
+- Undo/redo works after marking letters
+
 ## 0.2.1 (2026-11-13)
 
 ### 🐛 Fixes
