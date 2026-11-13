@@ -58,6 +58,11 @@ This takes about 3 minutes.
 5. A window opens so you can choose a folder. Find the **VHL-Text-Overlay** folder from
    Step 1, click it **once**, and click **Select Folder** (on a Mac, **Select**). Choose
    the folder itself, not a file inside it.
+
+   > **Only see an "icons" folder?** That's normal. This window only shows folders, so
+   > the files inside are hidden here, but they're still there. If you've opened
+   > **VHL-Text-Overlay** and see just **icons**, you're in the right place: click
+   > **Select Folder**. Don't open **icons**.
 6. A box named **VHL Text Overlay** now appears on the page. That means it's installed.
 
    <img src="docs/images/install-3-installed-en.png" width="600" alt="The VHL Text Overlay box on the Extensions page after installing">
@@ -282,6 +287,11 @@ Tarda unos 3 minutos.
 5. Se abre una ventana para elegir una carpeta. Busque la carpeta **VHL-Text-Overlay** del
    Paso 1, haga **un solo clic** en ella y luego en **Seleccionar carpeta** (en un Mac,
    **Seleccionar**). Elija la carpeta, no un archivo de dentro.
+
+   > **¿Solo ve una carpeta "icons"?** Es normal. Esta ventana solo muestra carpetas, así
+   > que aquí no se ven los archivos de dentro, pero siguen ahí. Si abrió
+   > **VHL-Text-Overlay** y solo ve **icons**, está en el lugar correcto: pulse
+   > **Seleccionar carpeta**. No abra **icons**.
 6. Ahora aparece un recuadro llamado **VHL Text Overlay**. Eso significa que está instalada.
 
    <img src="docs/images/install-3-installed-es.png" width="600" alt="El recuadro VHL Text Overlay en la página Extensiones después de instalarla">
