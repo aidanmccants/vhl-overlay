@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#e8445f"/>
+      <stop offset=".55" stop-color="#c60e30"/>
+      <stop offset="1" stop-color="#7d0820"/>
+    </linearGradient>
+    <radialGradient id="glow" cx=".25" cy=".15" r=".9">
+      <stop offset="0" stop-color="#fff" stop-opacity=".45"/>
+      <stop offset=".6" stop-color="#fff" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="sheen" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fff" stop-opacity=".7"/>
+      <stop offset="1" stop-color="#fff" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="glass" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fff" stop-opacity=".42"/>
+      <stop offset="1" stop-color="#fff" stop-opacity=".14"/>
+    </linearGradient>
+    <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#4a0613" flood-opacity=".35"/>
+    </filter>
+  </defs>
+  <!-- squircle tile -->
+  <rect x="4" y="4" width="120" height="120" rx="30" fill="url(#bg)"/>
+  <rect x="4" y="4" width="120" height="120" rx="30" fill="url(#glow)"/>
+  <!-- glass card -->
+  <rect x="20" y="26" width="88" height="76" rx="20" fill="url(#glass)" stroke="#fff" stroke-opacity=".7" stroke-width="2"/>
+  <path d="M40 27.5h48a19 19 0 0 1 19 19v1.5H21v-1.5a19 19 0 0 1 19-19z" fill="url(#sheen)" opacity=".55"/>
+  <!-- T with caret -->
+  <g filter="url(#shadow)" fill="#fff">
+    <rect x="34" y="42" width="44" height="11" rx="5.5"/>
+    <rect x="50.5" y="42" width="11" height="46" rx="5.5"/>
+    <rect x="84" y="46" width="6" height="40" rx="3" fill="#ffffff" fill-opacity=".8"/>
+  </g>
+  <!-- rim highlight -->
+  <rect x="5" y="5" width="118" height="118" rx="29" fill="none" stroke="#fff" stroke-opacity=".35" stroke-width="2"/>
+</svg>
