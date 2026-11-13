@@ -605,3 +605,25 @@ bump and changelog entry without changing anything).
 
 `npm run screenshots` regenerates the README pictures in `docs/images/` (English and
 Spanish Chrome) from a sample page.
+
+---
+
+## License / Licencia
+
+The **code** is open source under the [MIT License](LICENSE): you can use, copy, change and
+share it.
+
+The **name "VHL Text Overlay", its logo and icons, and the other branding images**
+(`assets/`, `extension/icons/`, `docs/store/`) are **not** covered by the MIT License. Please
+don't use them for your own version. If you publish a modified version, give it a different
+name and icon. See the trademark notice in [LICENSE](LICENSE).
+
+"VHL" and "VHL Central" are trademarks of Vista Higher Learning, Inc. This is an
+independent project, not made by, endorsed by or affiliated with Vista Higher Learning.
+Icons by [Lucide](https://lucide.dev) (ISC License).
+
+*En español:* el **código** es de código abierto con la [licencia MIT](LICENSE). El
+**nombre "VHL Text Overlay", su logotipo, iconos e imágenes de marca** no están incluidos en
+esa licencia: si publica una versión modificada, use otro nombre y otro icono. "VHL" y
+"VHL Central" son marcas de Vista Higher Learning, Inc.; este proyecto es independiente y no
+está afiliado a Vista Higher Learning.
