@@ -41,9 +41,9 @@ test('installing opens the welcome page and the tour runs through every feature 
       await page.waitForTimeout(250);
     }
     assert.deepEqual(titles, [
-      'Welcome to VHL Text Overlay 👋', 'Off, Pen or Typing', 'Write anywhere', 'Edit, move or delete', 'Text size',
+      'Welcome to VHL Text Overlay', 'Off, Pen or Typing', 'Write anywhere', 'Edit, move or delete', 'Text size',
       'Colors that stay readable', 'Highlight letters', 'Move this toolbar', 'Save a picture of your work', 'Clear', 'Hide the toolbars',
-      'You’re all set! 🎉',
+      'You’re all set!',
     ]);
     assert.deepEqual(supportLinks, [...Array(11).fill(''), SUPPORT], 'support link only on the last step');
     assert.equal(await tourTitle(page), null, 'Done closes the tour');

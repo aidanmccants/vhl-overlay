@@ -6,6 +6,12 @@
   window.__vhlOverlayLoaded = true;
 
   const IS_TOP = window === window.top;
+  // Icons come from Lucide (see icons.js, built by scripts/icons.mjs).
+  const ICONS = globalThis.VHL_ICONS || {};
+  const ic = (name) =>
+    `<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[name] || ''}</svg>`;
+  // Tour and tip text writes {{icon-name}} where an icon goes.
+  const withIcons = (html) => html.replace(/\{\{([\w-]+)\}\}/g, (_, n) => ic(n));
   // Each color has a shade for light backgrounds and a shade for dark backgrounds.
   // When a text box starts, the shade that's easiest to read there is used.
   const COLORS = [
@@ -217,6 +223,7 @@
       transition: opacity .2s var(--ease), transform .4s var(--spring);
     }
     .grip { left: 0; background: rgba(44, 44, 50, .85); cursor: grab; }
+    .grip .ico, .del .ico { width: 12px; height: 12px; }
     .grip:active { cursor: grabbing; }
     .del { left: 24px; background: rgba(255, 59, 48, .88); cursor: pointer; font-size: 13px; }
     .typing .note.selected .grip, .typing .note.selected .del { opacity: 1; transform: none; pointer-events: auto; }
@@ -252,13 +259,16 @@
     /* Zero layout shift: labels that change (on/off, Copy/Copied, Next/Done) are all
        stacked in one grid cell, so a button is always as wide as its longest label. */
     .stack { display: inline-grid; place-items: center; }
-    .stack > span { grid-area: 1 / 1; white-space: nowrap; }
+    .stack > span { grid-area: 1 / 1; white-space: nowrap; display: inline-flex; align-items: center; gap: 6px; }
+    /* Lucide icons */
+    .ico { display: block; flex: none; width: 16px; height: 16px; }
     .stack > span.off { visibility: hidden; }
     /* Kept in the layout but invisible, so nothing moves when it's not needed. */
     .reserve { visibility: hidden !important; pointer-events: none !important; }
 
     .glass button {
       position: relative; font: inherit; color: var(--ink); cursor: pointer; white-space: nowrap;
+      display: inline-flex; align-items: center; justify-content: center; gap: 6px;
       border: 0; background: var(--chip); border-radius: 999px;
       box-shadow: inset 0 1px 0 rgba(255, 255, 255, .6), 0 1px 2px rgba(0, 0, 0, .08);
       transition: transform .35s var(--spring), background .2s var(--ease), box-shadow .25s var(--ease), color .2s var(--ease);
@@ -272,7 +282,9 @@
       padding: 6px 7px; border-radius: 999px;
     }
     .toolbar.hidden { transform: translateY(-14px) scale(.94); }
-    .toolbar .drag { cursor: grab; color: var(--ink-soft); padding: 0 3px 0 5px; font-size: 14px; letter-spacing: -2px; }
+    .toolbar .drag { cursor: grab; color: var(--ink-soft); padding: 0 1px 0 3px; display: flex; }
+    .toolbar .drag .ico { width: 18px; height: 18px; }
+    .toolbar button.icon .ico { width: 17px; height: 17px; }
     .toolbar button { padding: 8px 13px; white-space: nowrap; font-weight: 500; }
     .toolbar button.on {
       background: linear-gradient(180deg, #e0294b, #b00c2b); color: #fff;
@@ -320,8 +332,11 @@
     }
     .panel .flip { width: 36px; height: 28px; font-size: 14px; color: var(--ink-soft); }
     .panel .tools { display: flex; gap: 8px; }
+    .panel button .ico { width: 18px; height: 18px; }
+    .panel .flip .ico { width: 16px; height: 16px; }
     .panel button.markbtn, .panel button.erasebtn { font-size: 17px; }
     .panel button.markbtn.on, .panel button.erasebtn.on {
+      color: #fff;
       background: linear-gradient(180deg, #e0294b, #b00c2b);
       box-shadow: inset 0 1px 0 rgba(255, 255, 255, .45), 0 4px 14px rgba(198, 14, 48, .45);
     }
@@ -348,6 +363,7 @@
     }
     .shotcard:not(.hidden) img { animation: develop .6s var(--ease) both; }
     @keyframes develop { from { opacity: 0; transform: scale(1.04); filter: brightness(1.6) blur(4px); } }
+    .shotcard .title .ico { width: 18px; height: 18px; }
     .shotcard .title { display: flex; align-items: center; gap: 8px; margin: 2px 4px 10px; font: 600 14px/1.2 var(--font); }
     .shotcard .title .grow { flex: 1; }
     .shotcard .title button { width: 28px; height: 28px; padding: 0; font-size: 12px; }
@@ -361,6 +377,7 @@
       margin: 10px 4px 0; height: 2.7em; font: 13px/1.35 var(--font); color: var(--ink-soft);
       display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; overflow-wrap: anywhere;
     }
+    .toast .ico { width: 16px; height: 16px; }
     .toast button { padding: 6px 12px; font-weight: 600; background: var(--accent); color: #fff; }
 
     /* ---------- first-time tour ---------- */
@@ -386,6 +403,7 @@
     .tour-pop h3 { margin: 6px 0 6px; font: 700 17px/1.25 var(--font); }
     .tour-pop p { margin: 0; font: 14px/1.45 var(--font); }
     .tour-pop p + p { margin-top: 8px; }
+    .tour-pop .content .ico { display: inline-block; width: 1.05em; height: 1.05em; vertical-align: -.17em; }
     /* Small and quiet: an optional way to support the project (last step only). */
     .tour-pop p.support { margin-top: 12px; font-size: 12px; }
     .tour-pop .support a { color: var(--ink-soft); text-decoration: none; }
@@ -447,10 +465,17 @@
     }).observe(document.documentElement, { childList: true, subtree: true });
   }
 
-  function btn(label, title, onClick, cls) {
+  // A button with an optional Lucide icon in front of its label (or alone).
+  function btn(label, title, onClick, cls, icon) {
     const b = document.createElement('button');
     b.type = 'button';
-    b.textContent = label;
+    if (icon) {
+      b.innerHTML = ic(icon);
+      if (label) b.append(Object.assign(document.createElement('span'), { textContent: label }));
+      else b.setAttribute('aria-label', title);
+    } else {
+      b.textContent = label;
+    }
     b.title = title;
     if (cls) b.className = cls;
     // pointerdown default would steal focus from the note being edited
@@ -462,13 +487,21 @@
 
   // Give a button several labels stacked in one spot (see .stack in the CSS); only
   // one is visible, but the button is always sized for the longest.
+  // A label is text, or [icon, text].
   function stack(b, labels) {
     b.textContent = '';
-    b.classList.add('stack');
-    b._labels = labels.map((t) => {
+    const box = document.createElement('span');
+    box.className = 'stack';
+    b.append(box);
+    b._labels = labels.map((l) => {
       const span = document.createElement('span');
-      span.textContent = t;
-      b.append(span);
+      if (Array.isArray(l)) {
+        span.innerHTML = ic(l[0]);
+        span.append(l[1]);
+      } else {
+        span.textContent = l;
+      }
+      box.append(span);
       return span;
     });
     setStack(b, 0);
@@ -486,7 +519,7 @@
 
     const drag = document.createElement('span');
     drag.className = 'drag';
-    drag.textContent = '⋮⋮';
+    drag.innerHTML = ic('grip-vertical');
     drag.title = 'Drag to move the toolbar';
     makeDraggable(drag, toolbar, null);
 
@@ -497,25 +530,25 @@
     ui.modes.setAttribute('aria-label', L('Mode', 'Modo'));
     ui.mode = {
       off: btn(L('Off', 'Apagado'), L('Use the textbook normally (turn pages, click its buttons). Your work stays on the page.',
-        'Use el libro con normalidad (pasar páginas, pulsar botones). Su trabajo se queda en la página.'), () => setMode('off')),
-      pen: btn(L('🖊️ Pen', '🖊️ Lápiz'), L('Draw on the page with a pen, mouse or finger',
-        'Dibuje en la página con un lápiz, el ratón o el dedo'), () => setMode('pen')),
-      typing: btn('✏️ Typing', L('Click anywhere on the page to add text (Alt+Shift+T closes the toolbar)',
-        'Haga clic en cualquier lugar para añadir texto (Alt+Mayús+T cierra la barra)'), () => setMode('typing')),
+        'Use el libro con normalidad (pasar páginas, pulsar botones). Su trabajo se queda en la página.'), () => setMode('off'), '', 'mouse-pointer-2'),
+      pen: btn(L('Pen', 'Lápiz'), L('Draw on the page with a pen, mouse or finger',
+        'Dibuje en la página con un lápiz, el ratón o el dedo'), () => setMode('pen'), '', 'pen-line'),
+      typing: btn('Typing', L('Click anywhere on the page to add text (Alt+Shift+T closes the toolbar)',
+        'Haga clic en cualquier lugar para añadir texto (Alt+Mayús+T cierra la barra)'), () => setMode('typing'), '', 'type'),
     };
     for (const [m, b] of Object.entries(ui.mode)) {
       b.dataset.mode = m;
       ui.modes.append(b);
     }
 
-    ui.shot = btn('📷 Screenshot', 'Take a screenshot with your text, then copy or download it (Alt+Shift+S)', () => takeScreenshot());
-    ui.clear = btn('🗑 Clear', 'Remove all text boxes', () => {
-      if (confirm('Remove all of your typed text from this page?')) chrome.runtime.sendMessage({ cmd: 'clear-all' });
-    });
-    ui.close = btn('✕', 'Hide toolbar (your text stays on the page)', () => sendState({ open: false, typing: false, pen: false, mark: false }), 'icon');
+    ui.shot = btn('Screenshot', 'Take a screenshot with your text, then copy or download it (Alt+Shift+S)', () => takeScreenshot(), '', 'camera');
+    ui.clear = btn('Clear', 'Remove all text boxes and drawings', () => {
+      if (confirm('Remove all of your typed text and drawings from this page?')) chrome.runtime.sendMessage({ cmd: 'clear-all' });
+    }, '', 'trash-2');
+    ui.close = btn('', 'Hide toolbar (your text stays on the page)', () => sendState({ open: false, typing: false, pen: false, mark: false }), 'icon', 'x');
 
     const sep = () => Object.assign(document.createElement('span'), { className: 'sep' });
-    ui.help = btn('?', 'Show the tour of every feature again', () => startTour(), 'icon');
+    ui.help = btn('', 'Show the tour of every feature again', () => startTour(), 'icon', 'circle-help');
     toolbar.append(drag, ui.modes, sep(), ui.shot, ui.clear, ui.help, ui.close);
     root.appendChild(toolbar);
 
@@ -536,17 +569,17 @@
       sw.dataset.color = c.id;
       return sw;
     });
-    ui.mark = btn('🖍', L('Highlighter: click or drag across letters to mark them (click again to unmark)',
+    ui.mark = btn('', L('Highlighter: click or drag across letters to mark them (click again to unmark)',
       'Marcador: haga clic o arrastre sobre las letras para marcarlas (otro clic las desmarca)'), () =>
-      sendState(state.mark ? { mark: false, typing: true } : { mark: true, typing: false, pen: false }), 'markbtn');
-    ui.eraser = btn('🧽', L('Eraser: touch a drawing to erase it (a Surface Pen’s eraser end works too)',
+      sendState(state.mark ? { mark: false, typing: true } : { mark: true, typing: false, pen: false }), 'markbtn', 'highlighter');
+    ui.eraser = btn('', L('Eraser: touch a drawing to erase it (a Surface Pen’s eraser end works too)',
       'Borrador: toque un dibujo para borrarlo (también funciona el extremo borrador del lápiz)'), () =>
-      sendState(state.pen && state.eraser ? { eraser: false } : { eraser: true, pen: true, typing: false, mark: false }), 'erasebtn');
+      sendState(state.pen && state.eraser ? { eraser: false } : { eraser: true, pen: true, typing: false, mark: false }), 'erasebtn', 'eraser');
     const tools = document.createElement('div');
     tools.className = 'tools';
     tools.append(ui.mark, ui.eraser);
-    ui.flip = btn('⇄', 'Move this toolbar to the other side of the screen', () =>
-      sendState({ side: state.side === 'left' ? 'right' : 'left' }), 'flip');
+    ui.flip = btn('', 'Move this toolbar to the other side of the screen', () =>
+      sendState({ side: state.side === 'left' ? 'right' : 'left' }), 'flip', 'arrow-left-right');
     const swatchGroup = document.createElement('div');
     swatchGroup.className = 'swatches';
     swatchGroup.append(...ui.swatches);
@@ -652,7 +685,7 @@
   const TOUR_STEPS = [
     {
       place: 'center',
-      title: L('Welcome to VHL Text Overlay 👋', 'Bienvenido a VHL Text Overlay 👋'),
+      title: L('Welcome to VHL Text Overlay', 'Bienvenido a VHL Text Overlay'),
       body: L(
         '<p>Here’s a one-minute tour of everything it can do. You can try each thing as you go.</p><p>You can skip the tour now, or any time.</p>',
         '<p>Este es un recorrido de un minuto por todo lo que puede hacer. Puede probar cada cosa sobre la marcha.</p><p>Puede saltarse el recorrido ahora o en cualquier momento.</p>'
@@ -663,16 +696,16 @@
       target: () => [ui.modes],
       title: L('Off, Pen or Typing', 'Apagado, Lápiz o Typing'),
       body: L(
-        '<p><b>✏️ Typing</b>: click the page to add text.</p><p><b>🖊️ Pen</b>: draw with a pen, mouse or finger. Press harder for thicker lines. Flip a Surface Pen over to erase.</p><p><b>Off</b>: use the textbook normally. Your work stays on the page.</p>',
-        '<p><b>✏️ Typing</b>: haga clic en la página para añadir texto.</p><p><b>🖊️ Lápiz</b>: dibuje con un lápiz, el ratón o el dedo. Si aprieta más, la línea es más gruesa. Dé la vuelta al lápiz de Surface para borrar.</p><p><b>Apagado</b>: use el libro con normalidad. Su trabajo se queda en la página.</p>'
+        '<p><b>{{type}} Typing</b>: click the page to add text.</p><p><b>{{pen-line}} Pen</b>: draw with a pen, mouse or finger. Press harder for thicker lines. Flip a Surface Pen over to erase.</p><p><b>{{mouse-pointer-2}} Off</b>: use the textbook normally. Your work stays on the page.</p>',
+        '<p><b>{{type}} Typing</b>: haga clic en la página para añadir texto.</p><p><b>{{pen-line}} Lápiz</b>: dibuje con un lápiz, el ratón o el dedo. Si aprieta más, la línea es más gruesa. Dé la vuelta al lápiz de Surface para borrar.</p><p><b>{{mouse-pointer-2}} Apagado</b>: use el libro con normalidad. Su trabajo se queda en la página.</p>'
       ),
     },
     {
       place: 'bottom',
       title: L('Write anywhere', 'Escriba donde quiera'),
       body: L(
-        `<p>Click any spot on the page and type. Click somewhere else to start another piece of text.</p><p>${kbd('Enter')} starts a new line. ${kbd('Esc')} finishes.</p><div class="try">👉 Try it now: click a blank on the page and type a word.</div>`,
-        `<p>Haga clic en cualquier lugar de la página y escriba. Haga clic en otro sitio para empezar otro texto.</p><p>${kbd('Intro')} empieza una línea nueva. ${kbd('Esc')} termina.</p><div class="try">👉 Pruébelo: haga clic en un espacio en blanco y escriba una palabra.</div>`
+        `<p>Click any spot on the page and type. Click somewhere else to start another piece of text.</p><p>${kbd('Enter')} starts a new line. ${kbd('Esc')} finishes.</p><div class="try">Try it now: click a blank on the page and type a word.</div>`,
+        `<p>Haga clic en cualquier lugar de la página y escriba. Haga clic en otro sitio para empezar otro texto.</p><p>${kbd('Intro')} empieza una línea nueva. ${kbd('Esc')} termina.</p><div class="try">Pruébelo: haga clic en un espacio en blanco y escriba una palabra.</div>`
       ),
     },
     {
@@ -685,8 +718,8 @@
       place: 'bottom',
       title: L('Edit, move or delete', 'Editar, mover o borrar'),
       body: L(
-        '<p>Click your text to change it.</p><p>Drag the dark gray <b>✥</b> handle to move it, or click the red <b>×</b> to delete it.</p><p>Your text sticks to the page when you scroll or zoom.</p>',
-        '<p>Haga clic en su texto para cambiarlo.</p><p>Arrastre el círculo gris oscuro <b>✥</b> para moverlo, o pulse la <b>×</b> roja para borrarlo.</p><p>El texto se queda pegado a la página al desplazarse o ampliar.</p>'
+        '<p>Click your text to change it.</p><p>Drag the dark gray <b>{{move}}</b> handle to move it, or click the red <b>{{x}}</b> to delete it.</p><p>Your text sticks to the page when you scroll or zoom.</p>',
+        '<p>Haga clic en su texto para cambiarlo.</p><p>Arrastre el círculo gris oscuro <b>{{move}}</b> para moverlo, o pulse la <b>{{x}}</b> roja para borrarlo.</p><p>El texto se queda pegado a la página al desplazarse o ampliar.</p>'
       ),
     },
     {
@@ -709,48 +742,48 @@
       target: () => [ui.mark],
       title: L('Highlight letters', 'Resaltar letras'),
       body: L(
-        `<p>Show a verb ending in another color, like <b>limpi<u style="color:#b91c1c">e</u></b>. Three ways:</p><p>• Type ${kbd('&gt;')} before the letters: <b>hac&gt;er</b> gives <b>hac<u style="color:#b91c1c">er</u></b>. A space ends it (${kbd('&gt;&gt;')} types a real &gt;).<br>• Select letters in your text, then click a color dot.<br>• Click <b>🖍</b>, then click or drag across letters. Click again to unmark.</p>`,
-        `<p>Muestre una terminación verbal en otro color, como <b>limpi<u style="color:#b91c1c">e</u></b>. Tres maneras:</p><p>• Escriba ${kbd('&gt;')} antes de las letras: <b>hac&gt;er</b> da <b>hac<u style="color:#b91c1c">er</u></b>. Un espacio lo termina (${kbd('&gt;&gt;')} escribe un &gt; de verdad).<br>• Seleccione letras de su texto y pulse un punto de color.<br>• Pulse <b>🖍</b> y haga clic o arrastre sobre las letras. Otro clic las desmarca.</p>`
+        `<p>Show a verb ending in another color, like <b>limpi<u style="color:#b91c1c">e</u></b>. Three ways:</p><p>• Type ${kbd('&gt;')} before the letters: <b>hac&gt;er</b> gives <b>hac<u style="color:#b91c1c">er</u></b>. A space ends it (${kbd('&gt;&gt;')} types a real &gt;).<br>• Select letters in your text, then click a color dot.<br>• Click <b>{{highlighter}}</b>, then click or drag across letters. Click again to unmark.</p>`,
+        `<p>Muestre una terminación verbal en otro color, como <b>limpi<u style="color:#b91c1c">e</u></b>. Tres maneras:</p><p>• Escriba ${kbd('&gt;')} antes de las letras: <b>hac&gt;er</b> da <b>hac<u style="color:#b91c1c">er</u></b>. Un espacio lo termina (${kbd('&gt;&gt;')} escribe un &gt; de verdad).<br>• Seleccione letras de su texto y pulse un punto de color.<br>• Pulse <b>{{highlighter}}</b> y haga clic o arrastre sobre las letras. Otro clic las desmarca.</p>`
       ),
     },
     {
       target: () => [ui.flip],
       title: L('Move this toolbar', 'Mover esta barra'),
       body: L(
-        '<p><b>⇄</b> moves the size and color toolbar to the other side of the screen if it’s in your way.</p>',
-        '<p><b>⇄</b> mueve la barra de tamaño y color al otro lado de la pantalla si le molesta.</p>'
+        '<p><b>{{arrow-left-right}}</b> moves the size and color toolbar to the other side of the screen if it’s in your way.</p>',
+        '<p><b>{{arrow-left-right}}</b> mueve la barra de tamaño y color al otro lado de la pantalla si le molesta.</p>'
       ),
     },
     {
       target: () => [ui.shot],
       title: L('Save a picture of your work', 'Guardar una imagen de su trabajo'),
       body: L(
-        `<p>Click <b>📷 Screenshot</b>. Chrome asks to <b>share this tab</b>: click <b>Share</b>. Nothing is recorded or sent anywhere.</p><p>Then choose <b>Copy</b> (paste it anywhere with ${kbd(MOD + '+V')}) or <b>Download</b> (saves a picture file).</p><p>Shortcut: ${kbd('Alt+Shift+S')}</p>`,
-        `<p>Pulse <b>📷 Screenshot</b>. Chrome pregunta si quiere <b>compartir esta pestaña</b>: pulse <b>Compartir</b>. No se graba ni se envía nada.</p><p>Luego elija <b>Copiar</b> (péguela donde quiera con ${kbd(MOD + '+V')}) o <b>Descargar</b> (guarda un archivo de imagen).</p><p>Atajo: ${kbd('Alt+Mayús+S')}</p>`
+        `<p>Click <b>{{camera}} Screenshot</b>. Chrome asks to <b>share this tab</b>: click <b>Share</b>. Nothing is recorded or sent anywhere.</p><p>Then choose <b>Copy</b> (paste it anywhere with ${kbd(MOD + '+V')}) or <b>Download</b> (saves a picture file).</p><p>Shortcut: ${kbd('Alt+Shift+S')}</p>`,
+        `<p>Pulse <b>{{camera}} Screenshot</b>. Chrome pregunta si quiere <b>compartir esta pestaña</b>: pulse <b>Compartir</b>. No se graba ni se envía nada.</p><p>Luego elija <b>Copiar</b> (péguela donde quiera con ${kbd(MOD + '+V')}) o <b>Descargar</b> (guarda un archivo de imagen).</p><p>Atajo: ${kbd('Alt+Mayús+S')}</p>`
       ),
     },
     {
       target: () => [ui.clear],
       title: L('Clear', 'Borrar todo'),
       body: L(
-        '<p><b>🗑 Clear</b> erases all of your text on the page.</p><p>Remember: text is never saved. Refreshing the page erases it too, so copy a picture first.</p>',
-        '<p><b>🗑 Clear</b> borra todo su texto de la página.</p><p>Recuerde: el texto nunca se guarda. Al recargar la página también se borra, así que copie una imagen antes.</p>'
+        '<p><b>{{trash-2}} Clear</b> erases all of your text on the page.</p><p>Remember: text is never saved. Refreshing the page erases it too, so copy a picture first.</p>',
+        '<p><b>{{trash-2}} Clear</b> borra todo su texto de la página.</p><p>Recuerde: el texto nunca se guarda. Al recargar la página también se borra, así que copie una imagen antes.</p>'
       ),
     },
     {
       target: () => [ui.close],
       title: L('Hide the toolbars', 'Ocultar las barras'),
       body: L(
-        `<p><b>✕</b> hides both toolbars. Your text stays on the page.</p><p>To bring them back, click the <b>T</b> button at the top right of Chrome, or press ${kbd('Alt+Shift+T')}.</p>`,
-        `<p><b>✕</b> oculta las dos barras. Su texto se queda en la página.</p><p>Para que vuelvan, pulse el botón <b>T</b> arriba a la derecha de Chrome o ${kbd('Alt+Mayús+T')}.</p>`
+        `<p><b>{{x}}</b> hides both toolbars. Your text stays on the page.</p><p>To bring them back, click the <b>T</b> button at the top right of Chrome, or press ${kbd('Alt+Shift+T')}.</p>`,
+        `<p><b>{{x}}</b> oculta las dos barras. Su texto se queda en la página.</p><p>Para que vuelvan, pulse el botón <b>T</b> arriba a la derecha de Chrome o ${kbd('Alt+Mayús+T')}.</p>`
       ),
     },
     {
       target: () => [ui.help],
-      title: L('You’re all set! 🎉', '¡Todo listo! 🎉'),
+      title: L('You’re all set!', '¡Todo listo!'),
       body: L(
-        '<p>Want to see this tour again? Click <b>?</b> any time.</p><p class="support"><a href="https://buymeacoffee.com/aidanmccants" target="_blank" rel="noopener">Enjoying it? ☕ Buy me a coffee</a></p>',
-        '<p>¿Quiere ver este recorrido otra vez? Pulse <b>?</b> cuando quiera.</p><p class="support"><a href="https://buymeacoffee.com/aidanmccants" target="_blank" rel="noopener">¿Le resulta útil? ☕ Invíteme a un café</a></p>'
+        '<p>Want to see this tour again? Click <b>{{circle-help}}</b> any time.</p><p class="support"><a href="https://buymeacoffee.com/aidanmccants" target="_blank" rel="noopener">Enjoying it? {{coffee}} Buy me a coffee</a></p>',
+        '<p>¿Quiere ver este recorrido otra vez? Pulse <b>{{circle-help}}</b> cuando quiera.</p><p class="support"><a href="https://buymeacoffee.com/aidanmccants" target="_blank" rel="noopener">¿Le resulta útil? {{coffee}} Invíteme a un café</a></p>'
       ),
       next: L('Done', 'Terminar'),
     },
@@ -815,7 +848,7 @@
     content.innerHTML =
       // The step counter keeps its line on the first step too (hidden), so nothing jumps.
       `<div class="count${tour.i > 0 ? '' : ' reserve'}">${L('Step', 'Paso')} ${Math.max(1, tour.i)} ${L('of', 'de')} ${n - 1}</div>` +
-      `<h3>${step.title}</h3>${step.body}` +
+      `<h3>${step.title}</h3>${withIcons(step.body)}` +
       `<div class="dots">${TOUR_STEPS.map((_, j) => `<span class="dot${j === tour.i ? ' on' : ''}"></span>`).join('')}</div>`;
     const row = document.createElement('div');
     row.className = 'row';
@@ -1051,8 +1084,8 @@
     shotCard.innerHTML = '';
     const title = document.createElement('div');
     title.className = 'title';
-    title.innerHTML = `<span>${L('📷 Screenshot ready', '📷 Captura lista')}</span><span class="grow"></span>`;
-    title.append(btn('✕', L('Close', 'Cerrar'), hideShotCard));
+    title.innerHTML = `${ic('camera')}<span>${L('Screenshot ready', 'Captura lista')}</span><span class="grow"></span>`;
+    title.append(btn('', L('Close', 'Cerrar'), hideShotCard, '', 'x'));
     const img = document.createElement('img');
     img.src = shotUrl;
     img.alt = L('Screenshot preview', 'Vista previa de la captura');
@@ -1086,8 +1119,8 @@
       a.remove();
       done(dlBtn, L(`Saved to your Downloads folder as ${name}`, `Guardada en Descargas como ${name}`));
     });
-    stack(copyBtn, [L('Copy', 'Copiar'), L('✓ Copied', '✓ Copiada')]);
-    stack(dlBtn, [L('Download', 'Descargar'), L('✓ Downloaded', '✓ Descargada')]);
+    stack(copyBtn, [['copy', L('Copy', 'Copiar')], ['check', L('Copied', 'Copiada')]]);
+    stack(dlBtn, [['download', L('Download', 'Descargar')], ['check', L('Downloaded', 'Descargada')]]);
     actions.append(copyBtn, dlBtn);
     shotCard.append(title, img, actions, status);
     shotCard.classList.remove('hidden');
@@ -1132,11 +1165,12 @@
     el.className = 'note';
     const grip = document.createElement('div');
     grip.className = 'grip';
-    grip.textContent = '✥';
+    grip.innerHTML = ic('move');
     grip.title = 'Drag to move';
     const del = document.createElement('button');
     del.className = 'del';
-    del.textContent = '×';
+    del.innerHTML = ic('x');
+    del.setAttribute('aria-label', 'Delete');
     del.title = 'Delete';
     const text = document.createElement('div');
     text.className = 'text';
@@ -1946,8 +1980,8 @@
   function markHint() {
     if (!IS_TOP || Date.now() - hintShown < 4000) return;
     hintShown = Date.now();
-    toast(L('Highlighter is on: click or drag across letters in your text. Click 🖍 again to go back to typing.',
-      'El marcador está activado: haga clic o arrastre sobre las letras de su texto. Pulse 🖍 otra vez para volver a escribir.'));
+    toast(L('Highlighter is on: click or drag across letters in your text. Click the highlighter button again to go back to typing.',
+      'El marcador está activado: haga clic o arrastre sobre las letras de su texto. Pulse otra vez el botón del marcador para volver a escribir.'));
   }
 
   // ---------------------------------------------------------------------------

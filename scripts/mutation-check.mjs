@@ -211,8 +211,8 @@ export const MUTANTS = [
     id: 'highlighter-clicks-leak',
     why: "with the highlighter on, clicks on the page reach the reader's buttons",
     file: 'content.js',
-    find: 'if (!(state.typing || state.mark) || capturing) return;',
-    replace: 'if (!state.typing || capturing) return;',
+    find: 'if (!(state.typing || state.mark || state.pen) || capturing) return;',
+    replace: 'if (!(state.typing || state.pen) || capturing) return;',
     tests: [T('marks')],
   },
   {
@@ -243,8 +243,8 @@ export const MUTANTS = [
     id: 'mark-button-grows',
     why: 'turning on the 🖍 highlighter makes its button bigger and pushes the toolbar around',
     file: 'content.js',
-    find: '.panel button.markbtn { font-size: 17px; }',
-    replace: '.panel button.markbtn { font-size: 17px; } .panel button.markbtn.on { height: 44px; }',
+    find: '.panel button.markbtn, .panel button.erasebtn { font-size: 17px; }',
+    replace: '.panel button.markbtn, .panel button.erasebtn { font-size: 17px; } .panel button.markbtn.on { height: 44px; }',
     tests: [T('layout')],
   },
   {

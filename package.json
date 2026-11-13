@@ -13,9 +13,11 @@
     "notes": "node scripts/release.mjs notes",
     "release": "node scripts/release.mjs prepare",
     "screenshots": "node scripts/screenshots.mjs",
-    "test:mutations": "node scripts/mutation-check.mjs"
+    "test:mutations": "node scripts/mutation-check.mjs",
+    "icons": "node scripts/icons.mjs"
   },
   "devDependencies": {
+    "lucide-static": "0.460.0",
     "playwright": "1.63.0"
   },
   "engines": {

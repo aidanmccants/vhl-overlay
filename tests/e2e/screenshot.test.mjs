@@ -34,9 +34,9 @@ test('Copy puts the picture on the clipboard', async () => {
   const { page } = b;
   await ui(page, '.shotcard .actions button').nth(0).click();
   await page.waitForTimeout(300);
-  assert.equal(await ui(page, '.shotcard .actions button').nth(0).getAttribute('aria-label'), '✓ Copied');
-  const visible = await ui(page, '.shotcard .actions button').nth(0).evaluate((b) => [...b.children].filter((s) => getComputedStyle(s).visibility === 'visible').map((s) => s.textContent));
-  assert.deepEqual(visible, ['✓ Copied'], 'only the new label is visible');
+  assert.equal(await ui(page, '.shotcard .actions button').nth(0).getAttribute('aria-label'), 'Copied');
+  const visible = await ui(page, '.shotcard .actions button').nth(0).evaluate((b) => [...b.querySelectorAll('.stack > span')].filter((s) => getComputedStyle(s).visibility === 'visible').map((s) => s.textContent));
+  assert.deepEqual(visible, ['Copied'], 'only the new label is visible');
   const size = await page.evaluate(async () => {
     const [item] = await navigator.clipboard.read();
     return (await item.getType('image/png')).size;

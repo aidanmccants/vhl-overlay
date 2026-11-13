@@ -43,6 +43,7 @@
         "*://*.vhlcentral.com/*"
       ],
       "js": [
+        "icons.js",
         "content.js"
       ],
       "all_frames": true,

@@ -11,7 +11,7 @@
   <div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div>
   <main class="card">
     <img class="logo" src="icons/icon128.png" alt="" width="88" height="88">
-    <h1 data-i18n="title">VHL Text Overlay is installed 🎉</h1>
+    <h1 data-i18n="title">VHL Text Overlay is installed</h1>
     <p class="lead" data-i18n="lead">Type on your VHL textbook pages, then copy or download a picture of your work. Three quick steps:</p>
 
     <ol class="steps">
@@ -19,7 +19,7 @@
         <span class="num">1</span>
         <div>
           <h2 data-i18n="s1t">Pin the button</h2>
-          <p data-i18n="s1">At the top right of Chrome, click the puzzle piece 🧩, then the pin 📌 next to <b>VHL Text Overlay</b>. This button will stay there:</p>
+          <p data-i18n="s1">At the top right of Chrome, click the puzzle piece {{puzzle}}, then the pin {{pin}} next to <b>VHL Text Overlay</b>. This button will stay there:</p>
           <img class="btnicon" src="icons/icon48.png" alt="" width="34" height="34">
         </div>
       </li>
@@ -34,7 +34,7 @@
         <span class="num">3</span>
         <div>
           <h2 data-i18n="s3t">Take the one-minute tour</h2>
-          <p data-i18n="s3">The first time, a short tour shows you every feature right on the page. You can skip it at any time, and replay it later with the <b>?</b> button.</p>
+          <p data-i18n="s3">The first time, a short tour shows you every feature right on the page. You can skip it at any time, and replay it later with the <b>{{circle-help}}</b> button.</p>
         </div>
       </li>
     </ol>
@@ -45,10 +45,11 @@
       <span data-i18n="toggle">Show me the tour the first time I use it</span>
     </label>
 
-    <a class="cta" href="https://www.vhlcentral.com/" data-i18n="cta">Open VHL Central →</a>
+    <a class="cta" href="https://www.vhlcentral.com/" data-i18n="cta">Open VHL Central {{arrow-right}}</a>
 
-    <p class="support"><a href="https://buymeacoffee.com/aidanmccants" target="_blank" rel="noopener" data-i18n="support">Enjoying it? ☕ Buy me a coffee</a></p>
+    <p class="support"><a href="https://buymeacoffee.com/aidanmccants" target="_blank" rel="noopener" data-i18n="support">Enjoying it? {{coffee}} Buy me a coffee</a></p>
   </main>
+  <script src="icons.js"></script>
   <script src="welcome.js"></script>
 </body>
 </html>
