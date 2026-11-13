@@ -235,7 +235,7 @@
     .toolbar .sep { width: 1px; height: 20px; background: var(--ink-soft); opacity: .25; margin: 0 2px; }
 
     .panel {
-      top: max(70px, calc(50vh - 190px)); left: calc(100% - 66px); width: 52px; box-sizing: border-box;
+      top: max(64px, calc(50vh - 215px)); left: calc(100% - 72px); width: 58px; box-sizing: border-box;
       display: flex; flex-direction: column; align-items: center; gap: 7px;
       padding: 12px 0; border-radius: 26px;
     }
@@ -254,10 +254,12 @@
       width: 28px; height: 28px; border-radius: 50%;
       box-shadow: 0 0 0 1.5px rgba(255, 255, 255, .85), 0 2px 6px rgba(0, 0, 0, .2), inset 0 1px 1px rgba(255, 255, 255, .5);
     }
-    .panel .swatch:hover { transform: scale(1.12); }
+    /* room for the selection ring (about 4px around a dot) without touching neighbors */
+    .panel .swatches { display: flex; flex-direction: column; align-items: center; gap: 14px; padding: 6px 0 4px; }
+    .panel .swatch:hover { transform: scale(1.08); }
     .panel .swatch.active {
-      transform: scale(1.12);
-      box-shadow: 0 0 0 2px rgba(255, 255, 255, .95), 0 0 0 4.5px var(--accent), 0 4px 12px rgba(198, 14, 48, .35);
+      transform: scale(1.04);
+      box-shadow: 0 0 0 2px rgba(255, 255, 255, .95), 0 0 0 4px var(--accent), 0 3px 10px rgba(198, 14, 48, .3);
     }
     .panel .flip { width: 36px; height: 28px; font-size: 14px; color: var(--ink-soft); }
 
@@ -432,7 +434,10 @@
     });
     ui.flip = btn('⇄', 'Move this toolbar to the other side of the screen', () =>
       sendState({ side: state.side === 'left' ? 'right' : 'left' }), 'flip');
-    panel.append(label('Size'), ui.bigger, ui.size, ui.smaller, hsep(), label('Color'), ...ui.swatches, hsep(), ui.flip);
+    const swatchGroup = document.createElement('div');
+    swatchGroup.className = 'swatches';
+    swatchGroup.append(...ui.swatches);
+    panel.append(label('Size'), ui.bigger, ui.size, ui.smaller, hsep(), label('Color'), swatchGroup, hsep(), ui.flip);
     root.appendChild(panel);
 
     toastEl = document.createElement('div');
