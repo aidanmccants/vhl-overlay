@@ -1,6 +1,6 @@
 // VHL Text Overlay - background service worker.
-// Holds the per-tab UI state (toolbar open, typing on, color, size), relays it
-// to every frame in the tab, and takes screenshots.
+// Holds the per-tab UI state (toolbar open, typing on, color, size, side), relays it
+// to every frame in the tab, and samples screen pixels for the contrast check.
 
 const DEFAULT_STATE = { open: false, typing: false, color: 'blue', size: 18, side: 'right' };
 
@@ -33,14 +33,7 @@ function isVhl(url) {
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
-function timestamp() {
-  const d = new Date();
-  const p = (n) => String(n).padStart(2, '0');
-  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}_${p(d.getHours())}-${p(d.getMinutes())}-${p(d.getSeconds())}`;
-}
-
-// Chrome allows only ~2 captureVisibleTab calls per second, so every capture
-// (screenshots and background sampling) goes through this queue.
+// Chrome allows only ~2 captureVisibleTab calls per second, so captures are queued.
 let captureQueue = Promise.resolve();
 let lastCapture = 0;
 function queuedCapture(fn) {
@@ -100,34 +93,6 @@ async function sampleBackground(tab, rect, vw) {
   });
 }
 
-async function screenshot(tab) {
-  try {
-    const dataUrl = await queuedCapture(async () => {
-      broadcast(tab.id, { type: 'capture-start' });
-      await sleep(200); // let every frame hide its toolbar / editing outlines
-      try {
-        return await chrome.tabs.captureVisibleTab(tab.windowId, { format: 'png' });
-      } finally {
-        broadcast(tab.id, { type: 'capture-end' });
-      }
-    });
-    await chrome.downloads.download({
-      url: dataUrl,
-      filename: `VHL Overlay/vhl-${timestamp()}.png`,
-      saveAs: false,
-    });
-    broadcast(tab.id, { type: 'toast', text: 'Screenshot saved to Downloads/VHL Overlay' });
-  } catch (err) {
-    console.warn('captureVisibleTab failed', err);
-    broadcast(tab.id, {
-      type: 'toast',
-      error: true,
-      text:
-        "Couldn't take the screenshot. Click the extension's toolbar icon once (or press Alt+Shift+S) and try again.",
-    });
-  }
-}
-
 chrome.action.onClicked.addListener(async (tab) => {
   if (!isVhl(tab.url)) return;
   const s = await getState(tab.id);
@@ -136,9 +101,6 @@ chrome.action.onClicked.addListener(async (tab) => {
   else await setState(tab.id, { open: true, typing: true });
 });
 
-chrome.commands.onCommand.addListener(async (command, tab) => {
-  if (command === 'take-screenshot' && tab && isVhl(tab.url)) await screenshot(tab);
-});
 
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   const tab = sender.tab;
@@ -162,8 +124,14 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
           sendResponse(null); // no screenshot permission yet: the page keeps its CSS-based guess
         }
         break;
+      case 'capture':
+        // A screenshot is being taken: every frame hides its toolbars and outlines.
+        broadcast(tab.id, { type: msg.on ? 'capture-start' : 'capture-end' });
+        sendResponse(true);
+        break;
       case 'screenshot':
-        await screenshot(tab);
+        // Shortcut pressed inside a frame: the top page takes the screenshot.
+        chrome.tabs.sendMessage(tab.id, { type: 'do-screenshot' }, { frameId: 0 }).catch(() => {});
         sendResponse(true);
         break;
       default:

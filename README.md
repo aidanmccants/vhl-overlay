@@ -1,3 +1,5 @@
+<img src="extension/icons/icon128.png" width="96" alt="" align="right">
+
 # VHL Text Overlay
 
 *[Leer en español ↓](#español)*
@@ -6,14 +8,14 @@
 
 When you have your textbook open on **reader.vhlcentral.com**, this tool lets you
 click anywhere on the page and type. You can use it to fill in blanks, add notes, or
-show answers. When you're finished, you can save a picture of the page with your
-writing on it.
+show answers. When you're finished, you can copy a picture of the page with your
+writing on it and paste it anywhere.
 
 <img src="docs/images/use-2-type-en.png" width="600" alt="A textbook page with the blanks filled in using the tool">
 
 Your writing is **not saved** and doesn't change the real textbook. It sits on top of the
 page, like a clear sheet of plastic, and disappears when you close or refresh the page.
-To keep your work, save a picture (see step 6 below).
+To keep your work, copy a picture of it (see step 6 below).
 
 It works in the **Google Chrome** web browser on a computer. It does not work on phones
 or tablets.
@@ -63,8 +65,8 @@ This takes about 3 minutes.
 1. At the top right of Chrome, next to the address bar, click the small **puzzle-piece**
    icon 🧩.
 2. Find **VHL Text Overlay** in the list and click the **pin** 📌 next to it.
-3. This blue button now stays at the top right of Chrome:
-   <img src="extension/icons/icon48.png" width="24" alt="The blue T button"> That's your button.
+3. This button now stays at the top right of Chrome:
+   <img src="extension/icons/icon48.png" width="28" alt="The T button"> That's your button.
 
 ---
 
@@ -76,7 +78,7 @@ Go to reader.vhlcentral.com and open the page you want, the same way you normall
 
 ### 2. Turn it on
 
-Click the blue **T** button at the top right of Chrome. Two small toolbars appear: a bar
+Click the **T** button at the top right of Chrome. Two small toolbars appear: a bar
 of buttons at the top right of the page, and a narrow toolbar for **text size and color**
 on the right edge. You're now ready to write.
 
@@ -108,9 +110,9 @@ your writing gets a thin outline so you can still read it.
 | | Button | What it does |
 |---|---|---|
 | **1** | **✏️ Typing: on / off** | While it's **on**, clicking the page adds writing. Turn it **off** to use the textbook normally (turn pages, click buttons). Your writing stays on the page. |
-| **2** | **📷 Save** | Saves a picture of your screen with your writing (see below). |
+| **2** | **📷 Copy** | Copies a picture of the page with your writing (see below). |
 | **3** | **🗑 Clear** | Erases all of your writing on the page. |
-| **4** | **✕** | Hides both toolbars. Your writing stays. Click the blue **T** to bring them back. |
+| **4** | **✕** | Hides both toolbars. Your writing stays. Click the **T** button to bring them back. |
 
 You can move the top bar by dragging the dots **⋮⋮** at its left end.
 
@@ -127,20 +129,24 @@ You can move the top bar by dragging the dots **⋮⋮** at its left end.
 > **Tip:** To change the size or color of something you already wrote, click it first,
 > then click **A+**, **A−**, or a color.
 
-### 6. Save your work
+### 6. Keep your work: copy a picture
 
-Click **📷 Save**. A picture of your screen is saved to your computer, with your
-writing on it. The toolbars and the small blue and red tabs are left out of the picture.
-This message appears at the bottom of the page when it's done:
+1. Click **📷 Copy** (or press **Alt + Shift + S**).
+2. Chrome asks if you want to **share this tab**. Click **Share** (or **Allow**).
+   Nothing is recorded or sent anywhere: the tool takes one picture and stops sharing
+   right away.
+3. This message appears at the bottom of the page:
 
-<img src="docs/images/use-6-saved-en.png" width="300" alt="The message: Screenshot saved to Downloads/VHL Overlay">
+   <img src="docs/images/use-6-saved-en.png" width="360" alt="The message: Screenshot copied. Paste it anywhere with Ctrl+V.">
 
-To find your pictures, open your **Downloads** folder and then the **VHL Overlay** folder
-inside it. Each picture is named with the date and time, for example
-`vhl-2026-11-13_14-55-02.png`. You can print it, email it, or attach it to an assignment.
+4. **Paste** the picture wherever you want it, for example an email, a Google Doc, Word,
+   or an assignment: press **Ctrl + V** (on a Mac, **⌘ Command + V**).
 
-The picture only includes what you can see on the screen, so scroll first to show the
-part you want.
+The toolbars and the small blue and red tabs are left out of the picture. The picture only
+includes what you can see on the screen, so scroll first to show the part you want.
+
+> **Tip:** The picture is only on your clipboard until you copy something else, so paste
+> it right away.
 
 ---
 
@@ -150,10 +156,15 @@ part you want.
 You chose the wrong folder in Step 2. Click **Load unpacked** again and pick the folder
 named **VHL Text Overlay**. It has a folder named **icons** inside it.
 
-**"Couldn't take the screenshot."**
-Chrome only lets the tool take pictures after you've clicked the blue **T** button on
-that page. This can happen after you refresh the page. Click the blue **T** button once
-(click it a second time if the bar disappears), then click **📷 Save** again.
+**I clicked 📷 Copy but nothing happened, or it says "Screenshot cancelled."**
+When Chrome asks to share this tab, click **Share** (or **Allow**), not **Cancel**.
+
+**It says "Screenshot ready" with a "Copy to clipboard" button.**
+Click that button. (This happens if you clicked somewhere else while Chrome was asking.)
+
+**Nothing appears when I paste.**
+Make sure you saw the "Screenshot copied" message, then paste with **Ctrl + V**
+(**⌘ Command + V** on a Mac) right away, before copying anything else.
 
 **I can't click the textbook's buttons or turn the page.**
 Typing is on, so your clicks add writing instead. Click **✏️ Typing: on** to turn it
@@ -161,18 +172,18 @@ off. Click it again when you want to write.
 
 **My writing disappeared.**
 Refreshing the page or closing the tab erases your writing. Sometimes turning to a new
-page also hides the writing from the old page. Remember to click **📷 Save** before you
+page also hides the writing from the old page. Remember to click **📷 Copy** and paste your picture before you
 move on.
 
-**The blue T button does nothing.**
+**The T button does nothing.**
 Make sure you're on reader.vhlcentral.com. The tool only works on that website.
 
 **Chrome shows a message about "developer mode extensions."**
 This is normal for tools added this way. You can close the message.
 
 **Keyboard shortcuts (optional)**
-- **Alt + Shift + T**: turn the tool on or off (same as the blue **T** button)
-- **Alt + Shift + S**: save a picture
+- **Alt + Shift + T**: turn the tool on or off (same as the **T** button)
+- **Alt + Shift + S**: copy a picture (same as **📷 Copy**)
 
 On a Mac, **Alt** is the **Option** key.
 
@@ -187,20 +198,22 @@ round arrow ↻ on the **VHL Text Overlay** box.
 
 <a id="español"></a>
 
+<img src="extension/icons/icon128.png" width="96" alt="" align="right">
+
 # VHL Text Overlay (en español)
 
 **Escriba sobre las páginas de su libro de VHL, como si pegara notas encima de la página.**
 
 Con el libro abierto en **reader.vhlcentral.com**, esta herramienta le permite hacer clic
 en cualquier parte de la página y escribir. Sirve para completar espacios en blanco,
-añadir notas o mostrar respuestas. Al terminar, puede guardar una imagen de la página
-con lo que escribió.
+añadir notas o mostrar respuestas. Al terminar, puede copiar una imagen de la página
+con lo que escribió y pegarla donde quiera.
 
 <img src="docs/images/use-2-type-es.png" width="600" alt="Una página del libro con los espacios en blanco completados con la herramienta">
 
 Lo que escribe **no se guarda** y no cambia el libro de verdad. Queda encima de la
 página, como una hoja de plástico transparente, y desaparece al cerrar o recargar la
-página. Para conservar su trabajo, guarde una imagen (vea el paso 6).
+página. Para conservar su trabajo, copie una imagen (vea el paso 6).
 
 Funciona en el navegador **Google Chrome** en un ordenador. No funciona en móviles ni
 tabletas.
@@ -250,8 +263,8 @@ Tarda unos 3 minutos.
 1. Arriba a la derecha de Chrome, junto a la barra de direcciones, haga clic en el icono
    de la **pieza de puzle** 🧩.
 2. Busque **VHL Text Overlay** y haga clic en la **chincheta** 📌 que tiene al lado.
-3. Este botón azul queda ahora arriba a la derecha de Chrome:
-   <img src="extension/icons/icon48.png" width="24" alt="El botón azul con la T"> Ese es su botón.
+3. Este botón queda ahora arriba a la derecha de Chrome:
+   <img src="extension/icons/icon48.png" width="28" alt="El botón con la T"> Ese es su botón.
 
 ---
 
@@ -263,7 +276,7 @@ Entre en reader.vhlcentral.com y abra la página que quiera, como siempre.
 
 ### 2. Actívela
 
-Haga clic en el botón azul **T**, arriba a la derecha de Chrome. Aparecen dos pequeñas
+Haga clic en el botón **T**, arriba a la derecha de Chrome. Aparecen dos pequeñas
 barras: una barra de botones arriba a la derecha de la página y una barra estrecha para
 el **tamaño y el color del texto** en el borde derecho. Ya puede escribir.
 
@@ -298,9 +311,9 @@ muchos colores, el texto lleva un contorno fino para que se pueda leer.
 | | Botón | Qué hace |
 |---|---|---|
 | **1** | **✏️ Typing: on / off** | Cuando está en **on** (activado), al hacer clic en la página se añade texto. Póngalo en **off** (desactivado) para usar el libro con normalidad (pasar páginas, pulsar botones). Su texto sigue en la página. |
-| **2** | **📷 Save** | Guarda una imagen de la pantalla con su texto (vea abajo). |
+| **2** | **📷 Copy** | Copia una imagen de la página con su texto (vea abajo). |
 | **3** | **🗑 Clear** | Borra todo lo que escribió en la página. |
-| **4** | **✕** | Oculta las dos barras. Su texto se queda. Haga clic en la **T** azul para que vuelvan. |
+| **4** | **✕** | Oculta las dos barras. Su texto se queda. Haga clic en el botón **T** para que vuelvan. |
 
 Puede mover la barra de arriba arrastrando los puntos **⋮⋮** de su lado izquierdo.
 
@@ -317,22 +330,25 @@ Puede mover la barra de arriba arrastrando los puntos **⋮⋮** de su lado izqu
 > **Consejo:** para cambiar el tamaño o el color de algo que ya escribió, haga clic en
 > ello primero y luego en **A+**, **A−** o un color.
 
-### 6. Guarde su trabajo
+### 6. Conserve su trabajo: copie una imagen
 
-Haga clic en **📷 Save**. Se guarda en su ordenador una imagen de la pantalla con su
-texto. Las barras de botones y las pestañas azules y rojas no salen en la imagen. Al
-terminar, aparece este mensaje abajo en la página ("Imagen guardada en
-Descargas/VHL Overlay"):
+1. Haga clic en **📷 Copy** (o pulse **Alt + Mayús + S**).
+2. Chrome pregunta si quiere **compartir esta pestaña**. Haga clic en **Compartir** (o
+   **Permitir**). No se graba ni se envía nada: la herramienta toma una sola imagen y deja
+   de compartir enseguida.
+3. Aparece este mensaje abajo en la página ("Captura copiada. Péguela donde quiera con
+   Ctrl+V"):
 
-<img src="docs/images/use-6-saved-es.png" width="300" alt="El mensaje: Screenshot saved to Downloads/VHL Overlay">
+   <img src="docs/images/use-6-saved-es.png" width="360" alt="El mensaje: Screenshot copied. Paste it anywhere with Ctrl+V.">
 
-Para encontrar las imágenes, abra la carpeta **Descargas** y dentro la carpeta
-**VHL Overlay**. Cada imagen lleva la fecha y la hora en el nombre, por ejemplo
-`vhl-2026-11-13_14-55-02.png`. Puede imprimirla, enviarla por correo o adjuntarla a una
-tarea.
+4. **Pegue** la imagen donde la quiera, por ejemplo en un correo, un documento de Google,
+   Word o una tarea: pulse **Ctrl + V** (en un Mac, **⌘ Comando + V**).
 
-La imagen solo incluye lo que se ve en la pantalla, así que desplácese primero hasta la
-parte que quiera guardar.
+Las barras de botones y las pestañas azules y rojas no salen en la imagen. La imagen solo
+incluye lo que se ve en la pantalla, así que desplácese primero hasta la parte que quiera.
+
+> **Consejo:** la imagen solo se queda en el portapapeles hasta que copie otra cosa, así
+> que péguela enseguida.
 
 ---
 
@@ -342,10 +358,16 @@ parte que quiera guardar.
 Eligió una carpeta equivocada en el Paso 2. Pulse otra vez **Cargar descomprimida** y
 elija la carpeta llamada **VHL Text Overlay**. Dentro tiene una carpeta llamada **icons**.
 
-**Sale el mensaje "Couldn't take the screenshot" (no se pudo hacer la captura).**
-Chrome solo deja que la herramienta haga imágenes después de pulsar el botón azul **T**
-en esa página. Puede pasar después de recargar la página. Haga clic una vez en la **T**
-azul (otra vez si la barra desaparece) y vuelva a pulsar **📷 Save**.
+**Pulsé 📷 Copy y no pasó nada, o sale "Screenshot cancelled" (captura cancelada).**
+Cuando Chrome pregunte si quiere compartir esta pestaña, pulse **Compartir** (o
+**Permitir**), no **Cancelar**.
+
+**Sale "Screenshot ready" (captura lista) con un botón "Copy to clipboard".**
+Pulse ese botón. (Pasa si hizo clic en otro sitio mientras Chrome preguntaba.)
+
+**Al pegar no aparece nada.**
+Compruebe que vio el mensaje "Screenshot copied" y pegue con **Ctrl + V** (**⌘ Comando + V**
+en un Mac) enseguida, antes de copiar otra cosa.
 
 **No puedo pulsar los botones del libro ni pasar de página.**
 La escritura está activada, así que sus clics añaden texto. Pulse **✏️ Typing: on** para
@@ -353,18 +375,18 @@ desactivarla. Púlselo otra vez cuando quiera escribir.
 
 **Mi texto ha desaparecido.**
 Recargar la página o cerrar la pestaña borra lo que escribió. A veces, al pasar de
-página también se oculta el texto de la página anterior. Recuerde pulsar **📷 Save**
+página también se oculta el texto de la página anterior. Recuerde pulsar **📷 Copy** y pegar la imagen
 antes de seguir.
 
-**El botón azul T no hace nada.**
+**El botón T no hace nada.**
 Compruebe que está en reader.vhlcentral.com. La herramienta solo funciona en esa web.
 
 **Chrome muestra un aviso sobre extensiones en "modo de desarrollador".**
 Es normal con las herramientas añadidas de esta forma. Puede cerrar el aviso.
 
 **Atajos de teclado (opcional)**
-- **Alt + Mayús + T**: activar o desactivar la herramienta (igual que el botón azul **T**)
-- **Alt + Mayús + S**: guardar una imagen
+- **Alt + Mayús + T**: activar o desactivar la herramienta (igual que el botón **T**)
+- **Alt + Mayús + S**: copiar una imagen (igual que **📷 Copy**)
 
 En un Mac, **Alt** es la tecla **Opción**.
 
@@ -380,9 +402,9 @@ clic en la flecha circular ↻ del recuadro **VHL Text Overlay**.
 
 The download link above always points to the newest release. To publish one:
 
-1. Raise `"version"` in `extension/manifest.json` (for example `1.0.0` → `1.0.1`).
+1. Raise `"version"` in `extension/manifest.json` (for example `0.1.0` → `0.1.1`).
 2. On GitHub, open **Actions** → **Publish release** → **Run workflow**.
 
 This builds `VHL-Text-Overlay.zip` and publishes it as release `v<version>`. Pushing a
-tag like `v1.0.1` does the same. Screenshots in `docs/images/` were taken in Chrome
+tag like `v0.1.1` does the same. Screenshots in `docs/images/` were taken in Chrome
 (English and Spanish) against a sample page.

@@ -69,6 +69,18 @@
     );
   }
 
+  window.addEventListener(
+    'keydown',
+    (e) => {
+      if (e.altKey && e.shiftKey && !e.ctrlKey && !e.metaKey && e.code === 'KeyS') {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        takeScreenshot();
+      }
+    },
+    true
+  );
+
   const KEY_EVENTS = ['keydown', 'keyup', 'keypress'];
   for (const type of KEY_EVENTS) {
     window.addEventListener(
@@ -106,9 +118,39 @@
   // UI construction
   // ---------------------------------------------------------------------------
 
+  // "Liquid Glass" look: translucent, blurred, softly lit surfaces with spring-y motion.
   const CSS = `
     :host { all: initial; }
+    :host {
+      --spring: cubic-bezier(.2, .9, .25, 1.15);
+      --ease: cubic-bezier(.25, .8, .25, 1);
+      --glass: rgba(255, 255, 255, .58);
+      --glass-strong: rgba(255, 255, 255, .78);
+      --glass-edge: rgba(255, 255, 255, .7);
+      --ink: #0b0b12;
+      --ink-soft: rgba(11, 11, 18, .55);
+      --chip: rgba(255, 255, 255, .55);
+      --chip-hover: rgba(255, 255, 255, .85);
+      --accent: #0a84ff;
+      --shadow: 0 10px 40px rgba(17, 12, 46, .22), 0 2px 8px rgba(17, 12, 46, .12);
+      --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, system-ui, sans-serif;
+    }
+    @media (prefers-color-scheme: dark) {
+      :host {
+        --glass: rgba(36, 36, 44, .55);
+        --glass-strong: rgba(36, 36, 44, .8);
+        --glass-edge: rgba(255, 255, 255, .22);
+        --ink: #f5f5f7;
+        --ink-soft: rgba(245, 245, 247, .6);
+        --chip: rgba(255, 255, 255, .12);
+        --chip-hover: rgba(255, 255, 255, .24);
+        --shadow: 0 10px 40px rgba(0, 0, 0, .5), 0 2px 8px rgba(0, 0, 0, .3);
+      }
+    }
+
     .layer { position: fixed; inset: 0; pointer-events: none; overflow: hidden; }
+
+    /* ---------- typed text ---------- */
     .note {
       position: absolute; left: 0; top: 0; transform-origin: 0 0;
       pointer-events: none; min-width: 12px;
@@ -116,73 +158,126 @@
     .typing .note { pointer-events: auto; }
     .text {
       font-family: "Segoe Print", "Bradley Hand", "Comic Sans MS", Arial, sans-serif;
-      line-height: 1.2; white-space: pre; outline: none; padding: 1px 3px;
-      min-width: 8px; min-height: 1.2em; cursor: text; border-radius: 3px;
+      line-height: 1.2; white-space: pre; outline: none; padding: 1px 4px;
+      min-width: 8px; min-height: 1.2em; cursor: text; border-radius: 8px;
       font-weight: 600;
+      animation: pop .38s var(--spring) both;
+      transition: color .35s var(--ease), font-size .25s var(--ease), box-shadow .25s var(--ease), text-shadow .35s var(--ease);
     }
-    .typing .note:hover .text { box-shadow: 0 0 0 1px rgba(37, 99, 235, .45); }
-    .note.selected .text { box-shadow: 0 0 0 1.5px #2563eb, 0 0 0 3px rgba(255,255,255,.85); }
+    @keyframes pop { from { opacity: 0; transform: scale(.85); filter: blur(3px); } }
+    .typing .note:hover .text { box-shadow: 0 0 0 1px rgba(10, 132, 255, .45); }
+    .note.selected .text { box-shadow: 0 0 0 1.5px var(--accent), 0 0 0 4px rgba(255, 255, 255, .7), 0 4px 14px rgba(10, 132, 255, .25); }
     .note.probing { opacity: 0 !important; }
     .grip, .del {
-      position: absolute; top: -18px; height: 16px; display: none;
-      font: 600 11px/16px Arial, sans-serif; color: #fff; border-radius: 3px;
-      user-select: none; text-align: center;
+      position: absolute; top: -24px; width: 20px; height: 20px; display: grid; place-items: center;
+      font: 600 11px/1 var(--font); color: #fff; border-radius: 50%;
+      user-select: none; padding: 0; border: 1px solid rgba(255, 255, 255, .6);
+      box-shadow: 0 3px 10px rgba(0, 0, 0, .25), inset 0 1px 0 rgba(255, 255, 255, .6);
+      backdrop-filter: blur(10px) saturate(1.6);
+      opacity: 0; transform: scale(.4) translateY(6px); pointer-events: none;
+      transition: opacity .2s var(--ease), transform .4s var(--spring);
     }
-    .grip { left: 0; width: 16px; background: #2563eb; cursor: move; }
-    .del { left: 18px; width: 16px; background: #dc2626; cursor: pointer; border: 0; padding: 0; }
-    .typing .note.selected .grip, .typing .note.selected .del { display: block; }
+    .grip { left: 0; background: rgba(10, 132, 255, .85); cursor: grab; }
+    .grip:active { cursor: grabbing; }
+    .del { left: 24px; background: rgba(255, 59, 48, .88); cursor: pointer; font-size: 13px; }
+    .typing .note.selected .grip, .typing .note.selected .del { opacity: 1; transform: none; pointer-events: auto; }
+    .typing .note.selected .del { transition-delay: .04s; }
+    .grip:hover, .del:hover { transform: scale(1.12) !important; }
     .capturing .text { box-shadow: none !important; background: transparent !important; }
     .capturing .grip, .capturing .del { display: none !important; }
-    .hidden { display: none !important; }
+
+    /* ---------- glass surfaces ---------- */
+    .glass {
+      position: fixed; pointer-events: auto; color: var(--ink);
+      background: var(--glass);
+      backdrop-filter: blur(24px) saturate(1.9);
+      -webkit-backdrop-filter: blur(24px) saturate(1.9);
+      border: 1px solid var(--glass-edge);
+      box-shadow: var(--shadow), inset 0 1px 0 rgba(255, 255, 255, .75), inset 0 -1px 0 rgba(255, 255, 255, .15);
+      font: 13px/1 var(--font); user-select: none;
+      transition: opacity .32s var(--ease), transform .55s var(--spring), filter .32s var(--ease),
+        visibility 0s, left .6s var(--spring), top .25s var(--ease);
+    }
+    /* soft specular highlight across the top, like light on curved glass */
+    .glass::before {
+      content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+      background: linear-gradient(180deg, rgba(255, 255, 255, .55), rgba(255, 255, 255, 0) 55%);
+      mix-blend-mode: soft-light;
+    }
+    .glass.hidden {
+      opacity: 0; visibility: hidden; pointer-events: none; filter: blur(8px);
+      transition: opacity .25s var(--ease), transform .35s var(--ease), filter .25s var(--ease),
+        visibility 0s .35s, left .6s var(--spring);
+    }
+
+    .glass button {
+      position: relative; font: inherit; color: var(--ink); cursor: pointer;
+      border: 0; background: var(--chip); border-radius: 999px;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, .6), 0 1px 2px rgba(0, 0, 0, .08);
+      transition: transform .35s var(--spring), background .2s var(--ease), box-shadow .25s var(--ease), color .2s var(--ease);
+    }
+    .glass button:hover { background: var(--chip-hover); transform: translateY(-1px); }
+    .glass button:active { transform: scale(.9); transition-duration: .12s; }
+    .glass button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
     .toolbar {
-      position: fixed; top: 12px; right: 12px; pointer-events: auto;
-      display: flex; align-items: center; gap: 6px; padding: 6px 8px;
-      background: #fff; color: #111827; border-radius: 10px;
-      box-shadow: 0 4px 18px rgba(0,0,0,.22), 0 0 0 1px rgba(0,0,0,.06);
-      font: 13px/1 system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
-      user-select: none;
+      top: 14px; right: 14px; display: flex; align-items: center; gap: 6px;
+      padding: 6px 7px; border-radius: 999px;
     }
-    .toolbar .drag { cursor: move; color: #9ca3af; padding: 0 2px; font-size: 14px; }
-    .toolbar button {
-      font: inherit; border: 1px solid #d1d5db; background: #f9fafb; color: #111827;
-      border-radius: 6px; padding: 5px 8px; cursor: pointer; white-space: nowrap;
+    .toolbar.hidden { transform: translateY(-14px) scale(.94); }
+    .toolbar .drag { cursor: grab; color: var(--ink-soft); padding: 0 3px 0 5px; font-size: 14px; letter-spacing: -2px; }
+    .toolbar button { padding: 8px 13px; white-space: nowrap; font-weight: 500; }
+    .toolbar button.on {
+      background: linear-gradient(180deg, #3b9bff, #0a7aff); color: #fff;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, .45), 0 4px 14px rgba(10, 132, 255, .45);
     }
-    .toolbar button:hover { background: #eef2ff; }
-    .toolbar button.on { background: #2563eb; border-color: #2563eb; color: #fff; }
-    .toolbar .sep { width: 1px; align-self: stretch; background: #e5e7eb; }
+    .toolbar button.icon { width: 32px; height: 32px; padding: 0; }
+    .toolbar .sep { width: 1px; height: 20px; background: var(--ink-soft); opacity: .25; margin: 0 2px; }
+
     .panel {
-      position: fixed; top: max(64px, calc(50vh - 170px)); right: 10px; pointer-events: auto;
-      display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 8px 6px;
-      background: #fff; color: #111827; border-radius: 12px;
-      box-shadow: 0 4px 18px rgba(0,0,0,.22), 0 0 0 1px rgba(0,0,0,.06);
-      font: 13px/1 system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif; user-select: none;
+      top: max(70px, calc(50vh - 190px)); left: calc(100% - 66px); width: 52px; box-sizing: border-box;
+      display: flex; flex-direction: column; align-items: center; gap: 7px;
+      padding: 12px 0; border-radius: 26px;
     }
-    .panel.left { right: auto; left: 10px; }
-    .panel button {
-      font: inherit; border: 1px solid #d1d5db; background: #f9fafb; color: #111827;
-      border-radius: 6px; width: 34px; height: 30px; padding: 0; cursor: pointer;
-    }
-    .panel button:hover { background: #eef2ff; }
+    .panel.left { left: 14px; }
+    .panel.hidden { transform: translateX(18px) scale(.94); }
+    .panel.left.hidden { transform: translateX(-18px) scale(.94); }
+    .panel button { width: 36px; height: 36px; padding: 0; }
     .panel .big { font-size: 16px; font-weight: 700; }
     .panel .small { font-size: 11px; font-weight: 700; }
-    .panel .size { font-weight: 600; font-variant-numeric: tabular-nums; padding: 2px 0; }
-    .panel .label { font-size: 10px; color: #6b7280; text-transform: uppercase; letter-spacing: .04em; }
-    .panel .sep { height: 1px; width: 100%; background: #e5e7eb; }
+    .panel .size { font-weight: 600; font-variant-numeric: tabular-nums; padding: 1px 0; }
+    .panel .size.bump { animation: bump .35s var(--spring); }
+    @keyframes bump { 40% { transform: scale(1.3); } }
+    .panel .label { font-size: 9.5px; font-weight: 600; color: var(--ink-soft); text-transform: uppercase; letter-spacing: .06em; }
+    .panel .sep { height: 1px; width: 26px; background: var(--ink-soft); opacity: .25; margin: 2px 0; }
     .panel .swatch {
-      width: 24px; height: 24px; padding: 0; border-radius: 50%;
-      border: 2px solid #fff; box-shadow: 0 0 0 1px #9ca3af;
+      width: 28px; height: 28px; border-radius: 50%;
+      box-shadow: 0 0 0 1.5px rgba(255, 255, 255, .85), 0 2px 6px rgba(0, 0, 0, .2), inset 0 1px 1px rgba(255, 255, 255, .5);
     }
-    .panel .swatch:hover { background-clip: padding-box; }
-    .panel .swatch.active { box-shadow: 0 0 0 2.5px #111827; }
-    .panel .flip { font-size: 14px; height: 24px; color: #6b7280; }
+    .panel .swatch:hover { transform: scale(1.12); }
+    .panel .swatch.active {
+      transform: scale(1.12);
+      box-shadow: 0 0 0 2px rgba(255, 255, 255, .95), 0 0 0 4.5px var(--accent), 0 4px 12px rgba(10, 132, 255, .35);
+    }
+    .panel .flip { width: 36px; height: 28px; font-size: 14px; color: var(--ink-soft); }
+
     .toast {
-      position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%);
-      background: #111827; color: #fff; padding: 10px 14px; border-radius: 8px;
-      font: 13px/1.35 system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
-      max-width: 80vw; pointer-events: none; box-shadow: 0 4px 18px rgba(0,0,0,.25);
+      left: 50%; bottom: 28px; transform: translateX(-50%);
+      display: flex; align-items: center; gap: 10px;
+      padding: 11px 18px; border-radius: 999px; max-width: 80vw;
+      font: 500 13.5px/1.35 var(--font);
+      background: var(--glass-strong);
     }
-    .toast.error { background: #b91c1c; }
+    .toast.hidden { transform: translate(-50%, 24px) scale(.92); }
+    .toast.error { color: #fff; background: rgba(215, 38, 38, .82); }
+    .toast button { padding: 6px 12px; font-weight: 600; background: var(--accent); color: #fff; }
+
+    /* screenshots: hide instantly, no fading into the picture */
+    :host([data-capturing]) * { transition: none !important; animation: none !important; }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before { transition-duration: .01ms !important; animation: none !important; }
+    }
   `;
 
   function ensureUI() {
@@ -233,7 +328,7 @@
   let ui = {};
   function buildToolbar() {
     toolbar = document.createElement('div');
-    toolbar.className = 'toolbar hidden';
+    toolbar.className = 'glass toolbar hidden';
 
     const drag = document.createElement('span');
     drag.className = 'drag';
@@ -245,13 +340,11 @@
       sendState({ typing: !state.typing })
     );
 
-    ui.shot = btn('📷 Save', 'Save a screenshot with your text (Alt+Shift+S)', () =>
-      chrome.runtime.sendMessage({ cmd: 'screenshot' })
-    );
+    ui.shot = btn('📷 Copy', 'Copy a screenshot with your text to the clipboard (Alt+Shift+S)', () => takeScreenshot());
     ui.clear = btn('🗑 Clear', 'Remove all text boxes', () => {
       if (confirm('Remove all of your typed text from this page?')) chrome.runtime.sendMessage({ cmd: 'clear-all' });
     });
-    ui.close = btn('✕', 'Hide toolbar (your text stays on the page)', () => sendState({ open: false, typing: false }));
+    ui.close = btn('✕', 'Hide toolbar (your text stays on the page)', () => sendState({ open: false, typing: false }), 'icon');
 
     const sep = () => Object.assign(document.createElement('span'), { className: 'sep' });
     toolbar.append(drag, ui.typing, sep(), ui.shot, ui.clear, ui.close);
@@ -259,7 +352,7 @@
 
     // Side toolbar: text size and color.
     panel = document.createElement('div');
-    panel.className = 'panel hidden';
+    panel.className = 'glass panel hidden';
     const label = (t) => Object.assign(document.createElement('div'), { className: 'label', textContent: t });
     const hsep = () => Object.assign(document.createElement('div'), { className: 'sep' });
     ui.bigger = btn('A+', 'Bigger text', () => changeSize(2), 'big');
@@ -280,7 +373,7 @@
     root.appendChild(panel);
 
     toastEl = document.createElement('div');
-    toastEl.className = 'toast hidden';
+    toastEl.className = 'glass toast hidden';
     root.appendChild(toastEl);
   }
 
@@ -304,20 +397,112 @@
       ui.typing.textContent = state.typing ? '✏️ Typing: on' : '✏️ Typing: off';
       panel.classList.toggle('hidden', !state.open || capturing);
       panel.classList.toggle('left', state.side === 'left');
-      ui.size.textContent = String(selected ? selected.size : state.size);
+      const sizeText = String(selected ? selected.size : state.size);
+      if (ui.size.textContent && ui.size.textContent !== sizeText) {
+        ui.size.classList.remove('bump');
+        void ui.size.offsetWidth; // restart the little "bump" animation
+        ui.size.classList.add('bump');
+      }
+      ui.size.textContent = sizeText;
       const cur = family(selected ? selected.color : state.color).id;
       for (const s of ui.swatches) s.classList.toggle('active', s.dataset.color === cur);
     }
   }
 
   let toastTimer = null;
-  function toast(text, isError) {
+  function toast(text, isError, action) {
     if (!toastEl) return;
     toastEl.textContent = text;
+    if (action) toastEl.append(btn(action.label, action.label, action.onClick));
     toastEl.classList.toggle('error', !!isError);
     toastEl.classList.remove('hidden');
     clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => toastEl.classList.add('hidden'), isError ? 6000 : 2500);
+    toastTimer = setTimeout(() => toastEl.classList.add('hidden'), action ? 15000 : isError ? 6000 : 3000);
+  }
+
+  // ---------------------------------------------------------------------------
+  // Screenshot: Chrome's "share this tab" capture -> clipboard
+  // ---------------------------------------------------------------------------
+
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+  let shooting = false;
+
+  async function takeScreenshot() {
+    if (!IS_TOP) {
+      // Frames inside the page can't share the tab; the top page does it.
+      chrome.runtime.sendMessage({ cmd: 'screenshot' });
+      return;
+    }
+    if (shooting) return;
+    shooting = true;
+    ensureUI();
+    let stream;
+    try {
+      // Chrome asks "Share this tab?" (this tab is offered first). Nothing is recorded
+      // or sent anywhere; one frame is taken and the sharing stops right away.
+      stream = await navigator.mediaDevices.getDisplayMedia({
+        video: { displaySurface: 'browser', frameRate: 30 },
+        audio: false,
+        preferCurrentTab: true,
+        selfBrowserSurface: 'include',
+        surfaceSwitching: 'exclude',
+        monitorTypeSurfaces: 'exclude',
+      });
+    } catch (err) {
+      shooting = false;
+      toast(err && err.name === 'NotAllowedError' ? 'Screenshot cancelled.' : "Couldn't start the screenshot: " + (err && err.message), err && err.name !== 'NotAllowedError');
+      return;
+    }
+    let blob = null;
+    try {
+      const video = document.createElement('video');
+      video.muted = true;
+      video.playsInline = true;
+      video.srcObject = stream;
+      await video.play();
+      chrome.runtime.sendMessage({ cmd: 'capture', on: true }); // hide toolbars + outlines in every frame
+      captureStart();
+      // Give the page a moment to hide our UI (and settle after Chrome's "sharing" bar appears).
+      await sleep(450);
+      await new Promise((res) => {
+        if (!video.requestVideoFrameCallback) return res();
+        const t = setTimeout(res, 400);
+        video.requestVideoFrameCallback(() => {
+          clearTimeout(t);
+          res();
+        });
+      });
+      const canvas = document.createElement('canvas');
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      canvas.getContext('2d').drawImage(video, 0, 0);
+      blob = await new Promise((res) => canvas.toBlob(res, 'image/png'));
+    } catch (err) {
+      console.warn('VHL overlay screenshot failed', err);
+    } finally {
+      stream.getTracks().forEach((t) => t.stop());
+      chrome.runtime.sendMessage({ cmd: 'capture', on: false });
+      captureEnd();
+      shooting = false;
+    }
+    if (!blob) {
+      toast("Couldn't take the screenshot. Please try again.", true);
+      return;
+    }
+    await copyImage(blob);
+  }
+
+  const PASTE_HINT = /Mac|iPhone|iPad/.test(navigator.platform) ? '⌘V' : 'Ctrl+V';
+
+  async function copyImage(blob) {
+    try {
+      window.focus();
+      await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+      toast(`✓ Screenshot copied. Paste it anywhere with ${PASTE_HINT}.`);
+    } catch (err) {
+      // Usually means the page lost focus during the share prompt; one more click fixes it.
+      toast('Screenshot ready.', false, { label: 'Copy to clipboard', onClick: () => copyImage(blob) });
+    }
   }
 
   // ---------------------------------------------------------------------------
@@ -625,8 +810,10 @@
   // ---------------------------------------------------------------------------
 
   function captureStart() {
+    if (capturing) return;
     capturing = true;
     if (!host) return;
+    host.setAttribute('data-capturing', '');
     layer.classList.add('capturing');
     refocusAfterCapture = selected && root.activeElement === selected.textEl ? selected : null;
     if (refocusAfterCapture) refocusAfterCapture.textEl.blur(); // hide the blinking caret
@@ -634,8 +821,11 @@
   }
 
   function captureEnd() {
+    if (!capturing) return;
     capturing = false;
     if (!host) return;
+    // keep motion off until the toolbars are back in place
+    requestAnimationFrame(() => requestAnimationFrame(() => host.removeAttribute('data-capturing')));
     layer.classList.remove('capturing');
     render();
     if (refocusAfterCapture && notes.has(refocusAfterCapture)) focusEnd(refocusAfterCapture.textEl);
@@ -663,6 +853,9 @@
       }
       case 'clear-all':
         clearAll();
+        break;
+      case 'do-screenshot':
+        if (IS_TOP) takeScreenshot();
         break;
       case 'probe-start':
         for (const n of probing) n.el.classList.add('probing');

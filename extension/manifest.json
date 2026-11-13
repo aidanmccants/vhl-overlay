@@ -1,11 +1,19 @@
 {
   "manifest_version": 3,
   "name": "VHL Text Overlay",
-  "version": "1.1.0",
-  "description": "Type temporary text overlays on top of the VHL Central textbook reader and save them as a screenshot.",
-  "permissions": ["activeTab", "downloads", "storage"],
-  "host_permissions": ["*://*.vhlcentral.com/*"],
-  "background": { "service_worker": "background.js" },
+  "version": "0.1.0",
+  "description": "Type temporary text on top of the VHL Central textbook reader and copy a screenshot to your clipboard.",
+  "permissions": [
+    "activeTab",
+    "storage",
+    "clipboardWrite"
+  ],
+  "host_permissions": [
+    "*://*.vhlcentral.com/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
   "action": {
     "default_title": "VHL Text Overlay: toggle typing mode (Alt+Shift+T)",
     "default_icon": {
@@ -23,18 +31,20 @@
   },
   "commands": {
     "_execute_action": {
-      "suggested_key": { "default": "Alt+Shift+T" },
+      "suggested_key": {
+        "default": "Alt+Shift+T"
+      },
       "description": "Toggle typing mode"
-    },
-    "take-screenshot": {
-      "suggested_key": { "default": "Alt+Shift+S" },
-      "description": "Save a screenshot of the page with your overlays"
     }
   },
   "content_scripts": [
     {
-      "matches": ["*://*.vhlcentral.com/*"],
-      "js": ["content.js"],
+      "matches": [
+        "*://*.vhlcentral.com/*"
+      ],
+      "js": [
+        "content.js"
+      ],
       "all_frames": true,
       "run_at": "document_start"
     }
