@@ -142,16 +142,38 @@ You can move the top bar by dragging the dots **⋮⋮** at its left end.
 
 ### 5. Text size and color (the toolbar on the side)
 
-<img src="docs/images/use-5-side-bar-en.png" width="260" alt="The side toolbar with text size buttons, color dots, and a button to move it">
+<img src="docs/images/use-5-side-bar-en.png" width="260" alt="The side toolbar with text size buttons, the highlighter, color dots, and a button to move it">
 
 - **A+** makes the writing bigger and **A−** makes it smaller. The number shows the size.
 - The **colored dots** pick the color of your writing. Each dot shows two shades: the
   darker one is used on light backgrounds and the lighter one on dark backgrounds.
   The black dot turns white on dark backgrounds.
+- **🖍** is the highlighter for marking letters (see the next section).
 - **⇄** moves this toolbar to the other side of the screen if it's in your way.
 
 > **Tip:** To change the size or color of something you already wrote, click it first,
 > then click **A+**, **A−**, or a color.
+
+### Highlight part of a word (for example a verb ending)
+
+You can show some letters in a different color, like the ending in **habl<u>o</u>** or
+**limpi<u>e</u>**. Marked letters are also **bold and underlined**, so they still stand
+out in a black-and-white printout.
+
+<img src="docs/images/use-7-highlight-en.png" width="520" alt="Answers with their verb endings marked in red: hablo, comes, bailan">
+
+There are three ways to do it. Use whichever you like:
+
+- **Type `>` while you write.** Type `>` right before the letters you want marked:
+  typing `hac>er` gives hac**er** with "er" marked. The mark ends when you type a space,
+  so you can keep writing normally. (To type a real `>`, press it twice: `>>`.)
+- **Select and click a color, like in Word.** In something you already wrote, select the
+  letters (drag across them, or hold **Shift** and press the arrow keys), then click a color
+  dot. Only those letters change. Click the box's own color to take the mark off.
+- **Use the 🖍 highlighter.** Click **🖍**, then click a letter to mark it, or drag across
+  several letters. Click a marked letter again to unmark it. While 🖍 is on, the color dots
+  choose the marker color (red at first). Click **🖍** again (or **✏️ Typing**) to go back
+  to typing.
 
 ### 6. Keep your work: take a picture
 
@@ -376,16 +398,39 @@ Puede mover la barra de arriba arrastrando los puntos **⋮⋮** de su lado izqu
 
 ### 5. Tamaño y color del texto (la barra del lateral)
 
-<img src="docs/images/use-5-side-bar-es.png" width="260" alt="La barra lateral con los botones de tamaño, los puntos de colores y un botón para moverla">
+<img src="docs/images/use-5-side-bar-es.png" width="260" alt="La barra lateral con los botones de tamaño, el marcador, los puntos de colores y un botón para moverla">
 
 - **A+** agranda el texto y **A−** lo hace más pequeño. El número indica el tamaño.
 - Los **puntos de colores** eligen el color del texto. Cada punto muestra dos tonos: el más
   oscuro se usa sobre fondos claros y el más claro sobre fondos oscuros. El punto negro
   se vuelve blanco sobre fondos oscuros.
+- **🖍** es el marcador para resaltar letras (vea la sección siguiente).
 - **⇄** mueve esta barra al otro lado de la pantalla si le molesta.
 
 > **Consejo:** para cambiar el tamaño o el color de algo que ya escribió, haga clic en
 > ello primero y luego en **A+**, **A−** o un color.
+
+### Resaltar parte de una palabra (por ejemplo, la terminación verbal)
+
+Puede mostrar algunas letras en otro color, como la terminación de **habl<u>o</u>** o
+**limpi<u>e</u>**. Las letras marcadas también van en **negrita y subrayadas**, así que se
+siguen viendo en una copia impresa en blanco y negro.
+
+<img src="docs/images/use-7-highlight-es.png" width="520" alt="Respuestas con la terminación verbal marcada en rojo: hablo, comes, bailan">
+
+Hay tres maneras. Use la que prefiera:
+
+- **Escriba `>` mientras escribe.** Escriba `>` justo antes de las letras que quiere
+  marcar: al escribir `hac>er` sale hac**er** con "er" marcado. La marca termina al
+  escribir un espacio, así que puede seguir escribiendo con normalidad. (Para escribir un
+  `>` de verdad, púlselo dos veces: `>>`.)
+- **Seleccione y pulse un color, como en Word.** En algo que ya escribió, seleccione las
+  letras (arrastre sobre ellas o mantenga **Mayús** y pulse las flechas) y pulse un punto de
+  color. Solo cambian esas letras. Pulse el color propio del texto para quitar la marca.
+- **Use el marcador 🖍.** Pulse **🖍** y haga clic en una letra para marcarla, o arrastre
+  sobre varias letras. Otro clic en una letra marcada la desmarca. Con 🖍 activado, los
+  puntos de colores eligen el color del marcador (al principio, rojo). Pulse **🖍** otra vez
+  (o **✏️ Typing**) para volver a escribir.
 
 ### 6. Conserve su trabajo: saque una imagen
 
@@ -473,7 +518,7 @@ Needs [Node.js](https://nodejs.org) 20 or newer. Run `npm install` once, then
 | `npm run test:unit` | Fast tests for the release tool (zip, version bumps, release notes) |
 | `npm run test:e2e` | Loads the real extension in Chromium and tests every feature on a sample page (`tests/fixtures`) |
 | `npm test` | All of the above |
-| `npm run test:mutations` | Plants 21 realistic bugs, one at a time, and fails if the tests miss any of them |
+| `npm run test:mutations` | Plants 30 realistic bugs, one at a time, and fails if the tests miss any of them |
 
 The mutation check is what keeps the tests honest: if a test stops really checking its
 feature, a planted bug gets through and the check fails. Each mutant is listed in

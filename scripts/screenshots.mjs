@@ -192,9 +192,11 @@ async function box(loc) { const b = await loc.boundingBox(); return { x: b.x, y:
   const big = await box(sr('.panel .big')), small = await box(sr('.panel .small'));
   const s0 = await box(sr('.panel .swatch').nth(0)), s5 = await box(sr('.panel .swatch').nth(5));
   const flip = await box(sr('.panel .flip'));
+  const hl = await box(sr('.panel .markbtn'));
   await mark(page, [
     { x: big.x, y: big.y, w: big.w, h: small.y + small.h - big.y, pad: 5, label: L('Text size', 'Tamaño'), labelPos: 'left' },
-    { x: s0.x, y: s0.y, w: s0.w, h: s5.y + s5.h - s0.y, pad: 5, label: L('Text color', 'Color'), labelPos: 'left' },
+    { ...hl, pad: 4, label: L('Highlighter', 'Marcador'), labelPos: 'left' },
+    { x: s0.x, y: s0.y, w: s5.x + s5.w - s0.x, h: s5.y + s5.h - s0.y, pad: 5, label: L('Text color', 'Color'), labelPos: 'left' },
     { ...flip, pad: 4, label: L('Move to the other side', 'Mover al otro lado'), labelPos: 'left' },
   ]);
   await shot('use-5-side-bar', { x: pb.x - 230, y: pb.y - 12, width: 1000 - (pb.x - 230), height: pb.h + 24 });
@@ -218,6 +220,30 @@ async function box(loc) { const b = await loc.boundingBox(); return { x: b.x, y:
   await page.waitForTimeout(1200);
   const sc = await box(sr('.shotcard'));
   await shot('use-6-saved', { x: sc.x - 24, y: sc.y - 24, width: sc.w + 48, height: sc.h + 48 });
+  await sr('.shotcard .title button').click();
+
+  // Verb endings marked with ">" while typing (fresh page, so the text boxes start empty)
+  await page.reload();
+  await page.waitForTimeout(800);
+  await sw.evaluate(async () => {
+    const [t] = await chrome.tabs.query({ active: true });
+    const s = { open: true, typing: true, color: 'blue', size: 18, markColor: 'red' };
+    await chrome.storage.session.set({ ['tab:' + t.id]: s });
+    chrome.tabs.sendMessage(t.id, { type: 'state', state: s, patch: {} });
+  });
+  await page.waitForTimeout(800);
+  const marked = ['habl>o', 'com>es', 'viv>imos', 'estudi>an', 'bail>an'];
+  for (let i = 0; i < 5; i++) {
+    await page.mouse.click(blanks[i].x + 14, blanks[i].y + blanks[i].h / 2 - 2);
+    await page.keyboard.type(marked[i]);
+  }
+  await page.keyboard.press('Escape');
+  await page.mouse.move(5, 500);
+  await page.waitForTimeout(800);
+  const n0 = await box(sr('.note .text').nth(0));
+  await mark(page, [{ ...n0, pad: 5, label: L('typed:  habl>o', 'escrito:  habl>o'), labelPos: 'right' }]);
+  await shot('use-7-highlight', { x: pageBox.x, y: blanks[0].y - 40, width: pageBox.w, height: blanks[4].y - blanks[0].y + 80 });
+  await unmark(page);
 
   await ctx.close();
 }

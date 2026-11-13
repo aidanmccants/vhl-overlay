@@ -21,7 +21,7 @@
   const MIN_SIZE = 10;
   const MAX_SIZE = 48;
 
-  let state = { open: false, typing: false, color: 'blue', size: 18, side: 'right' };
+  let state = { open: false, typing: false, mark: false, markColor: 'red', color: 'blue', size: 18, side: 'right' };
   let host = null; // shadow host element
   let root = null; // shadow root
   let layer = null; // container for notes
@@ -50,14 +50,17 @@
         if (isOurs(e)) {
           return; // our own UI handles it; the host stops it from bubbling to the page
         }
-        if (!state.typing || capturing) return;
+        if (!(state.typing || state.mark) || capturing) return;
         if (e.button !== undefined && e.button !== 0) return; // only left clicks / taps
         if (onScrollbar(e)) return; // let scrollbars keep working
         // Typing mode: the page should not react to this click at all.
         // (pointerdown/mousedown keep their default so the frame still gets focus.)
         if (type !== 'pointerdown' && type !== 'mousedown') e.preventDefault();
         e.stopImmediatePropagation();
-        if (type === 'pointerdown') onPageClick(e);
+        if (type === 'pointerdown') {
+          if (state.mark) markHint(); // highlighter: only letters can be clicked
+          else onPageClick(e);
+        }
         // Focus the new note once the browser has finished its own mousedown focus handling.
         if ((type === 'pointerup' || type === 'click') && pendingFocus) {
           const n = pendingFocus;
@@ -99,7 +102,9 @@
   // Other input-ish events that the page shouldn't react to when they come from us.
   for (const type of ['input', 'beforeinput', 'paste', 'copy', 'cut', 'focusin', 'focusout', 'wheel']) {
     window.addEventListener(type, (e) => {
-      if (isOurs(e)) e.stopImmediatePropagation();
+      if (!isOurs(e)) return;
+      if (type === 'beforeinput') onOwnBeforeInput(e);
+      e.stopImmediatePropagation();
     }, true);
   }
 
@@ -155,7 +160,19 @@
       position: absolute; left: 0; top: 0; transform-origin: 0 0;
       pointer-events: none; min-width: 12px;
     }
-    .typing .note { pointer-events: auto; }
+    .typing .note, .marking .note { pointer-events: auto; }
+    /* Highlighter mode: a marker-shaped cursor over the letters */
+    .marking .text {
+      cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24'%3E%3Cpath d='M4 20l3-1 11-11-2-2L5 17z' fill='%23c60e30' stroke='white' stroke-width='1.2'/%3E%3Cpath d='M3 22h8' stroke='%23c60e30' stroke-width='2.4'/%3E%3C/svg%3E") 3 21, crosshair;
+      user-select: none;
+    }
+    .marking .note:hover .text { box-shadow: 0 0 0 1px rgba(198, 14, 48, .45); }
+    /* Marked letters: their own color, bold, and underlined (so they also show in
+       black-and-white printouts). */
+    .text .mark {
+      font-weight: 800; text-decoration: underline; text-decoration-thickness: .1em;
+      text-underline-offset: .16em; transition: color .25s var(--ease);
+    }
     .text {
       font-family: "Segoe Print", "Bradley Hand", "Comic Sans MS", Arial, sans-serif;
       line-height: 1.2; white-space: pre; outline: none; padding: 1px 4px;
@@ -243,7 +260,7 @@
     .toolbar .sep { width: 1px; height: 20px; background: var(--ink-soft); opacity: .25; margin: 0 2px; }
 
     .panel {
-      top: max(64px, calc(50vh - 215px)); left: calc(100% - 72px); width: 58px; box-sizing: border-box;
+      top: max(64px, calc(50vh - 215px)); left: calc(100% - 108px); width: 94px; box-sizing: border-box;
       display: flex; flex-direction: column; align-items: center; gap: 7px;
       padding: 12px 0; border-radius: 26px;
     }
@@ -262,14 +279,20 @@
       width: 28px; height: 28px; border-radius: 50%;
       box-shadow: 0 0 0 1.5px rgba(255, 255, 255, .85), 0 2px 6px rgba(0, 0, 0, .2), inset 0 1px 1px rgba(255, 255, 255, .5);
     }
-    /* room for the selection ring (about 4px around a dot) without touching neighbors */
-    .panel .swatches { display: flex; flex-direction: column; align-items: center; gap: 14px; padding: 6px 0 4px; }
+    /* Two columns of dots (keeps the toolbar short enough for small laptop screens),
+       with room for the selection ring (about 4px around a dot) without touching neighbors. */
+    .panel .swatches { display: grid; grid-template-columns: repeat(2, 28px); gap: 14px; padding: 6px 0 4px; }
     .panel .swatch:hover { transform: scale(1.08); }
     .panel .swatch.active {
       transform: scale(1.04);
       box-shadow: 0 0 0 2px rgba(255, 255, 255, .95), 0 0 0 4px var(--accent), 0 3px 10px rgba(198, 14, 48, .3);
     }
     .panel .flip { width: 36px; height: 28px; font-size: 14px; color: var(--ink-soft); }
+    .panel button.markbtn { font-size: 17px; }
+    .panel button.markbtn.on {
+      background: linear-gradient(180deg, #e0294b, #b00c2b);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, .45), 0 4px 14px rgba(198, 14, 48, .45);
+    }
 
     .toast {
       left: 50%; bottom: 28px; transform: translateX(-50%);
@@ -432,7 +455,7 @@
 
     ui.typing = stack(
       btn('✏️ Typing', 'Typing mode: click anywhere on the page to add text (Alt+Shift+T closes the toolbar)', () =>
-        sendState({ typing: !state.typing })
+        sendState(state.typing ? { typing: false } : { typing: true, mark: false })
       ),
       ['✏️ Typing: on', '✏️ Typing: off']
     );
@@ -441,7 +464,7 @@
     ui.clear = btn('🗑 Clear', 'Remove all text boxes', () => {
       if (confirm('Remove all of your typed text from this page?')) chrome.runtime.sendMessage({ cmd: 'clear-all' });
     });
-    ui.close = btn('✕', 'Hide toolbar (your text stays on the page)', () => sendState({ open: false, typing: false }), 'icon');
+    ui.close = btn('✕', 'Hide toolbar (your text stays on the page)', () => sendState({ open: false, typing: false, mark: false }), 'icon');
 
     const sep = () => Object.assign(document.createElement('span'), { className: 'sep' });
     ui.help = btn('?', 'Show the tour of every feature again', () => startTour(), 'icon');
@@ -459,18 +482,21 @@
     ui.size.title = 'Text size';
     ui.smaller = btn('A−', 'Smaller text', () => changeSize(-2), 'small');
     ui.swatches = COLORS.map((c) => {
-      const sw = btn('', c.name + ' (switches to a lighter or darker shade automatically so it stays readable)', () => sendState({ color: c.id }), 'swatch');
+      const sw = btn('', c.name + ' (switches to a lighter or darker shade automatically so it stays readable)', () => pickColor(c.id), 'swatch');
       // left half: shade used on light backgrounds; right half: shade used on dark ones
       sw.style.background = `linear-gradient(135deg, ${c.light} 0 55%, ${c.dark} 55% 100%)`;
       sw.dataset.color = c.id;
       return sw;
     });
+    ui.mark = btn('🖍', L('Highlighter: click or drag across letters to mark them (click again to unmark)',
+      'Marcador: haga clic o arrastre sobre las letras para marcarlas (otro clic las desmarca)'), () =>
+      sendState(state.mark ? { mark: false, typing: true } : { mark: true, typing: false }), 'markbtn');
     ui.flip = btn('⇄', 'Move this toolbar to the other side of the screen', () =>
       sendState({ side: state.side === 'left' ? 'right' : 'left' }), 'flip');
     const swatchGroup = document.createElement('div');
     swatchGroup.className = 'swatches';
     swatchGroup.append(...ui.swatches);
-    panel.append(label('Size'), ui.bigger, ui.size, ui.smaller, hsep(), label('Color'), swatchGroup, hsep(), ui.flip);
+    panel.append(label('Size'), ui.bigger, ui.size, ui.smaller, hsep(), label(L('Mark', 'Marcar')), ui.mark, hsep(), label('Color'), swatchGroup, hsep(), ui.flip);
     root.appendChild(panel);
 
     toastEl = document.createElement('div');
@@ -484,6 +510,16 @@
     sendState({ size });
   }
 
+  // A color dot was clicked. If letters are selected in a text box, only those
+  // letters change (like Word). In highlighter mode it picks the marker color.
+  // Otherwise it's the color for the whole box and for new text.
+  const markColor = () => state.markColor || 'red';
+
+  function pickColor(id) {
+    if (state.mark) return sendState({ markColor: id });
+    chrome.runtime.sendMessage({ cmd: 'pick-color', color: id });
+  }
+
   function sendState(patch) {
     chrome.runtime.sendMessage({ cmd: 'set-state', patch });
   }
@@ -491,6 +527,7 @@
   function render() {
     if (!host) return;
     layer.classList.toggle('typing', state.typing && !capturing);
+    layer.classList.toggle('marking', !!state.mark && !capturing);
     if (!state.typing) selectNote(null);
     if (toolbar) {
       toolbar.classList.toggle('hidden', !state.open || capturing);
@@ -505,7 +542,9 @@
         ui.size.classList.add('bump');
       }
       ui.size.textContent = sizeText;
-      const cur = family(selected ? selected.color : state.color).id;
+      ui.mark.classList.toggle('on', !!state.mark);
+      ui.mark.setAttribute('aria-pressed', String(!!state.mark));
+      const cur = family(state.mark ? markColor() : selected ? selected.color : state.color).id;
       for (const s of ui.swatches) s.classList.toggle('active', s.dataset.color === cur);
       if (tour && (!state.open || capturing)) hideTour(!state.open);
       else if (tour) showTourEls();
@@ -598,6 +637,14 @@
       body: L(
         '<p>Pick a color for your text. Each dot shows two shades.</p><p>The tool checks what’s behind your text and uses the shade that’s easiest to read. On photos it adds a thin outline.</p>',
         '<p>Elija un color para su texto. Cada punto muestra dos tonos.</p><p>La herramienta mira lo que hay detrás del texto y usa el tono que mejor se lee. Sobre fotos añade un contorno fino.</p>'
+      ),
+    },
+    {
+      target: () => [ui.mark],
+      title: L('Highlight letters', 'Resaltar letras'),
+      body: L(
+        `<p>Show a verb ending in another color, like <b>limpi<u style="color:#b91c1c">e</u></b>. Three ways:</p><p>• Type ${kbd('&gt;')} before the letters: <b>hac&gt;er</b> gives <b>hac<u style="color:#b91c1c">er</u></b>. A space ends it (${kbd('&gt;&gt;')} types a real &gt;).<br>• Select letters in your text, then click a color dot.<br>• Click <b>🖍</b>, then click or drag across letters. Click again to unmark.</p>`,
+        `<p>Muestre una terminación verbal en otro color, como <b>limpi<u style="color:#b91c1c">e</u></b>. Tres maneras:</p><p>• Escriba ${kbd('&gt;')} antes de las letras: <b>hac&gt;er</b> da <b>hac<u style="color:#b91c1c">er</u></b>. Un espacio lo termina (${kbd('&gt;&gt;')} escribe un &gt; de verdad).<br>• Seleccione letras de su texto y pulse un punto de color.<br>• Pulse <b>🖍</b> y haga clic o arrastre sobre las letras. Otro clic las desmarca.</p>`
       ),
     },
     {
@@ -1039,6 +1086,7 @@
 
     text.addEventListener('focus', () => selectNote(note));
     text.addEventListener('blur', () => {
+      endMarkTyping(note);
       if (capturing) return;
       setTimeout(() => {
         if (pendingFocus !== note && root.activeElement !== text && text.textContent.trim() === '') removeNote(note);
@@ -1048,7 +1096,11 @@
     del.addEventListener('click', () => removeNote(note));
     makeDraggable(grip, el, note);
     // Clicking the note's border/grip area shouldn't create a new note.
-    el.addEventListener('pointerdown', () => selectNote(note));
+    el.addEventListener('pointerdown', () => !state.mark && selectNote(note));
+    text.addEventListener('pointerdown', (e) => {
+      if (state.mark) startMarking(note, e);
+      else endMarkTyping(note); // clicking moves the caret: stop marking while typing
+    });
     return note;
   }
 
@@ -1072,14 +1124,26 @@
   const scrollX0 = (el) => (isRootScroller(el) ? 0 : el.scrollLeft);
   const scrollY0 = (el) => (isRootScroller(el) ? 0 : el.scrollTop);
 
+  // A thin outline in the opposite color keeps text readable on busy pictures.
+  const haloShadow = (halo) =>
+    halo ? [[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [-1, -1], [1, -1], [-1, 1]].map(([a, b]) => `${a}px ${b}px 1px ${halo}`).join(',') : 'none';
+
   function applyStyle(note) {
     const { color, halo } = readableColor(note.color, note.bg);
     note.textEl.style.color = color;
-    // A thin outline in the opposite color keeps text readable on busy pictures.
-    note.textEl.style.textShadow = halo
-      ? [[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [-1, -1], [1, -1], [-1, 1]].map(([a, b]) => `${a}px ${b}px 1px ${halo}`).join(',')
-      : 'none';
+    note.textEl.style.textShadow = haloShadow(halo);
     note.textEl.style.fontSize = note.size + 'px';
+    styleMarks(note);
+  }
+
+  // Marked letters get the readable shade of their own color, checked against the
+  // same background as the rest of the box.
+  function styleMarks(note) {
+    for (const span of note.textEl.querySelectorAll('.mark')) {
+      const { color, halo } = readableColor(span.dataset.c, note.bg);
+      span.style.color = color;
+      span.style.textShadow = haloShadow(halo);
+    }
   }
 
   // ---------------------------------------------------------------------------
@@ -1270,15 +1334,260 @@
   // Keyboard inside a note
   // ---------------------------------------------------------------------------
 
-  function onOwnKey(e) {
+  const noteOf = (e) => {
     const path = e.composedPath();
-    const note = [...notes].find((n) => path.includes(n.textEl));
+    return [...notes].find((n) => path.includes(n.textEl));
+  };
+
+  function onOwnKey(e) {
+    const note = noteOf(e);
     if (!note) return;
     if (e.key === 'Escape') {
       e.preventDefault();
       note.textEl.blur();
       selectNote(null);
+      return;
     }
+    if (e.key === '>' && !e.ctrlKey && !e.metaKey && !e.altKey && !e.isComposing) {
+      // ">" starts marking the letters you type next: hac>er gives hac + marked "er".
+      // ">>" types a real ">", and ">" while marking stops early.
+      e.preventDefault();
+      if (note.markTyping && note.markFresh) {
+        endMarkTyping(note);
+        typeText(note, '>', null);
+      } else if (note.markTyping) {
+        endMarkTyping(note);
+      } else {
+        note.markTyping = true;
+        note.markFresh = true;
+        note.textEl.style.caretColor = readableColor(markColor(), note.bg).color;
+      }
+      return;
+    }
+    // Moving the caret or starting a new line also ends the mark.
+    if (/^(Enter|Arrow|Home|End|Page|Tab)/.test(e.key)) endMarkTyping(note);
+  }
+
+  function endMarkTyping(note) {
+    if (!note.markTyping) return;
+    note.markTyping = false;
+    note.markFresh = false;
+    note.textEl.style.caretColor = '';
+  }
+
+  // Typing a letter. We only step in when the browser would get the color wrong:
+  // while marking, and right after a mark (the browser would keep typing inside it).
+  function onOwnBeforeInput(e) {
+    if (e.inputType !== 'insertText' || e.isComposing || e.data == null) {
+      if (e.inputType !== 'insertCompositionText') {
+        const n = noteOf(e);
+        if (n) endMarkTyping(n);
+      }
+      return;
+    }
+    const note = noteOf(e);
+    if (!note) return;
+    const sel = getSel();
+    if (!sel || !sel.rangeCount) return;
+    const [a, b] = selOffsets(note.textEl, sel);
+    if (a < 0) return;
+    const chars = getChars(note.textEl);
+    let color;
+    if (note.markTyping) {
+      if (/^[\p{L}\p{N}\p{M}]+$/u.test(e.data)) {
+        color = markColor();
+        note.markFresh = false;
+      } else {
+        endMarkTyping(note); // a space or punctuation ends the mark
+        color = null;
+      }
+    } else {
+      const left = a > 0 ? chars[a - 1].c : null;
+      const right = b < chars.length ? chars[b].c : null;
+      if (!left || left === right) return; // the browser gets this right on its own
+      color = null; // just after a mark: new letters are plain again
+    }
+    e.preventDefault();
+    typeText(note, e.data, color, [a, b]);
+  }
+
+  // ---------------------------------------------------------------------------
+  // Marked letters. A text box holds plain text plus <span class="mark" data-c="red">
+  // pieces. To change them we read the box as a list of letters with a color each,
+  // change that list, and rebuild the box.
+  // ---------------------------------------------------------------------------
+
+  const getSel = () => (root && root.getSelection ? root.getSelection() : window.getSelection());
+
+  function getChars(textEl) {
+    const out = [];
+    for (const node of textEl.childNodes) {
+      const c = node.nodeType === 1 ? node.dataset.c || null : null;
+      const t = node.nodeType === 1 && node.tagName === 'BR' ? '\n' : node.textContent;
+      for (const ch of t) out.push({ ch, c });
+    }
+    return out;
+  }
+
+  // Letter position of a (node, offset) point inside the box, or -1.
+  function offsetOf(textEl, node, off) {
+    if (!node || (node !== textEl && !textEl.contains(node))) return -1;
+    const r = document.createRange();
+    r.setStart(textEl, 0);
+    r.setEnd(node, off);
+    return [...r.toString()].length;
+  }
+
+  function selOffsets(textEl, sel) {
+    const r = sel.getRangeAt(0);
+    const a = offsetOf(textEl, r.startContainer, r.startOffset);
+    const b = offsetOf(textEl, r.endContainer, r.endOffset);
+    return a < 0 || b < 0 ? [-1, -1] : [a, b];
+  }
+
+  // The DOM point for letter position `pos`, staying with the letter on its left
+  // (so a caret right after plain text is in the plain text, not in the next mark).
+  function pointAt(textEl, pos) {
+    let n = 0;
+    let last = null;
+    for (const node of textEl.childNodes) {
+      const t = node.nodeType === 3 ? node : node.firstChild;
+      if (!t) continue;
+      const len = [...t.textContent].length;
+      if (pos <= n + len && (pos > n || n === 0)) return [t, [...t.textContent].slice(0, pos - n).join('').length];
+      n += len;
+      last = t;
+    }
+    return last ? [last, last.textContent.length] : [textEl, 0];
+  }
+
+  function setChars(note, chars, selA, selB = selA) {
+    const el = note.textEl;
+    el.textContent = '';
+    let i = 0;
+    while (i < chars.length) {
+      const c = chars[i].c;
+      let t = '';
+      while (i < chars.length && chars[i].c === c) t += chars[i++].ch;
+      if (c) {
+        const span = document.createElement('span');
+        span.className = 'mark';
+        span.dataset.c = c;
+        span.textContent = t;
+        el.append(span);
+      } else {
+        el.append(t);
+      }
+    }
+    styleMarks(note);
+    if (selA != null && root.activeElement === el) {
+      try {
+        getSel().setBaseAndExtent(...pointAt(el, selA), ...pointAt(el, selB));
+      } catch {
+        /* best effort */
+      }
+    }
+  }
+
+  // Replace letters a..b with `text` in one color (null = the box's own color).
+  function typeText(note, text, color, range) {
+    const sel = getSel();
+    const [a, b] = range || (sel && sel.rangeCount ? selOffsets(note.textEl, sel) : [-1, -1]);
+    const chars = getChars(note.textEl);
+    const at = a < 0 ? chars.length : a;
+    const ins = [...text].map((ch) => ({ ch, c: color }));
+    chars.splice(at, a < 0 ? 0 : b - a, ...ins);
+    setChars(note, chars, at + ins.length);
+  }
+
+  // Color letters a..b-1 (null = back to the box's own color).
+  function colorRange(note, a, b, color, keepSel) {
+    const chars = getChars(note.textEl);
+    for (let i = Math.max(0, a); i < Math.min(b, chars.length); i++) chars[i].c = chars[i].ch === '\n' ? null : color;
+    if (keepSel) setChars(note, chars, a, b);
+    else setChars(note, chars);
+  }
+
+  // Word-style: letters selected in the box you're editing take the clicked color.
+  function paintSelection(colorId) {
+    const note = selected;
+    if (!note || !notes.has(note) || !root || root.activeElement !== note.textEl) return false;
+    const sel = getSel();
+    if (!sel || !sel.rangeCount || sel.isCollapsed) return false;
+    const [a, b] = selOffsets(note.textEl, sel);
+    if (a < 0 || b <= a) return false;
+    colorRange(note, a, b, colorId === note.color ? null : colorId, true);
+    return true;
+  }
+
+  // Which letter is under the pointer? Returns its position, or -1. With `nearest`,
+  // the closest letter on the same line (for dragging past the ends).
+  function letterAt(textEl, x, y, nearest) {
+    let best = -1;
+    let bestD = Infinity;
+    let i = 0;
+    const r = document.createRange();
+    for (const node of textEl.childNodes) {
+      const t = node.nodeType === 3 ? node : node.firstChild;
+      if (!t) continue;
+      let off = 0;
+      for (const ch of t.textContent) {
+        if (ch !== '\n') {
+          r.setStart(t, off);
+          r.setEnd(t, off + ch.length);
+          const b = r.getBoundingClientRect();
+          if (x >= b.left && x <= b.right && y >= b.top && y <= b.bottom) return i;
+          const dy = y < b.top ? b.top - y : y > b.bottom ? y - b.bottom : 0;
+          const dx = x < b.left ? b.left - x : x > b.right ? x - b.right : 0;
+          const d = dy * 1000 + dx;
+          if (d < bestD) [bestD, best] = [d, i];
+        }
+        off += ch.length;
+        i++;
+      }
+    }
+    return nearest ? best : -1;
+  }
+
+  // Highlighter: click a letter to mark it (or unmark it), or drag across letters.
+  function startMarking(note, e) {
+    if (e.button !== 0) return;
+    e.preventDefault(); // no caret, no text selection
+    const first = letterAt(note.textEl, e.clientX, e.clientY, true);
+    if (first < 0) return;
+    const start = getChars(note.textEl);
+    const mc = markColor();
+    // Clicking a letter that already has this marker color takes the mark off.
+    const color = start[first].c === mc ? null : mc;
+    const paint = (i) => {
+      const [a, b] = i < first ? [i, first + 1] : [first, i + 1];
+      const chars = start.map((ch, k) => (k >= a && k < b && ch.ch !== '\n' ? { ...ch, c: color } : ch));
+      setChars(note, chars);
+    };
+    paint(first);
+    const t = note.textEl;
+    try {
+      t.setPointerCapture(e.pointerId);
+    } catch {
+      /* not critical */
+    }
+    const move = (ev) => paint(Math.max(0, letterAt(t, ev.clientX, ev.clientY, true)));
+    const up = () => {
+      t.removeEventListener('pointermove', move);
+      t.removeEventListener('pointerup', up);
+      t.removeEventListener('pointercancel', up);
+    };
+    t.addEventListener('pointermove', move);
+    t.addEventListener('pointerup', up);
+    t.addEventListener('pointercancel', up);
+  }
+
+  let hintShown = 0;
+  function markHint() {
+    if (!IS_TOP || Date.now() - hintShown < 4000) return;
+    hintShown = Date.now();
+    toast(L('Highlighter is on: click or drag across letters in your text. Click 🖍 again to go back to typing.',
+      'El marcador está activado: haga clic o arrastre sobre las letras de su texto. Pulse 🖍 otra vez para volver a escribir.'));
   }
 
   // ---------------------------------------------------------------------------
@@ -1312,8 +1621,13 @@
   // Messages from the background worker
   // ---------------------------------------------------------------------------
 
-  chrome.runtime.onMessage.addListener((msg) => {
+  chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     switch (msg.type) {
+      case 'paint':
+        // Only the frame holding selected letters answers; if none does, the
+        // background makes it the color for the whole box instead.
+        if (paintSelection(msg.color)) sendResponse(true);
+        break;
       case 'state': {
         state = msg.state;
         if (state.open || state.typing || notes.size) ensureUI();

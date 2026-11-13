@@ -78,7 +78,7 @@ export async function launch({ ext = EXT_DIR, tour = false, colorScheme = 'light
 export async function openToolbar(sw, patch = {}) {
   await sw.evaluate(async (patch) => {
     const [tab] = await chrome.tabs.query({ url: 'https://reader.vhlcentral.com/*' });
-    const state = { open: true, typing: true, color: 'blue', size: 18, side: 'right', ...patch };
+    const state = { open: true, typing: true, mark: false, markColor: 'red', color: 'blue', size: 18, side: 'right', ...patch };
     await chrome.storage.session.set({ ['tab:' + tab.id]: state });
     chrome.tabs.sendMessage(tab.id, { type: 'state', state, patch: {} });
   }, patch);

@@ -26,7 +26,7 @@ test('installing opens the welcome page and the tour runs through every feature 
     await page.waitForTimeout(900);
     assert.match(await tourTitle(page), /Welcome/);
     const titles = [];
-    for (let i = 0; i < 11; i++) {
+    for (let i = 0; i < 12; i++) {
       titles.push(await tourTitle(page));
       if (i > 0 && i < 10) {
         const ring = await ui(page, '.tour-ring').evaluate((r) => !r.classList.contains('off'));
@@ -37,7 +37,7 @@ test('installing opens the welcome page and the tour runs through every feature 
     }
     assert.deepEqual(titles, [
       'Welcome to VHL Text Overlay 👋', 'Typing mode', 'Write anywhere', 'Edit, move or delete', 'Text size',
-      'Colors that stay readable', 'Move this toolbar', 'Save a picture of your work', 'Clear', 'Hide the toolbars',
+      'Colors that stay readable', 'Highlight letters', 'Move this toolbar', 'Save a picture of your work', 'Clear', 'Hide the toolbars',
       'You’re all set! 🎉',
     ]);
     assert.equal(await tourTitle(page), null, 'Done closes the tour');

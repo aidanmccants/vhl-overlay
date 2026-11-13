@@ -43,9 +43,13 @@ test('picking a color recolors the selected box', async () => {
 test('the selection ring around a color dot does not overlap its neighbors', async () => {
   const { page } = b;
   const boxes = await ui(page, '.panel .swatch').evaluateAll((els) => els.map((e) => e.getBoundingClientRect().toJSON()));
-  for (let i = 1; i < boxes.length; i++) {
-    const gap = boxes[i].top - boxes[i - 1].bottom;
-    assert.ok(gap >= 10, `gap between dots ${i - 1} and ${i} is ${gap}px`); // ring is about 4px each side
+  // Every pair of dots is at least 10px apart across or down (the ring is about 4px each side).
+  for (let i = 0; i < boxes.length; i++) {
+    for (let j = i + 1; j < boxes.length; j++) {
+      const [p, q] = [boxes[i], boxes[j]];
+      const gap = Math.max(q.left - p.right, p.left - q.right, q.top - p.bottom, p.top - q.bottom);
+      assert.ok(gap >= 10, `gap between dots ${i} and ${j} is ${gap}px`);
+    }
   }
 });
 

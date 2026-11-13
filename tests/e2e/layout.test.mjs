@@ -55,6 +55,23 @@ test('the size number keeps the same width from 10 to 48', async () => {
   assertSameBoxes([panel10], [await ui(page, '.panel').boundingBox()], 'side toolbar');
 });
 
+test('turning the 🖍 highlighter on and off does not move the side toolbar, which fits the screen', async () => {
+  const { page } = b;
+  await settle(page);
+  // (The color dots are left out: the selected dot grows 4% with a transform, which moves nothing.)
+  const parts = async () => [await ui(page, '.panel').boundingBox(), ...(await boxes(ui(page, '.panel button:not(.swatch)')))];
+  const off = await parts();
+  await ui(page, '.panel .markbtn').click();
+  await settle(page);
+  assert.equal(await ui(page, '.panel .markbtn').getAttribute('aria-pressed'), 'true');
+  assertSameBoxes(off, await parts(), 'side toolbar with the highlighter on');
+  await ui(page, '.panel .markbtn').click();
+  await settle(page);
+  // A 700px-tall window still shows the whole side toolbar.
+  const panel = off[0];
+  assert.ok(panel.y >= 0 && panel.y + panel.height <= 700, `side toolbar ${panel.y}..${panel.y + panel.height} fits`);
+});
+
 test('the screenshot card does not change size when you Copy or Download', async () => {
   const { page } = b;
   await page.bringToFront();
@@ -90,11 +107,11 @@ test('tour buttons stay in the same place on every step', async () => {
   };
   const first = await rowOf();
   assert.equal(first.length, 3, 'Skip, Back and Next are always laid out');
-  for (let i = 1; i < 11; i++) {
+  for (let i = 1; i < 12; i++) {
     await ui(page, '.tour-pop .row button.primary').click();
     await settle(page);
     const now = await rowOf();
-    if (i < 10) assertSameBoxes(first, now, `tour step ${i} buttons`);
+    if (i < 11) assertSameBoxes(first, now, `tour step ${i} buttons`);
     else assertSameBoxes(first.slice(1), now.slice(1), 'last step Back/Done'); // Skip is hidden on the last step
   }
 });
