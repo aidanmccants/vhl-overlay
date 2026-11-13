@@ -233,8 +233,13 @@ questions. While it's in review you can't change the listing. Cancel the review 
 
 ## 9. After it's approved
 
-- Copy the store link (`https://chromewebstore.google.com/detail/...`).
-- Update the README's install steps to "**Add to Chrome**" from the store link. That replaces
+Your listing's address (already reserved; it works once the extension is published):
+
+```
+https://chromewebstore.google.com/detail/bkemohhbjdiopmcgfmkmaokfkkhinfhi
+```
+
+- Update the README's install steps to "**Add to Chrome**" from that link. That replaces
   Developer mode and Load unpacked, and Chrome then updates the extension automatically.
 - For each new version: run the release workflow, then in the dashboard choose
   **Package → Upload new package** with the new zip and submit again.
