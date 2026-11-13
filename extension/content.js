@@ -386,6 +386,10 @@
     .tour-pop h3 { margin: 6px 0 6px; font: 700 17px/1.25 var(--font); }
     .tour-pop p { margin: 0; font: 14px/1.45 var(--font); }
     .tour-pop p + p { margin-top: 8px; }
+    /* Small and quiet: an optional way to support the project (last step only). */
+    .tour-pop p.support { margin-top: 12px; font-size: 12px; }
+    .tour-pop .support a { color: var(--ink-soft); text-decoration: none; }
+    .tour-pop .support a:hover { color: var(--ink); text-decoration: underline; }
     .tour-pop .try { margin-top: 10px; padding: 8px 11px; border-radius: 14px; font: 500 13px/1.4 var(--font);
       background: rgba(198, 14, 48, .12); color: var(--ink); }
     .tour-pop kbd { font: 600 11.5px/1 var(--font); padding: 2px 6px; border-radius: 6px; background: var(--chip);
@@ -745,8 +749,8 @@
       target: () => [ui.help],
       title: L('You’re all set! 🎉', '¡Todo listo! 🎉'),
       body: L(
-        '<p>Want to see this tour again? Click <b>?</b> any time.</p>',
-        '<p>¿Quiere ver este recorrido otra vez? Pulse <b>?</b> cuando quiera.</p>'
+        '<p>Want to see this tour again? Click <b>?</b> any time.</p><p class="support"><a href="https://buymeacoffee.com/aidanmccants" target="_blank" rel="noopener">Enjoying it? ☕ Buy me a coffee</a></p>',
+        '<p>¿Quiere ver este recorrido otra vez? Pulse <b>?</b> cuando quiera.</p><p class="support"><a href="https://buymeacoffee.com/aidanmccants" target="_blank" rel="noopener">¿Le resulta útil? ☕ Invíteme a un café</a></p>'
       ),
       next: L('Done', 'Terminar'),
     },

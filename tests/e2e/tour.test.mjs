@@ -8,6 +8,7 @@ const tourTitle = (page) =>
     const p = document.querySelector('vhl-text-overlay')?.shadowRoot.querySelector('.tour-pop');
     return p && !p.classList.contains('hidden') ? p.querySelector('h3').textContent : null;
   });
+const SUPPORT = 'https://buymeacoffee.com/aidanmccants';
 const pending = (sw) => sw.evaluate(() => chrome.storage.local.get('tutorialPending').then((r) => r.tutorialPending));
 
 test('installing opens the welcome page and the tour runs through every feature once', async () => {
@@ -20,14 +21,18 @@ test('installing opens the welcome page and the tour runs through every feature 
     await welcome.goto(sw.url().replace('background.js', 'welcome.html'));
     assert.match(await welcome.locator('h1').textContent(), /installed/);
     assert.equal(await welcome.locator('#tour').isChecked(), true);
+    // A small, optional support link: on the welcome page and the tour's last step only.
+    assert.deepEqual(await welcome.locator('a[href*="buymeacoffee"]').evaluateAll((as) => as.map((a) => [a.href, a.target])), [[SUPPORT, '_blank']]);
     await welcome.close();
 
     await gotoReader(page, sw);
     await page.waitForTimeout(900);
     assert.match(await tourTitle(page), /Welcome/);
     const titles = [];
+    const supportLinks = [];
     for (let i = 0; i < 12; i++) {
       titles.push(await tourTitle(page));
+      supportLinks.push(await ui(page, '.tour-pop a[href*="buymeacoffee"]').evaluateAll((as) => as.map((a) => a.href).join()));
       if (i > 0 && i < 10) {
         const ring = await ui(page, '.tour-ring').evaluate((r) => !r.classList.contains('off'));
         if (i !== 2 && i !== 3) assert.ok(ring, `step ${i} highlights its button`);
@@ -40,6 +45,7 @@ test('installing opens the welcome page and the tour runs through every feature 
       'Colors that stay readable', 'Highlight letters', 'Move this toolbar', 'Save a picture of your work', 'Clear', 'Hide the toolbars',
       'You’re all set! 🎉',
     ]);
+    assert.deepEqual(supportLinks, [...Array(11).fill(''), SUPPORT], 'support link only on the last step');
     assert.equal(await tourTitle(page), null, 'Done closes the tour');
     assert.equal(await pending(sw), false, 'tour is not shown again');
 

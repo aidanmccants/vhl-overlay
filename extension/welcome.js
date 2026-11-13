@@ -10,6 +10,7 @@ const ES = {
   s3: 'La primera vez, un recorrido corto le muestra cada función en la misma página. Puede saltarlo en cualquier momento y volver a verlo con el botón <b>?</b>.',
   toggle: 'Mostrarme el recorrido la primera vez que la use',
   cta: 'Abrir VHL Central →',
+  support: '¿Le resulta útil? ☕ Invíteme a un café',
 };
 
 if (/^es\b/i.test(navigator.language)) {
