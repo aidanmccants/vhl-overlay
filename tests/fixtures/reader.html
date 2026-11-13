@@ -1,0 +1,27 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Lección 3</title></head>
+<body style="margin:0;font:17px Georgia,serif;background:#e5e7eb">
+<!-- A stand-in for the VHL reader: a top bar, a scrolling page viewer, a dark box and an iframe. -->
+<div style="position:fixed;inset:0 0 auto 0;height:44px;background:#374151;color:#fff;font:15px Arial;display:flex;align-items:center;padding:0 16px">
+  <button id="next" style="font:inherit">▶ Next page</button>&nbsp; Lección 3 · Página 92
+</div>
+<div id="scroller" style="position:absolute;inset:44px 0 0 0;overflow:auto">
+  <div id="page" style="width:620px;min-height:1400px;margin:24px auto;background:#fff;padding:36px 44px;box-shadow:0 2px 10px rgba(0,0,0,.15)">
+    <h2 style="margin-top:0">Práctica</h2>
+    <p><b>Completar</b> Completa las oraciones con la forma correcta del verbo.</p>
+    <p style="line-height:2.6">1. Yo <span class="blank">_____________</span> (hablar) español con mis amigos.<br>
+    2. Tú <span class="blank">_____________</span> (comer) en la cafetería.</p>
+    <div id="dark" style="background:#1e3a5f;color:#fff;padding:14px 18px;border-radius:8px;line-height:2.4">
+      <b>¡Atención!</b><br>3. Ustedes <span class="blank">_____________</span> (bailar) muy bien.
+    </div>
+    <iframe id="frame" src="/frame" style="margin-top:20px;width:400px;height:140px;border:1px solid #ccc"></iframe>
+  </div>
+</div>
+<script>
+  // Record what the "reader" itself sees, so tests can check we don't leak events to it.
+  window.readerClicks = 0; window.readerKeys = 0;
+  document.addEventListener('click', () => window.readerClicks++);
+  window.addEventListener('keydown', () => window.readerKeys++);
+  document.getElementById('next').addEventListener('click', () => (window.nextClicks = (window.nextClicks || 0) + 1));
+</script>
+</body></html>

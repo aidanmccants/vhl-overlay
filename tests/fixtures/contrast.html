@@ -1,0 +1,18 @@
+<!doctype html>
+<html><head><meta charset="utf-8"></head>
+<body style="margin:0;font:16px Arial;background:#fff">
+<div style="display:flex;gap:10px;padding:60px 20px">
+  <div id="white" style="width:220px;height:200px;background:#fff;border:1px solid #ccc">White</div>
+  <div id="dark" style="width:220px;height:200px;background:#0f172a;color:#ddd">Dark</div>
+  <div id="gray" style="width:220px;height:200px;background:#808080">Gray</div>
+  <canvas id="photo" width="220" height="200"></canvas>
+</div>
+<script>
+  // A busy "photo": random colored squares (seeded so every run looks the same).
+  let s = 7; const rnd = () => ((s = (s * 16807) % 2147483647) / 2147483647);
+  const c = document.getElementById('photo').getContext('2d');
+  for (let x = 0; x < 220; x += 6) for (let y = 0; y < 200; y += 6) {
+    c.fillStyle = `hsl(${rnd() * 360},60%,${rnd() * 100}%)`; c.fillRect(x, y, 6, 6);
+  }
+</script>
+</body></html>

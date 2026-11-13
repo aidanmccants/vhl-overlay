@@ -210,8 +210,16 @@
         visibility 0s .35s, left .6s var(--spring);
     }
 
+    /* Zero layout shift: labels that change (on/off, Copy/Copied, Next/Done) are all
+       stacked in one grid cell, so a button is always as wide as its longest label. */
+    .stack { display: inline-grid; place-items: center; }
+    .stack > span { grid-area: 1 / 1; white-space: nowrap; }
+    .stack > span.off { visibility: hidden; }
+    /* Kept in the layout but invisible, so nothing moves when it's not needed. */
+    .reserve { visibility: hidden !important; pointer-events: none !important; }
+
     .glass button {
-      position: relative; font: inherit; color: var(--ink); cursor: pointer;
+      position: relative; font: inherit; color: var(--ink); cursor: pointer; white-space: nowrap;
       border: 0; background: var(--chip); border-radius: 999px;
       box-shadow: inset 0 1px 0 rgba(255, 255, 255, .6), 0 1px 2px rgba(0, 0, 0, .08);
       transition: transform .35s var(--spring), background .2s var(--ease), box-shadow .25s var(--ease), color .2s var(--ease);
@@ -245,7 +253,7 @@
     .panel button { width: 36px; height: 36px; padding: 0; }
     .panel .big { font-size: 16px; font-weight: 700; }
     .panel .small { font-size: 11px; font-weight: 700; }
-    .panel .size { font-weight: 600; font-variant-numeric: tabular-nums; padding: 1px 0; }
+    .panel .size { width: 3ch; text-align: center; font-weight: 600; font-variant-numeric: tabular-nums; padding: 1px 0; white-space: nowrap; }
     .panel .size.bump { animation: bump .35s var(--spring); }
     @keyframes bump { 40% { transform: scale(1.3); } }
     .panel .label { font-size: 9.5px; font-weight: 600; color: var(--ink-soft); text-transform: uppercase; letter-spacing: .06em; }
@@ -293,8 +301,11 @@
     .shotcard .actions button.primary { background: linear-gradient(180deg, #e0294b, #b00c2b); color: #fff;
       box-shadow: inset 0 1px 0 rgba(255, 255, 255, .45), 0 4px 14px rgba(198, 14, 48, .4); }
     .shotcard .actions button.done { background: rgba(52, 199, 89, .9); color: #fff; }
-    .shotcard .status { margin: 10px 4px 0; min-height: 1.3em; font: 13px/1.35 var(--font); color: var(--ink-soft); }
-    .shotcard .status:empty { display: none; }
+    /* Two lines are always reserved for the status, so the card never grows. */
+    .shotcard .status {
+      margin: 10px 4px 0; height: 2.7em; font: 13px/1.35 var(--font); color: var(--ink-soft);
+      display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; overflow-wrap: anywhere;
+    }
     .toast button { padding: 6px 12px; font-weight: 600; background: var(--accent); color: #fff; }
 
     /* ---------- first-time tour ---------- */
@@ -316,7 +327,7 @@
     .tour-pop.hidden { transform: scale(.94) translateY(8px); }
     .tour-pop .content { animation: swap .4s var(--ease); }
     @keyframes swap { from { opacity: 0; transform: translateY(6px); } }
-    .tour-pop .count { font-size: 11px; font-weight: 600; color: var(--ink-soft); letter-spacing: .04em; text-transform: uppercase; }
+    .tour-pop .count { white-space: nowrap; font-size: 11px; font-weight: 600; color: var(--ink-soft); letter-spacing: .04em; text-transform: uppercase; }
     .tour-pop h3 { margin: 6px 0 6px; font: 700 17px/1.25 var(--font); }
     .tour-pop p { margin: 0; font: 14px/1.45 var(--font); }
     .tour-pop p + p { margin-top: 8px; }
@@ -389,6 +400,25 @@
     return b;
   }
 
+  // Give a button several labels stacked in one spot (see .stack in the CSS); only
+  // one is visible, but the button is always sized for the longest.
+  function stack(b, labels) {
+    b.textContent = '';
+    b.classList.add('stack');
+    b._labels = labels.map((t) => {
+      const span = document.createElement('span');
+      span.textContent = t;
+      b.append(span);
+      return span;
+    });
+    setStack(b, 0);
+    return b;
+  }
+  function setStack(b, i) {
+    b._labels.forEach((span, j) => span.classList.toggle('off', j !== i));
+    b.setAttribute('aria-label', b._labels[i].textContent);
+  }
+
   let ui = {};
   function buildToolbar() {
     toolbar = document.createElement('div');
@@ -400,8 +430,11 @@
     drag.title = 'Drag to move the toolbar';
     makeDraggable(drag, toolbar, null);
 
-    ui.typing = btn('✏️ Typing', 'Typing mode: click anywhere on the page to add text (Alt+Shift+T closes the toolbar)', () =>
-      sendState({ typing: !state.typing })
+    ui.typing = stack(
+      btn('✏️ Typing', 'Typing mode: click anywhere on the page to add text (Alt+Shift+T closes the toolbar)', () =>
+        sendState({ typing: !state.typing })
+      ),
+      ['✏️ Typing: on', '✏️ Typing: off']
     );
 
     ui.shot = btn('📷 Screenshot', 'Take a screenshot with your text, then copy or download it (Alt+Shift+S)', () => takeScreenshot());
@@ -462,7 +495,7 @@
     if (toolbar) {
       toolbar.classList.toggle('hidden', !state.open || capturing);
       ui.typing.classList.toggle('on', state.typing);
-      ui.typing.textContent = state.typing ? '✏️ Typing: on' : '✏️ Typing: off';
+      setStack(ui.typing, state.typing ? 0 : 1);
       panel.classList.toggle('hidden', !state.open || capturing);
       panel.classList.toggle('left', state.side === 'left');
       const sizeText = String(selected ? selected.size : state.size);
@@ -667,17 +700,30 @@
     const content = document.createElement('div');
     content.className = 'content';
     content.innerHTML =
-      (tour.i > 0 ? `<div class="count">${L('Step', 'Paso')} ${tour.i} ${L('of', 'de')} ${n - 1}</div>` : '') +
+      // The step counter keeps its line on the first step too (hidden), so nothing jumps.
+      `<div class="count${tour.i > 0 ? '' : ' reserve'}">${L('Step', 'Paso')} ${Math.max(1, tour.i)} ${L('of', 'de')} ${n - 1}</div>` +
       `<h3>${step.title}</h3>${step.body}` +
       `<div class="dots">${TOUR_STEPS.map((_, j) => `<span class="dot${j === tour.i ? ' on' : ''}"></span>`).join('')}</div>`;
     const row = document.createElement('div');
     row.className = 'row';
-    if (!last) row.append(btn(L('Skip tour', 'Saltar'), L('Skip the tour', 'Saltar el recorrido'), () => endTour(), 'link'));
+    // Skip and Back are always there (just invisible when they don't apply) so the
+    // buttons never shift between steps.
+    const skip = btn(L('Skip tour', 'Saltar'), L('Skip the tour', 'Saltar el recorrido'), () => endTour(), 'link');
+    skip.classList.toggle('reserve', last);
+    row.append(skip);
     const grow = document.createElement('span');
     grow.className = 'grow';
     row.append(grow);
-    if (tour.i > 0) row.append(btn(L('Back', 'Atrás'), L('Back', 'Atrás'), () => goTour(-1)));
-    row.append(btn(step.next || L('Next', 'Siguiente'), '', () => (last ? endTour() : goTour(1)), 'primary'));
+    const back = btn(L('Back', 'Atrás'), L('Back', 'Atrás'), () => goTour(-1));
+    back.classList.toggle('reserve', tour.i === 0);
+    row.append(back);
+    const next = stack(btn('', '', () => (last ? endTour() : goTour(1)), 'primary'), [
+      TOUR_STEPS[0].next,
+      L('Next', 'Siguiente'),
+      TOUR_STEPS[n - 1].next,
+    ]);
+    setStack(next, tour.i === 0 ? 0 : last ? 2 : 1);
+    row.append(next);
     content.append(row);
     tourPop.append(content);
     tourPop.classList.remove('hidden');
@@ -803,8 +849,9 @@
       await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
       const hiddenAt = performance.now();
       await sleep(250); // also lets the page settle after Chrome's "sharing" bar appears
-      await waitFreshFrame(frames, hiddenAt);
+      const fresh = await waitFreshFrame(frames, hiddenAt);
       frames.stop = true;
+      if (!fresh) throw new Error('no fresh frame'); // never hand over a picture with the toolbars in it
       const canvas = document.createElement('canvas');
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
@@ -838,12 +885,24 @@
     return w;
   }
 
-  // Wait (up to 2 s) until the video shows a frame captured after `hiddenAt`.
+  // Wait until the video shows a frame captured after `hiddenAt`. Chrome only sends a
+  // new frame when something on screen changes, so while waiting we flip an invisible
+  // pixel to ask for one. Returns false if no fresh frame came (then we don't use it).
   async function waitFreshFrame(w, hiddenAt) {
+    const nudge = document.createElement('div');
+    nudge.style.cssText = 'position:fixed;left:0;top:0;width:1px;height:1px;pointer-events:none;background:#000;opacity:0';
+    root.appendChild(nudge);
     const t0 = performance.now();
-    while (performance.now() - t0 < 2000) {
-      if (w.capture >= 0 ? w.capture >= hiddenAt : w.present >= hiddenAt + 150) return;
-      await sleep(30);
+    let n = 0;
+    try {
+      while (performance.now() - t0 < 4000) {
+        if (w.capture >= 0 ? w.capture >= hiddenAt : w.present >= hiddenAt + 150) return true;
+        if (++n % 8 === 0) nudge.style.opacity = nudge.style.opacity === '0' ? '0.01' : '0';
+        await sleep(30);
+      }
+      return false;
+    } finally {
+      nudge.remove();
     }
   }
 
@@ -888,8 +947,8 @@
     status.className = 'status';
     const actions = document.createElement('div');
     actions.className = 'actions';
-    const done = (b, label, msg) => {
-      b.textContent = label;
+    const done = (b, msg) => {
+      setStack(b, 1);
       b.classList.remove('primary');
       b.classList.add('done');
       status.textContent = msg;
@@ -900,7 +959,7 @@
       try {
         window.focus();
         await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
-        done(copyBtn, L('✓ Copied', '✓ Copiada'), L(`Paste it anywhere with ${PASTE_HINT}.`, `Péguela donde quiera con ${PASTE_HINT}.`));
+        done(copyBtn, L(`Paste it anywhere with ${PASTE_HINT}.`, `Péguela donde quiera con ${PASTE_HINT}.`));
       } catch (err) {
         status.textContent = L("Couldn't copy. Click Copy again, or use Download.", 'No se pudo copiar. Pulse Copiar otra vez o use Descargar.');
       }
@@ -912,8 +971,10 @@
       root.appendChild(a);
       a.click();
       a.remove();
-      done(dlBtn, L('✓ Downloaded', '✓ Descargada'), L(`Saved to your Downloads folder as ${name}`, `Guardada en Descargas como ${name}`));
+      done(dlBtn, L(`Saved to your Downloads folder as ${name}`, `Guardada en Descargas como ${name}`));
     });
+    stack(copyBtn, [L('Copy', 'Copiar'), L('✓ Copied', '✓ Copiada')]);
+    stack(dlBtn, [L('Download', 'Descargar'), L('✓ Downloaded', '✓ Descargada')]);
     actions.append(copyBtn, dlBtn);
     shotCard.append(title, img, actions, status);
     shotCard.classList.remove('hidden');

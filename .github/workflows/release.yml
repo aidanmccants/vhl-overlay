@@ -1,43 +1,90 @@
-# Builds VHL-Text-Overlay.zip and publishes it as a GitHub release.
-# Run it from the Actions tab ("Publish release" → "Run workflow"),
-# or push a tag like v1.0.0.
+# Publishes a release to GitHub Releases.
+#
+# Two ways to start it:
+#   1. Actions tab → "Publish release" → Run workflow, and pick how to bump the
+#      version (patch / minor / major), or "none" to release the current version.
+#   2. Locally: `npm run release -- patch`, then push the commit and the tag.
+#
+# Either way it runs every check and test, then the mutation check (which plants
+# bugs and makes sure the tests catch them), builds VHL-Text-Overlay.zip, writes
+# the release notes from the git history and publishes the release.
 name: Publish release
 
 on:
   workflow_dispatch:
+    inputs:
+      bump:
+        description: How to change the version
+        type: choice
+        options: [patch, minor, major, none]
+        default: patch
   push:
     tags: ['v*']
 
 permissions:
   contents: write
 
+concurrency: release
+
 jobs:
   release:
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
 
-      - name: Read version from manifest
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+
+      - name: Check, unit tests and browser tests
+        run: |
+          npm run check
+          npm run test:unit
+          npm run test:e2e
+
+      - name: Make sure the tests catch planted bugs
+        run: node scripts/mutation-check.mjs
+
+      - name: Bump the version, update CHANGELOG.md, commit and tag
+        if: github.event_name == 'workflow_dispatch' && inputs.bump != 'none'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          node scripts/release.mjs prepare ${{ inputs.bump }} --skip-tests
+          git push origin HEAD --follow-tags
+
+      - name: Build the zip and release notes
+        run: |
+          node scripts/release.mjs build
+          node scripts/release.mjs notes
+
+      - name: Read the version
         id: v
         run: echo "version=$(jq -r .version extension/manifest.json)" >> "$GITHUB_OUTPUT"
 
-      - name: Build zip
+      - name: Check the tag matches the extension version
+        if: startsWith(github.ref, 'refs/tags/')
         run: |
-          mkdir -p dist/"VHL Text Overlay"
-          cp -r extension/. dist/"VHL Text Overlay"/
-          cd dist && zip -r VHL-Text-Overlay.zip "VHL Text Overlay"
+          if [ "${GITHUB_REF_NAME}" != "v${{ steps.v.outputs.version }}" ]; then
+            echo "Tag ${GITHUB_REF_NAME} does not match manifest version ${{ steps.v.outputs.version }}" >&2
+            exit 1
+          fi
 
-      - name: Publish release
+      - name: Publish the GitHub release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || format('v{0}', steps.v.outputs.version) }}
+          tag_name: v${{ steps.v.outputs.version }}
           name: VHL Text Overlay ${{ steps.v.outputs.version }}
-          target_commitish: ${{ github.sha }}
+          body_path: dist/RELEASE_NOTES.md
           make_latest: true
-          files: dist/VHL-Text-Overlay.zip
-          body: |
-            **To install:** download **VHL-Text-Overlay.zip** below, then follow the steps in the
-            [instructions](https://github.com/${{ github.repository }}#readme).
-
-            **Para instalar:** descargue **VHL-Text-Overlay.zip** (abajo) y siga las
-            [instrucciones](https://github.com/${{ github.repository }}#español).
+          files: |
+            dist/VHL-Text-Overlay.zip
+            dist/VHL-Text-Overlay.zip.sha256
