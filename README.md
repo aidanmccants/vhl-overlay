@@ -13,7 +13,7 @@ writing on it.
 
 Your writing is **not saved** and doesn't change the real textbook. It sits on top of the
 page, like a clear sheet of plastic, and disappears when you close or refresh the page.
-To keep your work, save a picture (see step 5 below).
+To keep your work, save a picture (see step 6 below).
 
 It works in the **Google Chrome** web browser on a computer. It does not work on phones
 or tablets.
@@ -76,10 +76,11 @@ Go to reader.vhlcentral.com and open the page you want, the same way you normall
 
 ### 2. Turn it on
 
-Click the blue **T** button at the top right of Chrome. A small white bar of buttons
-appears at the top right of the page. You're now ready to write.
+Click the blue **T** button at the top right of Chrome. Two small toolbars appear: a bar
+of buttons at the top right of the page, and a narrow toolbar for **text size and color**
+on the right edge. You're now ready to write.
 
-<img src="docs/images/use-1-toolbar-appears-en.png" width="600" alt="The bar of buttons at the top right of the textbook page">
+<img src="docs/images/use-1-toolbar-appears-en.png" width="600" alt="The bar of buttons at the top right and the size and color toolbar on the right edge">
 
 ### 3. Write on the page
 
@@ -95,29 +96,44 @@ appears at the top right of the page. You're now ready to write.
 
 Your writing stays in place on the page, even if you scroll up and down or zoom in.
 
-### 4. The buttons on the bar
+**Your writing is always easy to read.** When you start writing somewhere, the tool checks
+the colors behind that spot and picks a shade that stands out. On a dark box, blue
+becomes light blue (like *bailan* in the picture above). On a photo or a busy picture,
+your writing gets a thin outline so you can still read it.
 
-<img src="docs/images/use-4-toolbar-buttons-en.png" width="500" alt="The bar of buttons, numbered 1 to 6">
+### 4. The bar at the top
+
+<img src="docs/images/use-4-top-bar-en.png" width="420" alt="The top bar of buttons, numbered 1 to 4">
 
 | | Button | What it does |
 |---|---|---|
 | **1** | **✏️ Typing: on / off** | While it's **on**, clicking the page adds writing. Turn it **off** to use the textbook normally (turn pages, click buttons). Your writing stays on the page. |
-| **2** | **A−  A+** | Makes the writing smaller or bigger. |
-| **3** | **Colored dots** | Changes the color of the writing. |
-| **4** | **📷 Save** | Saves a picture of your screen with your writing (see below). |
-| **5** | **🗑 Clear** | Erases all of your writing on the page. |
-| **6** | **✕** | Hides the bar. Your writing stays. Click the blue **T** to bring the bar back. |
+| **2** | **📷 Save** | Saves a picture of your screen with your writing (see below). |
+| **3** | **🗑 Clear** | Erases all of your writing on the page. |
+| **4** | **✕** | Hides both toolbars. Your writing stays. Click the blue **T** to bring them back. |
+
+You can move the top bar by dragging the dots **⋮⋮** at its left end.
+
+### 5. Text size and color (the toolbar on the side)
+
+<img src="docs/images/use-5-side-bar-en.png" width="260" alt="The side toolbar with text size buttons, color dots, and a button to move it">
+
+- **A+** makes the writing bigger and **A−** makes it smaller. The number shows the size.
+- The **colored dots** pick the color of your writing. Each dot shows two shades: the
+  darker one is used on light backgrounds and the lighter one on dark backgrounds.
+  The black dot turns white on dark backgrounds.
+- **⇄** moves this toolbar to the other side of the screen if it's in your way.
 
 > **Tip:** To change the size or color of something you already wrote, click it first,
-> then click **A−**, **A+**, or a color.
+> then click **A+**, **A−**, or a color.
 
-### 5. Save your work
+### 6. Save your work
 
 Click **📷 Save**. A picture of your screen is saved to your computer, with your
-writing on it. The bar of buttons and the small blue and red tabs are left out of the
-picture. This message appears at the bottom of the page when it's done:
+writing on it. The toolbars and the small blue and red tabs are left out of the picture.
+This message appears at the bottom of the page when it's done:
 
-<img src="docs/images/use-5-saved-en.png" width="300" alt="The message: Screenshot saved to Downloads/VHL Overlay">
+<img src="docs/images/use-6-saved-en.png" width="300" alt="The message: Screenshot saved to Downloads/VHL Overlay">
 
 To find your pictures, open your **Downloads** folder and then the **VHL Overlay** folder
 inside it. Each picture is named with the date and time, for example
@@ -184,7 +200,7 @@ con lo que escribió.
 
 Lo que escribe **no se guarda** y no cambia el libro de verdad. Queda encima de la
 página, como una hoja de plástico transparente, y desaparece al cerrar o recargar la
-página. Para conservar su trabajo, guarde una imagen (vea el paso 5).
+página. Para conservar su trabajo, guarde una imagen (vea el paso 6).
 
 Funciona en el navegador **Google Chrome** en un ordenador. No funciona en móviles ni
 tabletas.
@@ -247,10 +263,11 @@ Entre en reader.vhlcentral.com y abra la página que quiera, como siempre.
 
 ### 2. Actívela
 
-Haga clic en el botón azul **T**, arriba a la derecha de Chrome. Aparece una pequeña
-barra blanca de botones arriba a la derecha de la página. Ya puede escribir.
+Haga clic en el botón azul **T**, arriba a la derecha de Chrome. Aparecen dos pequeñas
+barras: una barra de botones arriba a la derecha de la página y una barra estrecha para
+el **tamaño y el color del texto** en el borde derecho. Ya puede escribir.
 
-<img src="docs/images/use-1-toolbar-appears-es.png" width="600" alt="La barra de botones arriba a la derecha de la página del libro">
+<img src="docs/images/use-1-toolbar-appears-es.png" width="600" alt="La barra de botones arriba a la derecha y la barra de tamaño y color en el borde derecho">
 
 ### 3. Escriba sobre la página
 
@@ -269,30 +286,45 @@ barra blanca de botones arriba a la derecha de la página. Ya puede escribir.
 El texto se queda en su sitio en la página, aunque se desplace hacia arriba o abajo o
 amplíe la página.
 
-### 4. Los botones de la barra
+**Lo que escribe siempre se lee bien.** Al empezar a escribir en un lugar, la herramienta
+mira los colores del fondo y elige un tono que destaque. Sobre un recuadro oscuro, el azul
+pasa a azul claro (como *bailan* en la imagen de arriba). Sobre una foto o un dibujo con
+muchos colores, el texto lleva un contorno fino para que se pueda leer.
 
-<img src="docs/images/use-4-toolbar-buttons-es.png" width="500" alt="La barra de botones, numerados del 1 al 6">
+### 4. La barra de arriba
+
+<img src="docs/images/use-4-top-bar-es.png" width="420" alt="La barra de botones de arriba, numerados del 1 al 4">
 
 | | Botón | Qué hace |
 |---|---|---|
 | **1** | **✏️ Typing: on / off** | Cuando está en **on** (activado), al hacer clic en la página se añade texto. Póngalo en **off** (desactivado) para usar el libro con normalidad (pasar páginas, pulsar botones). Su texto sigue en la página. |
-| **2** | **A−  A+** | Hace el texto más pequeño o más grande. |
-| **3** | **Puntos de colores** | Cambia el color del texto. |
-| **4** | **📷 Save** | Guarda una imagen de la pantalla con su texto (vea abajo). |
-| **5** | **🗑 Clear** | Borra todo lo que escribió en la página. |
-| **6** | **✕** | Oculta la barra. Su texto se queda. Haga clic en la **T** azul para que vuelva. |
+| **2** | **📷 Save** | Guarda una imagen de la pantalla con su texto (vea abajo). |
+| **3** | **🗑 Clear** | Borra todo lo que escribió en la página. |
+| **4** | **✕** | Oculta las dos barras. Su texto se queda. Haga clic en la **T** azul para que vuelvan. |
+
+Puede mover la barra de arriba arrastrando los puntos **⋮⋮** de su lado izquierdo.
+
+### 5. Tamaño y color del texto (la barra del lateral)
+
+<img src="docs/images/use-5-side-bar-es.png" width="260" alt="La barra lateral con los botones de tamaño, los puntos de colores y un botón para moverla">
+
+- **A+** agranda el texto y **A−** lo hace más pequeño. El número indica el tamaño.
+- Los **puntos de colores** eligen el color del texto. Cada punto muestra dos tonos: el más
+  oscuro se usa sobre fondos claros y el más claro sobre fondos oscuros. El punto negro
+  se vuelve blanco sobre fondos oscuros.
+- **⇄** mueve esta barra al otro lado de la pantalla si le molesta.
 
 > **Consejo:** para cambiar el tamaño o el color de algo que ya escribió, haga clic en
-> ello primero y luego en **A−**, **A+** o un color.
+> ello primero y luego en **A+**, **A−** o un color.
 
-### 5. Guarde su trabajo
+### 6. Guarde su trabajo
 
 Haga clic en **📷 Save**. Se guarda en su ordenador una imagen de la pantalla con su
-texto. La barra de botones y las pestañas azules y rojas no salen en la imagen. Al
+texto. Las barras de botones y las pestañas azules y rojas no salen en la imagen. Al
 terminar, aparece este mensaje abajo en la página ("Imagen guardada en
 Descargas/VHL Overlay"):
 
-<img src="docs/images/use-5-saved-es.png" width="300" alt="El mensaje: Screenshot saved to Downloads/VHL Overlay">
+<img src="docs/images/use-6-saved-es.png" width="300" alt="El mensaje: Screenshot saved to Downloads/VHL Overlay">
 
 Para encontrar las imágenes, abra la carpeta **Descargas** y dentro la carpeta
 **VHL Overlay**. Cada imagen lleva la fecha y la hora en el nombre, por ejemplo

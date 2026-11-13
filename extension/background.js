@@ -2,7 +2,7 @@
 // Holds the per-tab UI state (toolbar open, typing on, color, size), relays it
 // to every frame in the tab, and takes screenshots.
 
-const DEFAULT_STATE = { open: false, typing: false, color: '#1d4ed8', size: 18 };
+const DEFAULT_STATE = { open: false, typing: false, color: 'blue', size: 18, side: 'right' };
 
 async function getState(tabId) {
   const key = 'tab:' + tabId;
@@ -39,12 +39,78 @@ function timestamp() {
   return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}_${p(d.getHours())}-${p(d.getMinutes())}-${p(d.getSeconds())}`;
 }
 
+// Chrome allows only ~2 captureVisibleTab calls per second, so every capture
+// (screenshots and background sampling) goes through this queue.
+let captureQueue = Promise.resolve();
+let lastCapture = 0;
+function queuedCapture(fn) {
+  const run = captureQueue.then(async () => {
+    const wait = 550 - (Date.now() - lastCapture);
+    if (wait > 0) await sleep(wait);
+    try {
+      return await fn();
+    } finally {
+      lastCapture = Date.now();
+    }
+  });
+  captureQueue = run.catch(() => {});
+  return run;
+}
+
+function luminance(r, g, b) {
+  const f = (v) => {
+    v /= 255;
+    return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+  };
+  return 0.2126 * f(r) + 0.7152 * f(g) + 0.0722 * f(b);
+}
+
+// Measure the background behind a new text box from real screen pixels.
+// Returns { lum, busy }: the typical (median) brightness, and whether the area has
+// lots of strongly different colors (a photo or illustration).
+async function sampleBackground(tab, rect, vw) {
+  return queuedCapture(async () => {
+    broadcast(tab.id, { type: 'probe-start' }); // hide the empty new box
+    await sleep(60);
+    let dataUrl;
+    try {
+      dataUrl = await chrome.tabs.captureVisibleTab(tab.windowId, { format: 'png' });
+    } finally {
+      broadcast(tab.id, { type: 'probe-end' });
+    }
+    const bmp = await createImageBitmap(await (await fetch(dataUrl)).blob());
+    const k = bmp.width / vw; // device pixel ratio
+    const sx = Math.max(0, Math.floor(rect.x * k));
+    const sy = Math.max(0, Math.floor(rect.y * k));
+    const sw = Math.max(1, Math.min(bmp.width - sx, Math.floor(rect.w * k)));
+    const sh = Math.max(1, Math.min(bmp.height - sy, Math.floor(rect.h * k)));
+    const canvas = new OffscreenCanvas(sw, sh);
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(bmp, sx, sy, sw, sh, 0, 0, sw, sh);
+    const { data } = ctx.getImageData(0, 0, sw, sh);
+    const lums = [];
+    const step = 4 * Math.max(1, Math.floor((sw * sh) / 4000)); // ~4000 samples max
+    for (let i = 0; i < data.length; i += step) lums.push(luminance(data[i], data[i + 1], data[i + 2]));
+    lums.sort((a, b) => a - b);
+    const lum = lums[Math.floor(lums.length / 2)];
+    const ratio = (a, b) => (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
+    // Printed text on a plain page is a small share of pixels; a picture is a lot.
+    const different = lums.filter((l) => ratio(l, lum) > 2).length / lums.length;
+    return { lum, busy: different > 0.3 };
+  });
+}
+
 async function screenshot(tab) {
-  broadcast(tab.id, { type: 'capture-start' });
-  await sleep(200); // let every frame hide its toolbar / editing outlines
   try {
-    const dataUrl = await chrome.tabs.captureVisibleTab(tab.windowId, { format: 'png' });
-    broadcast(tab.id, { type: 'capture-end' });
+    const dataUrl = await queuedCapture(async () => {
+      broadcast(tab.id, { type: 'capture-start' });
+      await sleep(200); // let every frame hide its toolbar / editing outlines
+      try {
+        return await chrome.tabs.captureVisibleTab(tab.windowId, { format: 'png' });
+      } finally {
+        broadcast(tab.id, { type: 'capture-end' });
+      }
+    });
     await chrome.downloads.download({
       url: dataUrl,
       filename: `VHL Overlay/vhl-${timestamp()}.png`,
@@ -52,7 +118,6 @@ async function screenshot(tab) {
     });
     broadcast(tab.id, { type: 'toast', text: 'Screenshot saved to Downloads/VHL Overlay' });
   } catch (err) {
-    broadcast(tab.id, { type: 'capture-end' });
     console.warn('captureVisibleTab failed', err);
     broadcast(tab.id, {
       type: 'toast',
@@ -89,6 +154,13 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
       case 'clear-all':
         broadcast(tab.id, { type: 'clear-all' });
         sendResponse(true);
+        break;
+      case 'sample':
+        try {
+          sendResponse(await sampleBackground(tab, msg.rect, msg.vw));
+        } catch {
+          sendResponse(null); // no screenshot permission yet: the page keeps its CSS-based guess
+        }
         break;
       case 'screenshot':
         await screenshot(tab);
