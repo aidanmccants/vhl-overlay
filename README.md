@@ -60,6 +60,13 @@ This takes about 3 minutes.
 
    <img src="docs/images/install-3-installed-en.png" width="600" alt="The VHL Text Overlay box on the Extensions page after installing">
 
+7. A **welcome page** also opens in a new tab with a short summary of the next steps.
+
+   <img src="docs/images/welcome-en.png" width="480" alt="The welcome page that opens after installing">
+
+   The switch at the bottom controls the **one-minute tour** (see Part 2). Leave it on to
+   get the tour, or turn it off to skip it.
+
 ### Step 3: Put the button where you can see it
 
 1. At the top right of Chrome, next to the address bar, click the small **puzzle-piece**
@@ -84,6 +91,15 @@ on the right edge. You're now ready to write.
 
 <img src="docs/images/use-1-toolbar-appears-en.png" width="600" alt="The bar of buttons at the top right and the size and color toolbar on the right edge">
 
+**The first time**, a short tour starts and shows you every feature, one at a time, right
+on the page. A glowing ring points at each button, and you can try things as you go.
+Click **Next** to move on, **Back** to go back, or **Skip tour** to close it at any time.
+To see it again later, click the **?** button on the top bar.
+
+<img src="docs/images/tour-1-welcome-en.png" width="600" alt="The start of the tour, with Skip tour and Start the tour buttons">
+
+<img src="docs/images/tour-2-step-en.png" width="480" alt="A tour step pointing at the Typing button">
+
 ### 3. Write on the page
 
 - **Click** anywhere on the page, for example on a blank line, and **type**.
@@ -105,14 +121,15 @@ your writing gets a thin outline so you can still read it.
 
 ### 4. The bar at the top
 
-<img src="docs/images/use-4-top-bar-en.png" width="420" alt="The top bar of buttons, numbered 1 to 4">
+<img src="docs/images/use-4-top-bar-en.png" width="440" alt="The top bar of buttons, numbered 1 to 5">
 
 | | Button | What it does |
 |---|---|---|
 | **1** | **✏️ Typing: on / off** | While it's **on**, clicking the page adds writing. Turn it **off** to use the textbook normally (turn pages, click buttons). Your writing stays on the page. |
 | **2** | **📷 Copy** | Copies a picture of the page with your writing (see below). |
 | **3** | **🗑 Clear** | Erases all of your writing on the page. |
-| **4** | **✕** | Hides both toolbars. Your writing stays. Click the **T** button to bring them back. |
+| **4** | **?** | Shows the tour of every feature again. |
+| **5** | **✕** | Hides both toolbars. Your writing stays. Click the **T** button to bring them back. |
 
 You can move the top bar by dragging the dots **⋮⋮** at its left end.
 
@@ -258,6 +275,14 @@ Tarda unos 3 minutos.
 
    <img src="docs/images/install-3-installed-es.png" width="600" alt="El recuadro VHL Text Overlay en la página Extensiones después de instalarla">
 
+7. También se abre una **página de bienvenida** en una pestaña nueva con un resumen de los
+   siguientes pasos.
+
+   <img src="docs/images/welcome-es.png" width="480" alt="La página de bienvenida que se abre después de instalar">
+
+   El interruptor de abajo controla el **recorrido de un minuto** (vea la Parte 2). Déjelo
+   activado para ver el recorrido, o desactívelo para saltarlo.
+
 ### Paso 3: Poner el botón a la vista
 
 1. Arriba a la derecha de Chrome, junto a la barra de direcciones, haga clic en el icono
@@ -281,6 +306,16 @@ barras: una barra de botones arriba a la derecha de la página y una barra estre
 el **tamaño y el color del texto** en el borde derecho. Ya puede escribir.
 
 <img src="docs/images/use-1-toolbar-appears-es.png" width="600" alt="La barra de botones arriba a la derecha y la barra de tamaño y color en el borde derecho">
+
+**La primera vez**, empieza un recorrido corto que le muestra cada función, una por una,
+en la misma página. Un anillo luminoso señala cada botón y puede ir probando las cosas.
+Pulse **Siguiente** para avanzar, **Atrás** para volver o **Saltar** para cerrarlo en
+cualquier momento. Para verlo otra vez, pulse el botón **?** de la barra de arriba. (El
+recorrido aparece en español si Chrome está en español.)
+
+<img src="docs/images/tour-1-welcome-es.png" width="600" alt="El comienzo del recorrido, con los botones Saltar y Empezar">
+
+<img src="docs/images/tour-2-step-es.png" width="480" alt="Un paso del recorrido que señala el botón Typing">
 
 ### 3. Escriba sobre la página
 
@@ -306,14 +341,15 @@ muchos colores, el texto lleva un contorno fino para que se pueda leer.
 
 ### 4. La barra de arriba
 
-<img src="docs/images/use-4-top-bar-es.png" width="420" alt="La barra de botones de arriba, numerados del 1 al 4">
+<img src="docs/images/use-4-top-bar-es.png" width="440" alt="La barra de botones de arriba, numerados del 1 al 5">
 
 | | Botón | Qué hace |
 |---|---|---|
 | **1** | **✏️ Typing: on / off** | Cuando está en **on** (activado), al hacer clic en la página se añade texto. Póngalo en **off** (desactivado) para usar el libro con normalidad (pasar páginas, pulsar botones). Su texto sigue en la página. |
 | **2** | **📷 Copy** | Copia una imagen de la página con su texto (vea abajo). |
 | **3** | **🗑 Clear** | Borra todo lo que escribió en la página. |
-| **4** | **✕** | Oculta las dos barras. Su texto se queda. Haga clic en el botón **T** para que vuelvan. |
+| **4** | **?** | Vuelve a mostrar el recorrido de todas las funciones. |
+| **5** | **✕** | Oculta las dos barras. Su texto se queda. Haga clic en el botón **T** para que vuelvan. |
 
 Puede mover la barra de arriba arrastrando los puntos **⋮⋮** de su lado izquierdo.
 

@@ -272,6 +272,45 @@
     .toast.error { color: #fff; background: rgba(215, 38, 38, .82); }
     .toast button { padding: 6px 12px; font-weight: 600; background: var(--accent); color: #fff; }
 
+    /* ---------- first-time tour ---------- */
+    .tour-ring {
+      position: fixed; pointer-events: none; border-radius: 18px;
+      box-shadow: 0 0 0 3px rgba(10, 132, 255, .95), 0 0 0 9px rgba(10, 132, 255, .25), 0 0 34px 8px rgba(10, 132, 255, .35);
+      transition: left .55s var(--spring), top .55s var(--spring), width .55s var(--spring), height .55s var(--spring),
+        opacity .3s var(--ease), border-radius .4s var(--ease);
+      animation: breathe 2.2s ease-in-out infinite;
+    }
+    @keyframes breathe { 50% { box-shadow: 0 0 0 3px rgba(10, 132, 255, .95), 0 0 0 13px rgba(10, 132, 255, .12), 0 0 44px 12px rgba(10, 132, 255, .28); } }
+    .tour-ring.off { opacity: 0; }
+    .tour-pop {
+      width: min(320px, calc(100vw - 24px)); box-sizing: border-box; padding: 16px 16px 14px;
+      border-radius: 24px; background: var(--glass-strong);
+      transition: opacity .3s var(--ease), transform .5s var(--spring), filter .3s var(--ease),
+        left .55s var(--spring), top .55s var(--spring), visibility 0s;
+    }
+    .tour-pop.hidden { transform: scale(.94) translateY(8px); }
+    .tour-pop .content { animation: swap .4s var(--ease); }
+    @keyframes swap { from { opacity: 0; transform: translateY(6px); } }
+    .tour-pop .count { font-size: 11px; font-weight: 600; color: var(--ink-soft); letter-spacing: .04em; text-transform: uppercase; }
+    .tour-pop h3 { margin: 6px 0 6px; font: 700 17px/1.25 var(--font); }
+    .tour-pop p { margin: 0; font: 14px/1.45 var(--font); }
+    .tour-pop p + p { margin-top: 8px; }
+    .tour-pop .try { margin-top: 10px; padding: 8px 11px; border-radius: 14px; font: 500 13px/1.4 var(--font);
+      background: rgba(10, 132, 255, .12); color: var(--ink); }
+    .tour-pop kbd { font: 600 11.5px/1 var(--font); padding: 2px 6px; border-radius: 6px; background: var(--chip);
+      box-shadow: inset 0 -1px 0 rgba(0, 0, 0, .15); }
+    .tour-pop .dots { display: flex; gap: 5px; margin: 14px 0 12px; }
+    .tour-pop .dot { width: 6px; height: 6px; border-radius: 3px; background: var(--ink-soft); opacity: .3;
+      transition: width .4s var(--spring), opacity .3s var(--ease), background .3s; }
+    .tour-pop .dot.on { width: 18px; opacity: 1; background: var(--accent); }
+    .tour-pop .row { display: flex; align-items: center; gap: 8px; }
+    .tour-pop .row .grow { flex: 1; }
+    .tour-pop .row button { padding: 8px 14px; font-weight: 600; }
+    .tour-pop .row button.primary { background: linear-gradient(180deg, #3b9bff, #0a7aff); color: #fff;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, .45), 0 4px 14px rgba(10, 132, 255, .4); }
+    .tour-pop .row button.link { background: none; box-shadow: none; color: var(--ink-soft); padding: 8px 6px; font-weight: 500; }
+    .tour-pop .row button.link:hover { color: var(--ink); transform: none; }
+
     /* screenshots: hide instantly, no fading into the picture */
     :host([data-capturing]) * { transition: none !important; animation: none !important; }
 
@@ -302,7 +341,7 @@
     if (IS_TOP) buildToolbar();
     (document.body || document.documentElement).appendChild(host);
     keepAttached();
-    requestAnimationFrame(tick);
+    requestAnimationFrame(tick); // start the positioning loop
   }
 
   // Some single-page apps wipe <body>; put our layer back if that happens.
@@ -347,7 +386,8 @@
     ui.close = btn('✕', 'Hide toolbar (your text stays on the page)', () => sendState({ open: false, typing: false }), 'icon');
 
     const sep = () => Object.assign(document.createElement('span'), { className: 'sep' });
-    toolbar.append(drag, ui.typing, sep(), ui.shot, ui.clear, ui.close);
+    ui.help = btn('?', 'Show the tour of every feature again', () => startTour(), 'icon');
+    toolbar.append(drag, ui.typing, sep(), ui.shot, ui.clear, ui.help, ui.close);
     root.appendChild(toolbar);
 
     // Side toolbar: text size and color.
@@ -406,7 +446,268 @@
       ui.size.textContent = sizeText;
       const cur = family(selected ? selected.color : state.color).id;
       for (const s of ui.swatches) s.classList.toggle('active', s.dataset.color === cur);
+      if (tour && (!state.open || capturing)) hideTour(!state.open);
+      else if (tour) showTourEls();
+      maybeStartFirstTour();
     }
+  }
+
+  // ---------------------------------------------------------------------------
+  // First-time tour: a short, skippable walkthrough of every feature. It starts
+  // the first time the toolbars open after installing, and the "?" button
+  // replays it.
+  // ---------------------------------------------------------------------------
+
+  const ES = /^es\b/i.test(navigator.language || '');
+  const L = (en, es) => (ES ? es : en);
+  const MOD = /Mac/.test(navigator.platform) ? '⌘' : 'Ctrl';
+  const kbd = (k) => `<kbd>${k}</kbd>`;
+
+  let tour = null; // { i, cacheFor, els }
+  let tourRing = null;
+  let tourPop = null;
+  let tourChecked = false;
+
+  const unionRect = (els) => {
+    const rs = els
+      .filter(Boolean)
+      .map((e) => e.getBoundingClientRect())
+      .filter((r) => r.width || r.height);
+    if (!rs.length) return null;
+    const left = Math.min(...rs.map((r) => r.left));
+    const top = Math.min(...rs.map((r) => r.top));
+    const right = Math.max(...rs.map((r) => r.right));
+    const bottom = Math.max(...rs.map((r) => r.bottom));
+    return { left, top, right, bottom, width: right - left, height: bottom - top };
+  };
+  const latestNote = () =>
+    [...notes].reverse().find((n) => n.textEl.textContent.trim() && n.el.style.display !== 'none');
+
+  const TOUR_STEPS = [
+    {
+      place: 'center',
+      title: L('Welcome to VHL Text Overlay 👋', 'Bienvenido a VHL Text Overlay 👋'),
+      body: L(
+        '<p>Here’s a one-minute tour of everything it can do. You can try each thing as you go.</p><p>You can skip the tour now, or any time.</p>',
+        '<p>Este es un recorrido de un minuto por todo lo que puede hacer. Puede probar cada cosa sobre la marcha.</p><p>Puede saltarse el recorrido ahora o en cualquier momento.</p>'
+      ),
+      next: L('Start the tour', 'Empezar'),
+    },
+    {
+      target: () => [ui.typing],
+      title: L('Typing mode', 'Modo de escritura'),
+      body: L(
+        '<p>While <b>Typing</b> is on, clicking the page adds text instead of using the textbook.</p><p>Turn it off to turn pages or click the textbook’s buttons. Your text stays put.</p>',
+        '<p>Con <b>Typing</b> activado, al hacer clic en la página se añade texto en lugar de usar el libro.</p><p>Desactívelo para pasar páginas o pulsar los botones del libro. Su texto se queda.</p>'
+      ),
+    },
+    {
+      place: 'bottom',
+      title: L('Write anywhere', 'Escriba donde quiera'),
+      body: L(
+        `<p>Click any spot on the page and type. Click somewhere else to start another piece of text.</p><p>${kbd('Enter')} starts a new line. ${kbd('Esc')} finishes.</p><div class="try">👉 Try it now: click a blank on the page and type a word.</div>`,
+        `<p>Haga clic en cualquier lugar de la página y escriba. Haga clic en otro sitio para empezar otro texto.</p><p>${kbd('Intro')} empieza una línea nueva. ${kbd('Esc')} termina.</p><div class="try">👉 Pruébelo: haga clic en un espacio en blanco y escriba una palabra.</div>`
+      ),
+    },
+    {
+      target: () => {
+        const n = latestNote();
+        if (!n) return null;
+        selectNote(n);
+        return [n.textEl, n.el.querySelector('.grip'), n.el.querySelector('.del')];
+      },
+      place: 'bottom',
+      title: L('Edit, move or delete', 'Editar, mover o borrar'),
+      body: L(
+        '<p>Click your text to change it.</p><p>Drag the blue <b>✥</b> handle to move it, or click the red <b>×</b> to delete it.</p><p>Your text sticks to the page when you scroll or zoom.</p>',
+        '<p>Haga clic en su texto para cambiarlo.</p><p>Arrastre el círculo azul <b>✥</b> para moverlo, o pulse la <b>×</b> roja para borrarlo.</p><p>El texto se queda pegado a la página al desplazarse o ampliar.</p>'
+      ),
+    },
+    {
+      target: () => [ui.bigger, ui.size, ui.smaller],
+      title: L('Text size', 'Tamaño del texto'),
+      body: L(
+        '<p><b>A+</b> makes text bigger and <b>A−</b> makes it smaller.</p><p>To resize something you already wrote, click it first.</p>',
+        '<p><b>A+</b> agranda el texto y <b>A−</b> lo hace más pequeño.</p><p>Para cambiar algo que ya escribió, haga clic en ello primero.</p>'
+      ),
+    },
+    {
+      target: () => ui.swatches,
+      title: L('Colors that stay readable', 'Colores que siempre se leen'),
+      body: L(
+        '<p>Pick a color for your text. Each dot shows two shades.</p><p>The tool checks what’s behind your text and uses the shade that’s easiest to read. On photos it adds a thin outline.</p>',
+        '<p>Elija un color para su texto. Cada punto muestra dos tonos.</p><p>La herramienta mira lo que hay detrás del texto y usa el tono que mejor se lee. Sobre fotos añade un contorno fino.</p>'
+      ),
+    },
+    {
+      target: () => [ui.flip],
+      title: L('Move this toolbar', 'Mover esta barra'),
+      body: L(
+        '<p><b>⇄</b> moves the size and color toolbar to the other side of the screen if it’s in your way.</p>',
+        '<p><b>⇄</b> mueve la barra de tamaño y color al otro lado de la pantalla si le molesta.</p>'
+      ),
+    },
+    {
+      target: () => [ui.shot],
+      title: L('Copy a picture of your work', 'Copiar una imagen de su trabajo'),
+      body: L(
+        `<p>Click <b>📷 Copy</b>. Chrome asks to <b>share this tab</b>: click <b>Share</b>. Nothing is recorded or sent anywhere.</p><p>Then paste the picture anywhere with ${kbd(MOD + '+V')}.</p><p>Shortcut: ${kbd('Alt+Shift+S')}</p>`,
+        `<p>Pulse <b>📷 Copy</b>. Chrome pregunta si quiere <b>compartir esta pestaña</b>: pulse <b>Compartir</b>. No se graba ni se envía nada.</p><p>Luego pegue la imagen donde quiera con ${kbd(MOD + '+V')}.</p><p>Atajo: ${kbd('Alt+Mayús+S')}</p>`
+      ),
+    },
+    {
+      target: () => [ui.clear],
+      title: L('Clear', 'Borrar todo'),
+      body: L(
+        '<p><b>🗑 Clear</b> erases all of your text on the page.</p><p>Remember: text is never saved. Refreshing the page erases it too, so copy a picture first.</p>',
+        '<p><b>🗑 Clear</b> borra todo su texto de la página.</p><p>Recuerde: el texto nunca se guarda. Al recargar la página también se borra, así que copie una imagen antes.</p>'
+      ),
+    },
+    {
+      target: () => [ui.close],
+      title: L('Hide the toolbars', 'Ocultar las barras'),
+      body: L(
+        `<p><b>✕</b> hides both toolbars. Your text stays on the page.</p><p>To bring them back, click the <b>T</b> button at the top right of Chrome, or press ${kbd('Alt+Shift+T')}.</p>`,
+        `<p><b>✕</b> oculta las dos barras. Su texto se queda en la página.</p><p>Para que vuelvan, pulse el botón <b>T</b> arriba a la derecha de Chrome o ${kbd('Alt+Mayús+T')}.</p>`
+      ),
+    },
+    {
+      target: () => [ui.help],
+      title: L('You’re all set! 🎉', '¡Todo listo! 🎉'),
+      body: L(
+        '<p>Want to see this tour again? Click <b>?</b> any time.</p>',
+        '<p>¿Quiere ver este recorrido otra vez? Pulse <b>?</b> cuando quiera.</p>'
+      ),
+      next: L('Done', 'Terminar'),
+    },
+  ];
+
+  function maybeStartFirstTour() {
+    if (tourChecked || !IS_TOP || !state.open) return;
+    tourChecked = true;
+    chrome.storage.local.get('tutorialPending', (r) => {
+      if (!chrome.runtime.lastError && r && r.tutorialPending) {
+        setTimeout(() => state.open && !tour && startTour(), 650); // after the toolbars glide in
+      }
+    });
+  }
+
+  function buildTour() {
+    if (tourPop) return;
+    tourRing = document.createElement('div');
+    tourRing.className = 'tour-ring off';
+    tourPop = document.createElement('div');
+    tourPop.className = 'glass tour-pop hidden';
+    tourPop.setAttribute('role', 'dialog');
+    tourPop.setAttribute('aria-label', L('Feature tour', 'Recorrido'));
+    root.append(tourRing, tourPop);
+  }
+
+  function startTour() {
+    if (!IS_TOP) return;
+    ensureUI();
+    buildTour();
+    tour = { i: 0 };
+    if (!state.open || !state.typing) sendState({ open: true, typing: true });
+    showTourStep();
+  }
+
+  function endTour() {
+    if (!tour) return;
+    tour = null;
+    chrome.storage.local.set({ tutorialPending: false });
+    tourPop.classList.add('hidden');
+    tourRing.classList.add('off');
+  }
+
+  // Toolbars closed (ends the tour) or a screenshot in progress (pauses it).
+  function hideTour(end) {
+    if (end) return endTour();
+    tourPop.classList.add('hidden');
+    tourRing.classList.add('off');
+  }
+  function showTourEls() {
+    if (tourPop.classList.contains('hidden')) showTourStep();
+  }
+
+  function showTourStep() {
+    const step = TOUR_STEPS[tour.i];
+    const n = TOUR_STEPS.length;
+    const last = tour.i === n - 1;
+    tour.cacheFor = -1;
+    tourPop.innerHTML = '';
+    const content = document.createElement('div');
+    content.className = 'content';
+    content.innerHTML =
+      (tour.i > 0 ? `<div class="count">${L('Step', 'Paso')} ${tour.i} ${L('of', 'de')} ${n - 1}</div>` : '') +
+      `<h3>${step.title}</h3>${step.body}` +
+      `<div class="dots">${TOUR_STEPS.map((_, j) => `<span class="dot${j === tour.i ? ' on' : ''}"></span>`).join('')}</div>`;
+    const row = document.createElement('div');
+    row.className = 'row';
+    if (!last) row.append(btn(L('Skip tour', 'Saltar'), L('Skip the tour', 'Saltar el recorrido'), () => endTour(), 'link'));
+    const grow = document.createElement('span');
+    grow.className = 'grow';
+    row.append(grow);
+    if (tour.i > 0) row.append(btn(L('Back', 'Atrás'), L('Back', 'Atrás'), () => goTour(-1)));
+    row.append(btn(step.next || L('Next', 'Siguiente'), '', () => (last ? endTour() : goTour(1)), 'primary'));
+    content.append(row);
+    tourPop.append(content);
+    tourPop.classList.remove('hidden');
+    positionTour();
+  }
+
+  function goTour(d) {
+    if (!tour) return;
+    tour.i = Math.max(0, Math.min(TOUR_STEPS.length - 1, tour.i + d));
+    showTourStep();
+  }
+
+  // Runs every frame while the tour is open so the ring follows its target
+  // (for example while the side toolbar glides to the other side).
+  function positionTour() {
+    if (!tour || tourPop.classList.contains('hidden')) return;
+    const step = TOUR_STEPS[tour.i];
+    let rect = null;
+    if (step.target) {
+      if (tour.cacheFor !== tour.i) {
+        tour.cacheFor = tour.i;
+        tour.els = step.target();
+      }
+      rect = tour.els ? unionRect(tour.els) : null;
+    }
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    const m = 12;
+    const pw = tourPop.offsetWidth;
+    const ph = tourPop.offsetHeight;
+    let x;
+    let y;
+    if (rect) {
+      const pad = 7;
+      tourRing.classList.remove('off');
+      Object.assign(tourRing.style, {
+        left: rect.left - pad + 'px',
+        top: rect.top - pad + 'px',
+        width: rect.width + pad * 2 + 'px',
+        height: rect.height + pad * 2 + 'px',
+        borderRadius: Math.min(26, (rect.height + pad * 2) / 2) + 'px',
+      });
+      const gap = 18;
+      const below = rect.bottom + pad + gap;
+      const above = rect.top - pad - gap - ph;
+      const leftOf = rect.left - pad - gap - pw;
+      const rightOf = rect.right + pad + gap;
+      if (below + ph <= vh - m) [x, y] = [rect.left + rect.width / 2 - pw / 2, below];
+      else if (leftOf >= m) [x, y] = [leftOf, rect.top + rect.height / 2 - ph / 2];
+      else if (rightOf + pw <= vw - m) [x, y] = [rightOf, rect.top + rect.height / 2 - ph / 2];
+      else [x, y] = [rect.left + rect.width / 2 - pw / 2, above];
+    } else {
+      tourRing.classList.add('off');
+      x = vw / 2 - pw / 2;
+      y = step.place === 'bottom' ? vh - ph - 28 : vh / 2 - ph / 2;
+    }
+    tourPop.style.left = Math.round(Math.max(m, Math.min(vw - pw - m, x))) + 'px';
+    tourPop.style.top = Math.round(Math.max(m, Math.min(vh - ph - m, y))) + 'px';
   }
 
   let toastTimer = null;
@@ -746,6 +1047,7 @@
       const y = r.top + n.fy * r.height - (scrollY0(a) - n.sy) * scale;
       n.el.style.transform = `translate(${x}px, ${y}px) scale(${scale})`;
     }
+    if (tour) positionTour();
     requestAnimationFrame(tick);
   }
 

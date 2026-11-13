@@ -93,6 +93,14 @@ async function sampleBackground(tab, rect, vw) {
   });
 }
 
+// First install: turn on the one-time tour and show the welcome page.
+chrome.runtime.onInstalled.addListener(({ reason }) => {
+  if (reason === 'install') {
+    chrome.storage.local.set({ tutorialPending: true });
+    chrome.tabs.create({ url: chrome.runtime.getURL('welcome.html') });
+  }
+});
+
 chrome.action.onClicked.addListener(async (tab) => {
   if (!isVhl(tab.url)) return;
   const s = await getState(tab.id);
