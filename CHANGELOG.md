@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.1 (2026-11-13)
+
+### 🐛 Fixes
+
+- Fix nested folder in the release zip; speed up tests and releases
+
 ## 0.2.0 (2026-11-13)
 
 ### ✨ New
