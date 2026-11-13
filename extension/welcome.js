@@ -1,7 +1,7 @@
 // Welcome page shown once, right after installing.
 const ES = {
   title: 'VHL Text Overlay está instalada',
-  lead: 'Escriba sobre las páginas de su libro de VHL y copie o descargue una imagen de su trabajo. Tres pasos rápidos:',
+  lead: 'Escriba, resalte y dibuje sobre las páginas de su libro de VHL, y copie o descargue una imagen de su trabajo. Tres pasos rápidos:',
   s1t: 'Fije el botón',
   s1: 'Arriba a la derecha de Chrome, haga clic en la pieza de puzle {{puzzle}} y luego en la chincheta {{pin}} junto a <b>VHL Text Overlay</b>. Este botón se quedará allí:',
   s2t: 'Abra su libro',

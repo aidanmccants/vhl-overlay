@@ -571,6 +571,14 @@ feature, a planted bug gets through and the check fails. Each mutant is listed i
 It runs automatically on every pull request (a few minutes).
 Add one whenever you add a feature.
 
+### Chrome Web Store
+
+[`docs/store/README.md`](docs/store/README.md) has everything for the store listing:
+copy-paste text, privacy answers, reviewer instructions and all the images.
+`npm run store-assets` remakes the images from the current extension, and
+`npm run icons` refreshes the Lucide icons. The privacy policy is
+[`docs/PRIVACY.md`](docs/PRIVACY.md).
+
 ### Publishing a release
 
 The download link above always points to the newest release on GitHub. Two ways to make one:

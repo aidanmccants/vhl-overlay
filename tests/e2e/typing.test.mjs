@@ -98,7 +98,7 @@ test('Clear removes all text after confirming', async () => {
   await page.mouse.click(400, 300);
   await page.keyboard.type('borrar');
   page.once('dialog', (d) => d.accept());
-  await ui(page, '.toolbar button[title="Remove all text boxes"]').click();
+  await ui(page, '.toolbar button[title^="Remove all"]').click();
   await page.waitForTimeout(200);
   assert.equal((await noteTexts(page)).length, 0);
 });
