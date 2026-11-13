@@ -1,9 +1,12 @@
-# Runs the checks and tests on every push and pull request.
+# Runs the checks and tests on every push and pull request. On pull requests it
+# also runs the mutation check, which plants bugs one at a time and makes sure
+# the tests catch each of them (a few minutes).
 name: Tests
 
 on:
   push:
   pull_request:
+  workflow_dispatch: # lets you run it by hand from the Actions tab
 
 jobs:
   test:
@@ -30,3 +33,23 @@ jobs:
 
       - name: Browser tests
         run: npm run test:e2e
+
+  mutations:
+    # Only for pull requests (and by hand): that's where tests and features change.
+    if: github.event_name != 'push'
+    needs: test
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+
+      - name: Make sure the tests catch planted bugs
+        run: npm run test:mutations

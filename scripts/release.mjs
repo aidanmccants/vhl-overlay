@@ -23,7 +23,10 @@ export const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '
 export const EXT_DIR = process.env.VHL_EXT_DIR ? path.resolve(process.env.VHL_EXT_DIR) : path.join(ROOT, 'extension');
 export const DIST = path.join(ROOT, 'dist');
 export const ZIP_NAME = 'VHL-Text-Overlay.zip';
-export const ZIP_FOLDER = 'VHL Text Overlay'; // the folder people pick in "Load unpacked"
+// Files go at the top of the zip (no folder inside). Unzipping then gives exactly one
+// folder, named after the zip, with manifest.json directly in it: the folder people pick
+// in "Load unpacked". (A folder inside the zip turns into a folder-in-a-folder on Windows.)
+export const UNZIPPED_FOLDER = 'VHL-Text-Overlay';
 const REPO_URL = 'https://github.com/aidanmccants/vhl-overlay';
 
 // Permissions the extension is allowed to ask for. Anything else fails the check,
@@ -137,7 +140,7 @@ export function check() {
 
 export function buildZip() {
   const entries = listExtensionFiles().map((rel) => ({
-    name: `${ZIP_FOLDER}/${rel}`,
+    name: rel,
     data: fs.readFileSync(path.join(EXT_DIR, rel)),
   }));
   return createZip(entries);
@@ -243,7 +246,7 @@ export function releaseNotes({ from, sha256 } = {}) {
 1. Download **${ZIP_NAME}** below and unzip it. / Descargue **${ZIP_NAME}** (abajo) y descomprímalo.
 2. Follow the [step-by-step instructions](${REPO_URL}#readme). / Siga las [instrucciones paso a paso](${REPO_URL}#español).
 
-Already installed? Replace your old **${ZIP_FOLDER}** folder with the new one, then click ↻ on the
+Already installed? Replace your old **${UNZIPPED_FOLDER}** folder with the new one, then click ↻ on the
 extension at \`chrome://extensions\`.
 
 ## What's changed${prev ? ` since ${prev}` : ''}

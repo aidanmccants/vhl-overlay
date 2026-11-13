@@ -61,6 +61,10 @@ export async function launch({ ext = EXT_DIR, tour = false, colorScheme = 'light
     (await ctx.waitForEvent('serviceworker', (w) => w.url().endsWith('/background.js')));
   if (!tour) await sw.evaluate(() => chrome.storage.local.set({ tutorialPending: false }));
   for (const p of ctx.pages()) if (p.url().includes('welcome.html')) await p.close();
+  // Give up after 5 s instead of Playwright's default 30 s. Nothing in these tests
+  // should take that long, and a broken build (or a planted bug in the mutation
+  // check) then fails in seconds instead of waiting out every timeout.
+  ctx.setDefaultTimeout(5000);
   const page = await ctx.newPage();
   await ctx.grantPermissions(['clipboard-read', 'clipboard-write'], { origin: READER });
   const close = async () => {

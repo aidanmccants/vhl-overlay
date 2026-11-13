@@ -6,7 +6,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {
   validate, readManifest, listExtensionFiles, buildZip, pngSize, nextVersion,
-  categorize, changesMarkdown, releaseNotes, EXT_DIR, ZIP_FOLDER, ALLOWED_PERMISSIONS,
+  categorize, changesMarkdown, releaseNotes, EXT_DIR, ALLOWED_PERMISSIONS,
 } from '../../scripts/release.mjs';
 import { createZip, readZip, crc32 } from '../../scripts/lib/zip.mjs';
 
@@ -42,12 +42,15 @@ test('content script only runs on vhlcentral.com, in every frame, at document_st
   assert.equal(cs.run_at, 'document_start');
 });
 
-test('the zip has every extension file inside one "VHL Text Overlay" folder', () => {
+test('the zip has every extension file at its top level, with manifest.json directly inside', () => {
   const files = readZip(buildZip());
-  const expected = listExtensionFiles().map((f) => `${ZIP_FOLDER}/${f}`);
+  // No folder inside the zip: unzipping must give ONE folder with manifest.json right in it,
+  // or "Load unpacked" can't find the manifest.
+  const expected = listExtensionFiles();
+  assert.ok(expected.includes('manifest.json'));
   assert.deepEqual(files.map((f) => f.name), expected);
   for (const f of files) {
-    const original = fs.readFileSync(path.join(EXT_DIR, f.name.slice(ZIP_FOLDER.length + 1)));
+    const original = fs.readFileSync(path.join(EXT_DIR, f.name));
     assert.ok(original.equals(f.data), `${f.name} matches`);
   }
 });
