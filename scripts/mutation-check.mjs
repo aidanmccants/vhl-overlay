@@ -232,6 +232,14 @@ export const MUTANTS = [
     tests: [T('marks')],
   },
   {
+    id: 'undo-broken',
+    why: 'Ctrl+Z stops working after letters are marked',
+    file: 'content.js',
+    find: '      undoRedo(note, k === \'z\' && !e.shiftKey);',
+    replace: '',
+    tests: [T('marks')],
+  },
+  {
     id: 'mark-button-grows',
     why: 'turning on the 🖍 highlighter makes its button bigger and pushes the toolbar around',
     file: 'content.js',

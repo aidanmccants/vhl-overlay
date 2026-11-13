@@ -1348,12 +1348,20 @@
       selectNote(null);
       return;
     }
+    // Undo / redo (Ctrl+Z, Ctrl+Shift+Z, Ctrl+Y; ⌘ on a Mac) use the box's own history.
+    const k = e.key.toLowerCase();
+    if ((e.ctrlKey || e.metaKey) && !e.altKey && (k === 'z' || k === 'y')) {
+      e.preventDefault();
+      undoRedo(note, k === 'z' && !e.shiftKey);
+      return;
+    }
     if (e.key === '>' && !e.ctrlKey && !e.metaKey && !e.altKey && !e.isComposing) {
       // ">" starts marking the letters you type next: hac>er gives hac + marked "er".
       // ">>" types a real ">", and ">" while marking stops early.
       e.preventDefault();
       if (note.markTyping && note.markFresh) {
         endMarkTyping(note);
+        remember(note);
         typeText(note, '>', null);
       } else if (note.markTyping) {
         endMarkTyping(note);
@@ -1378,15 +1386,19 @@
   // Typing a letter. We only step in when the browser would get the color wrong:
   // while marking, and right after a mark (the browser would keep typing inside it).
   function onOwnBeforeInput(e) {
-    if (e.inputType !== 'insertText' || e.isComposing || e.data == null) {
-      if (e.inputType !== 'insertCompositionText') {
-        const n = noteOf(e);
-        if (n) endMarkTyping(n);
-      }
-      return;
-    }
     const note = noteOf(e);
     if (!note) return;
+    // Our own undo history: Chrome's can't follow the marks we add (Ctrl+Z would stop working).
+    if (e.inputType === 'historyUndo' || e.inputType === 'historyRedo') {
+      e.preventDefault();
+      undoRedo(note, e.inputType === 'historyUndo');
+      return;
+    }
+    if (e.inputType !== 'insertCompositionText') remember(note);
+    if (e.inputType !== 'insertText' || e.isComposing || e.data == null) {
+      if (e.inputType !== 'insertCompositionText') endMarkTyping(note);
+      return;
+    }
     const sel = getSel();
     if (!sel || !sel.rangeCount) return;
     const [a, b] = selOffsets(note.textEl, sel);
@@ -1416,6 +1428,29 @@
   // pieces. To change them we read the box as a list of letters with a color each,
   // change that list, and rebuild the box.
   // ---------------------------------------------------------------------------
+
+  // Undo/redo: a copy of the box's letters (and the caret) before each change.
+  function snapshot(note) {
+    const sel = getSel();
+    const at = sel && sel.rangeCount ? selOffsets(note.textEl, sel) : [-1, -1];
+    return { chars: getChars(note.textEl), sel: at[0] < 0 ? null : at };
+  }
+  function remember(note) {
+    note.undo = note.undo || [];
+    note.undo.push(snapshot(note));
+    if (note.undo.length > 300) note.undo.shift();
+    note.redo = [];
+  }
+  function undoRedo(note, undo) {
+    const from = undo ? note.undo : note.redo;
+    if (!from || !from.length) return;
+    const to = undo ? (note.redo = note.redo || []) : note.undo;
+    to.push(snapshot(note));
+    const snap = from.pop();
+    endMarkTyping(note);
+    const [a, b] = snap.sel || [snap.chars.length, snap.chars.length];
+    setChars(note, snap.chars, a, b);
+  }
 
   const getSel = () => (root && root.getSelection ? root.getSelection() : window.getSelection());
 
@@ -1516,6 +1551,7 @@
     if (!sel || !sel.rangeCount || sel.isCollapsed) return false;
     const [a, b] = selOffsets(note.textEl, sel);
     if (a < 0 || b <= a) return false;
+    remember(note);
     colorRange(note, a, b, colorId === note.color ? null : colorId, true);
     return true;
   }
@@ -1555,6 +1591,7 @@
     e.preventDefault(); // no caret, no text selection
     const first = letterAt(note.textEl, e.clientX, e.clientY, true);
     if (first < 0) return;
+    remember(note);
     const start = getChars(note.textEl);
     const mc = markColor();
     // Clicking a letter that already has this marker color takes the mark off.

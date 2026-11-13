@@ -179,3 +179,28 @@ test('marks work in text boxes inside frames too', async () => {
   assert.ok(fb);
   await page.keyboard.press('Escape');
 });
+
+test('Ctrl+Z undoes marks and typing one step at a time, and Ctrl+Shift+Z redoes', async () => {
+  // (the marker is still orange from the highlighter test)
+  const { page } = b;
+  const fr = await page.locator('#frame').boundingBox(); // just below the frame, on the page itself
+  await page.mouse.click(fr.x + 40, fr.y + fr.height + 40);
+  await page.keyboard.type('hac>er');
+  assert.deepEqual(await last(page), [['hac', null], ['er', 'orange']]);
+  await page.keyboard.press('Control+z');
+  assert.deepEqual(await last(page), [['hac', null], ['e', 'orange']]);
+  await page.keyboard.press('Control+z');
+  await page.keyboard.press('Control+z');
+  assert.deepEqual(await last(page), [['ha', null]]);
+  await page.keyboard.press('Control+Shift+z');
+  await page.keyboard.press('Control+Shift+z');
+  assert.deepEqual(await last(page), [['hac', null], ['e', 'orange']]);
+  // Coloring selected letters can be undone too.
+  await page.keyboard.press('Shift+ArrowLeft');
+  await ui(page, '.panel .swatch[data-color="green"]').click();
+  await page.waitForTimeout(200);
+  assert.deepEqual(await last(page), [['hac', null], ['e', 'green']]);
+  await page.keyboard.press('Control+z');
+  assert.deepEqual(await last(page), [['hac', null], ['e', 'orange']]);
+  await page.keyboard.press('Escape');
+});
