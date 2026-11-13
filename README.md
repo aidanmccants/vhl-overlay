@@ -1,4 +1,4 @@
-<img src="extension/icons/icon128.png" width="96" alt="" align="right">
+<p align="center"><img src="extension/icons/icon128.png" width="96" alt=""></p>
 
 # VHL Text Overlay
 
@@ -219,7 +219,7 @@ round arrow ↻ on the **VHL Text Overlay** box.
 
 <a id="español"></a>
 
-<img src="extension/icons/icon128.png" width="96" alt="" align="right">
+<p align="center"><img src="extension/icons/icon128.png" width="96" alt=""></p>
 
 # VHL Text Overlay (en español)
 
@@ -441,13 +441,43 @@ clic en la flecha circular ↻ del recuadro **VHL Text Overlay**.
 
 ---
 
-## For the maintainer: publishing a release
+## For the maintainer
 
-The download link above always points to the newest release. To publish one:
+Needs [Node.js](https://nodejs.org) 20 or newer. Run `npm install` once, then
+`npx playwright install chromium` to get the test browser.
 
-1. Raise `"version"` in `extension/manifest.json` (for example `0.1.0` → `0.1.1`).
-2. On GitHub, open **Actions** → **Publish release** → **Run workflow**.
+### Tests
 
-This builds `VHL-Text-Overlay.zip` and publishes it as release `v<version>`. Pushing a
-tag like `v0.1.1` does the same. Screenshots in `docs/images/` were taken in Chrome
-(English and Spanish) against a sample page.
+| Command | What it does |
+|---|---|
+| `npm run check` | Checks the extension: manifest, permissions, icon sizes, files, syntax, no remote code |
+| `npm run test:unit` | Fast tests for the release tool (zip, version bumps, release notes) |
+| `npm run test:e2e` | Loads the real extension in Chromium and tests every feature on a sample page (`tests/fixtures`) |
+| `npm test` | All of the above |
+| `npm run test:mutations` | Plants 21 realistic bugs, one at a time, and fails if the tests miss any of them |
+
+The mutation check is what keeps the tests honest: if a test stops really checking its
+feature, a planted bug gets through and the check fails. Each mutant is listed in
+`scripts/mutation-check.mjs` with the bug it plants and the tests that must catch it.
+Add one whenever you add a feature.
+
+### Publishing a release
+
+The download link above always points to the newest release on GitHub. Two ways to make one:
+
+- **On GitHub:** **Actions → Publish release → Run workflow**, then pick `patch`, `minor`
+  or `major` (or `none` to release the current version).
+- **On your computer:** `npm run release -- patch` (or `minor`, `major`, `1.2.3`), then
+  `git push && git push origin v<version>`.
+
+Both run every check, test and the mutation check first. Then they raise the version in
+`extension/manifest.json`, add an entry to `CHANGELOG.md`, build `VHL-Text-Overlay.zip`,
+write release notes from the commit messages (grouped into New, Fixes, Look and feel,
+Docs, Maintenance) and publish the release.
+
+Other release commands: `npm run build` (just the zip, in `dist/`), `npm run notes`
+(just the notes), `node scripts/release.mjs bump patch --dry-run` (preview a version
+bump and changelog entry without changing anything).
+
+`npm run screenshots` regenerates the README pictures in `docs/images/` (English and
+Spanish Chrome) from a sample page.
