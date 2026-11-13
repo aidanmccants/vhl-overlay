@@ -121,7 +121,7 @@ Upload these from this folder. They were made from the real extension by
 |---|---|---|
 | Store icon (required) | [`store-icon-128.png`](store-icon-128.png) | 128×128 (96px artwork + 16px transparent padding, as Google asks) |
 | Screenshot 1 | [`screenshot-1.png`](screenshot-1.png): typing answers | 1280×800 |
-| Screenshot 2 | [`screenshot-2.png`](screenshot-2.png): verb endings highlighted | 1280×800 |
+| Screenshot 2 | [`screenshot-2.png`](screenshot-2.png): all 3 ways to highlight verb endings (type `>`, select + color, highlighter) | 1280×800 |
 | Screenshot 3 | [`screenshot-3.png`](screenshot-3.png): pen mode | 1280×800 |
 | Screenshot 4 | [`screenshot-4.png`](screenshot-4.png): copy or download a picture | 1280×800 |
 | Screenshot 5 | [`screenshot-5.png`](screenshot-5.png): the built-in tour | 1280×800 |

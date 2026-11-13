@@ -107,10 +107,57 @@ await scene('Type your answers right on the textbook page', 'type');
 await fill(['hablo', 'comes', 'vivimos', 'estudian', 'bailan']);
 await shot(1);
 
-// 2. Verb endings highlighted (typed as habl>o), highlighter tool lit
-await scene('Highlight verb endings: type habl>o to get hablo', 'highlighter');
-await fill(['habl>o', 'com>es', 'viv>imos', 'estudi>an', 'bail>an']);
-await sr('.panel .markbtn').click();
+// 2. All three ways to highlight a verb ending, one per answer, with numbered labels.
+await scene('Highlight verb endings 3 ways', 'highlighter');
+{
+  const bl = await blanks();
+  const typeAt = async (i, text) => {
+    await tab.mouse.click(bl[i].x + 14, bl[i].y + bl[i].h / 2 - 2);
+    await tab.keyboard.type(text);
+  };
+  // (1) type ">" before the ending
+  await typeAt(0, 'habl>o');
+  // (2) like Word: select the letters, click a color
+  await typeAt(1, 'comes');
+  await tab.keyboard.press('Shift+ArrowLeft');
+  await tab.keyboard.press('Shift+ArrowLeft');
+  await sr('.panel .swatch[data-color="green"]').click();
+  await wait(200);
+  await typeAt(2, 'vivimos');
+  await typeAt(3, 'estudi>an');
+  await typeAt(4, 'bail>an');
+  await tab.keyboard.press('Escape');
+  // (3) the highlighter: drag across the letters (orange marker)
+  await sr('.panel .markbtn').click();
+  await sr('.panel .swatch[data-color="orange"]').click();
+  await wait(200);
+  const span = await sr('.note .text').nth(2).evaluate((t) => {
+    const n = t.firstChild;
+    const r = document.createRange();
+    const at = (i) => { r.setStart(n, i); r.setEnd(n, i + 1); return r.getBoundingClientRect(); };
+    const a = at(3), z = at(6);
+    return { x1: a.left + 2, x2: z.right - 2, y: (a.top + a.bottom) / 2 };
+  });
+  await tab.mouse.move(span.x1, span.y);
+  await tab.mouse.down();
+  await tab.mouse.move(span.x2, span.y, { steps: 6 });
+  await tab.mouse.up();
+  // Numbered labels in the margin, next to each answer.
+  const notes = await sr('.note .text').evaluateAll((ts) => ts.slice(0, 3).map((t) => { const r = t.getBoundingClientRect(); return r.top + r.height / 2; }));
+  const pageRight = await tab.locator('#page').evaluate((e) => e.getBoundingClientRect().right);
+  await tab.evaluate(({ ys, x, labels }) => {
+    labels.forEach((html, i) => {
+      const d = document.createElement('div');
+      d.innerHTML = `<b style="display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;background:#c60e30;color:#fff;font:700 13px/1 system-ui">${i + 1}</b>${html}`;
+      d.style.cssText = `position:fixed;left:${x}px;top:${ys[i] - 17}px;display:flex;align-items:center;gap:8px;padding:6px 12px 6px 7px;border-radius:999px;background:#fff;color:#111827;font:600 14px/1.2 -apple-system,'Segoe UI',Inter,Roboto,sans-serif;box-shadow:0 4px 14px rgba(0,0,0,.18);white-space:nowrap;z-index:4`;
+      document.body.appendChild(d);
+    });
+  }, { ys: notes, x: pageRight - 150, labels: [
+    'Type <code style="font:600 13px ui-monospace,monospace;background:#f3f4f6;padding:1px 5px;border-radius:5px">habl&gt;o</code>',
+    'Select letters, click a color',
+    'Highlighter: click or drag',
+  ] });
+}
 await tab.mouse.move(940, 590);
 await wait(700);
 await shot(2);
