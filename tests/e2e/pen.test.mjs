@@ -21,7 +21,12 @@ async function pen(pts, force = 0.5) {
 const line = (x, y, n = 25) => Array.from({ length: n }, (_, i) => [x + i * 6, y]);
 const strokeCount = (page) => ui(page, '.ink').count();
 const strokeBox = (page, i) => ui(page, '.ink path').nth(i).boundingBox();
-const mode = (page, m) => ui(page, `.modes button[data-mode="${m}"]`).click();
+// Pick a mode and wait until the page has really switched (no fixed sleeps: CI can be slow).
+async function mode(page, m) {
+  await ui(page, `.modes button[data-mode="${m}"][aria-pressed="false"]`).click();
+  await ui(page, `.modes button[data-mode="${m}"][aria-pressed="true"]`).waitFor();
+  await ui(page, m === 'pen' ? '.layer.drawing' : '.layer:not(.drawing)').waitFor({ state: 'attached' });
+}
 
 test('the mode selector has Off, Pen and Typing, and Typing is on at first', async () => {
   const { page, sw } = b;

@@ -240,6 +240,14 @@ export const MUTANTS = [
     tests: [T('marks')],
   },
   {
+    id: 'highlighter-ignores-selection',
+    why: 'selecting letters and clicking the highlighter does not mark them',
+    file: 'background.js',
+    find: "const marked = await chrome.tabs.sendMessage(tab.id, { type: 'paint', color: msg.color, highlighter: true }).catch(() => false);",
+    replace: 'const marked = false;',
+    tests: [T('marks')],
+  },
+  {
     id: 'mark-button-grows',
     why: 'turning on the 🖍 highlighter makes its button bigger and pushes the toolbar around',
     file: 'content.js',

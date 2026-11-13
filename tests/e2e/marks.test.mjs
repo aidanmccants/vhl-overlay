@@ -205,3 +205,31 @@ test('Ctrl+Z undoes marks and typing one step at a time, and Ctrl+Shift+Z redoes
   assert.deepEqual(await last(page), [['hac', null], ['e', 'orange']]);
   await page.keyboard.press('Escape');
 });
+
+test('select letters, then click the highlighter: they get marked, and you keep typing', async () => {
+  const { page } = b;
+  // (the marker is still orange from the highlighter test)
+  const fr = await page.locator('#frame').boundingBox();
+  await page.mouse.click(fr.x + fr.width + 30, fr.y + 30); // the empty page to the right of the frame
+  await page.keyboard.type('limpie');
+  await page.keyboard.press('Shift+ArrowLeft');
+  await ui(page, '.panel .markbtn').click();
+  await page.waitForTimeout(200);
+  assert.deepEqual(await last(page), [['limpi', null], ['e', 'orange']]);
+  assert.equal(await ui(page, '.panel .markbtn').getAttribute('aria-pressed'), 'false', 'still typing, not in highlighter mode');
+  assert.equal(await ui(page, '.modes button[data-mode="typing"]').getAttribute('aria-pressed'), 'true');
+  // The letters stay selected: clicking again takes the mark off.
+  await ui(page, '.panel .markbtn').click();
+  await page.waitForTimeout(200);
+  assert.deepEqual(await last(page), [['limpie', null]]);
+  // Typing carries on in the same box.
+  await page.keyboard.press('End');
+  await page.keyboard.type('s');
+  assert.deepEqual(await last(page), [['limpies', null]]);
+  // With nothing selected, the button turns highlighter mode on, as before.
+  await page.keyboard.press('Escape');
+  await ui(page, '.panel .markbtn').click();
+  await page.waitForTimeout(200);
+  assert.equal(await ui(page, '.panel .markbtn').getAttribute('aria-pressed'), 'true');
+  await ui(page, '.modes button[data-mode="typing"]').click();
+});

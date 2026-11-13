@@ -571,7 +571,9 @@
     });
     ui.mark = btn('', L('Highlighter: click or drag across letters to mark them (click again to unmark)',
       'Marcador: haga clic o arrastre sobre las letras para marcarlas (otro clic las desmarca)'), () =>
-      sendState(state.mark ? { mark: false, typing: true } : { mark: true, typing: false, pen: false }), 'markbtn', 'highlighter');
+      // With letters selected it marks them; otherwise it turns highlighter mode on/off.
+      state.mark ? sendState({ mark: false, typing: true }) : chrome.runtime.sendMessage({ cmd: 'highlight', color: markColor() }),
+    'markbtn', 'highlighter');
     ui.eraser = btn('', L('Eraser: touch a drawing to erase it (a Surface Pen’s eraser end works too)',
       'Borrador: toque un dibujo para borrarlo (también funciona el extremo borrador del lápiz)'), () =>
       sendState(state.pen && state.eraser ? { eraser: false } : { eraser: true, pen: true, typing: false, mark: false }), 'erasebtn', 'eraser');
@@ -742,8 +744,8 @@
       target: () => [ui.mark],
       title: L('Highlight letters', 'Resaltar letras'),
       body: L(
-        `<p>Show a verb ending in another color, like <b>limpi<u style="color:#b91c1c">e</u></b>. Three ways:</p><p>• Type ${kbd('&gt;')} before the letters: <b>hac&gt;er</b> gives <b>hac<u style="color:#b91c1c">er</u></b>. A space ends it (${kbd('&gt;&gt;')} types a real &gt;).<br>• Select letters in your text, then click a color dot.<br>• Click <b>{{highlighter}}</b>, then click or drag across letters. Click again to unmark.</p>`,
-        `<p>Muestre una terminación verbal en otro color, como <b>limpi<u style="color:#b91c1c">e</u></b>. Tres maneras:</p><p>• Escriba ${kbd('&gt;')} antes de las letras: <b>hac&gt;er</b> da <b>hac<u style="color:#b91c1c">er</u></b>. Un espacio lo termina (${kbd('&gt;&gt;')} escribe un &gt; de verdad).<br>• Seleccione letras de su texto y pulse un punto de color.<br>• Pulse <b>{{highlighter}}</b> y haga clic o arrastre sobre las letras. Otro clic las desmarca.</p>`
+        `<p>Show a verb ending in another color, like <b>limpi<u style="color:#b91c1c">e</u></b>. Three ways:</p><p>• Type ${kbd('&gt;')} before the letters: <b>hac&gt;er</b> gives <b>hac<u style="color:#b91c1c">er</u></b>. A space ends it (${kbd('&gt;&gt;')} types a real &gt;).<br>• Select letters in your text, then click a color dot.<br>• Click <b>{{highlighter}}</b>, then click or drag across letters (or select letters first, then click it). Click again to unmark.</p>`,
+        `<p>Muestre una terminación verbal en otro color, como <b>limpi<u style="color:#b91c1c">e</u></b>. Tres maneras:</p><p>• Escriba ${kbd('&gt;')} antes de las letras: <b>hac&gt;er</b> da <b>hac<u style="color:#b91c1c">er</u></b>. Un espacio lo termina (${kbd('&gt;&gt;')} escribe un &gt; de verdad).<br>• Seleccione letras de su texto y pulse un punto de color.<br>• Pulse <b>{{highlighter}}</b> y haga clic o arrastre sobre las letras (o seleccione letras y luego púlselo). Otro clic las desmarca.</p>`
       ),
     },
     {
@@ -1901,7 +1903,9 @@
   }
 
   // Word-style: letters selected in the box you're editing take the clicked color.
-  function paintSelection(colorId) {
+  // highlighter = true: the highlighter button with letters selected marks them in the marker
+  // color, or unmarks them if they already have it (like Word's highlighter button).
+  function paintSelection(colorId, highlighter) {
     const note = selected;
     if (!note || !notes.has(note) || !root || root.activeElement !== note.textEl) return false;
     const sel = getSel();
@@ -1909,7 +1913,12 @@
     const [a, b] = selOffsets(note.textEl, sel);
     if (a < 0 || b <= a) return false;
     remember(note);
-    colorRange(note, a, b, colorId === note.color ? null : colorId, true);
+    let color = colorId === note.color ? null : colorId;
+    if (highlighter) {
+      const chars = getChars(note.textEl).slice(a, b).filter((c) => c.ch !== '\n');
+      color = chars.every((c) => c.c === colorId) ? null : colorId;
+    }
+    colorRange(note, a, b, color, true);
     return true;
   }
 
@@ -2020,7 +2029,7 @@
       case 'paint':
         // Only the frame holding selected letters answers; if none does, the
         // background makes it the color for the whole box instead.
-        if (paintSelection(msg.color)) sendResponse(true);
+        if (paintSelection(msg.color, msg.highlighter)) sendResponse(true);
         break;
       case 'state': {
         state = msg.state;

@@ -128,6 +128,13 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
         sendResponse(painted ? null : await setState(tab.id, { color: msg.color }));
         break;
       }
+      case 'highlight': {
+        // The highlighter button: selected letters get marked (the frame holding them
+        // answers); with nothing selected, highlighter mode turns on.
+        const marked = await chrome.tabs.sendMessage(tab.id, { type: 'paint', color: msg.color, highlighter: true }).catch(() => false);
+        sendResponse(marked ? null : await setState(tab.id, { mark: true, typing: false, pen: false }));
+        break;
+      }
       case 'clear-all':
         broadcast(tab.id, { type: 'clear-all' });
         sendResponse(true);

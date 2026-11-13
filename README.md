@@ -176,6 +176,9 @@ There are three ways to do it. Use whichever you like:
   Click the **highlighter** button again (or **Typing**) to go back
   to typing.
 
+  **Shortcut:** select letters first, then click the **highlighter** button. Just those
+  letters get marked in the marker color, and you can keep typing. Do it again to unmark them.
+
 ### Draw with a pen (or a mouse, or your finger)
 
 Click **Pen** on the top bar, then draw on the page: circle an answer, underline a
@@ -455,6 +458,9 @@ Hay tres maneras. Use la que prefiera:
   principio, rojo). Pulse el **marcador** otra vez
   (o **Typing**) para volver a escribir.
 
+  **Atajo:** seleccione primero las letras y luego pulse el **marcador**. Solo esas letras se
+  marcan con el color del marcador, y puede seguir escribiendo. Repítalo para desmarcarlas.
+
 ### Dibujar con un lápiz (o con el ratón o el dedo)
 
 Pulse **Lápiz** en la barra de arriba y dibuje en la página: rodee una respuesta,
@@ -563,7 +569,7 @@ Needs [Node.js](https://nodejs.org) 20 or newer. Run `npm install` once, then
 | `npm run test:unit` | Fast tests for the release tool (zip, version bumps, release notes) |
 | `npm run test:e2e` | Loads the real extension in Chromium and tests every feature on a sample page (`tests/fixtures`) |
 | `npm test` | All of the above |
-| `npm run test:mutations` | Plants 40 realistic bugs, one at a time, and fails if the tests miss any of them |
+| `npm run test:mutations` | Plants 41 realistic bugs, one at a time, and fails if the tests miss any of them |
 
 The mutation check is what keeps the tests honest: if a test stops really checking its
 feature, a planted bug gets through and the check fails. Each mutant is listed in

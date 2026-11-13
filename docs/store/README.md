@@ -73,7 +73,7 @@ TYPE
 HIGHLIGHT VERB ENDINGS
 • Type ">" before the letters to mark them: habl>o gives hablo with the "o" marked.
 • Or select letters and click a color, like in Word.
-• Or use the highlighter: click or drag across letters.
+• Or use the highlighter: click or drag across letters, or select letters and click the highlighter.
 • Marked letters are bold and underlined, so they show even in black-and-white printouts.
 
 DRAW
