@@ -8,14 +8,14 @@
 
 When you have your textbook open on **reader.vhlcentral.com**, this tool lets you
 click anywhere on the page and type. You can use it to fill in blanks, add notes, or
-show answers. When you're finished, you can copy a picture of the page with your
-writing on it and paste it anywhere.
+show answers. When you're finished, you can take a picture of the page with your
+writing on it, then copy it or download it.
 
 <img src="docs/images/use-2-type-en.png" width="600" alt="A textbook page with the blanks filled in using the tool">
 
 Your writing is **not saved** and doesn't change the real textbook. It sits on top of the
 page, like a clear sheet of plastic, and disappears when you close or refresh the page.
-To keep your work, copy a picture of it (see step 6 below).
+To keep your work, take a picture of it (see step 6 below).
 
 It works in the **Google Chrome** web browser on a computer. It does not work on phones
 or tablets.
@@ -126,7 +126,7 @@ your writing gets a thin outline so you can still read it.
 | | Button | What it does |
 |---|---|---|
 | **1** | **✏️ Typing: on / off** | While it's **on**, clicking the page adds writing. Turn it **off** to use the textbook normally (turn pages, click buttons). Your writing stays on the page. |
-| **2** | **📷 Copy** | Copies a picture of the page with your writing (see below). |
+| **2** | **📷 Screenshot** | Takes a picture of the page with your writing, to copy or download (see below). |
 | **3** | **🗑 Clear** | Erases all of your writing on the page. |
 | **4** | **?** | Shows the tour of every feature again. |
 | **5** | **✕** | Hides both toolbars. Your writing stays. Click the **T** button to bring them back. |
@@ -146,24 +146,28 @@ You can move the top bar by dragging the dots **⋮⋮** at its left end.
 > **Tip:** To change the size or color of something you already wrote, click it first,
 > then click **A+**, **A−**, or a color.
 
-### 6. Keep your work: copy a picture
+### 6. Keep your work: take a picture
 
-1. Click **📷 Copy** (or press **Alt + Shift + S**).
+1. Click **📷 Screenshot** (or press **Alt + Shift + S**).
 2. Chrome asks if you want to **share this tab**. Click **Share** (or **Allow**).
    Nothing is recorded or sent anywhere: the tool takes one picture and stops sharing
    right away.
-3. This message appears at the bottom of the page:
+3. A small card appears at the bottom of the page with a preview of your picture:
 
-   <img src="docs/images/use-6-saved-en.png" width="360" alt="The message: Screenshot copied. Paste it anywhere with Ctrl+V.">
+   <img src="docs/images/use-6-saved-en.png" width="360" alt="The Screenshot ready card with a preview and Copy and Download buttons">
 
-4. **Paste** the picture wherever you want it, for example an email, a Google Doc, Word,
-   or an assignment: press **Ctrl + V** (on a Mac, **⌘ Command + V**).
+4. Choose what to do with it. You can do both:
+   - **Copy**: then **paste** the picture wherever you want it, for example an email, a
+     Google Doc, Word, or an assignment. Press **Ctrl + V** (on a Mac, **⌘ Command + V**).
+     The picture is only on your clipboard until you copy something else, so paste it
+     right away.
+   - **Download**: saves the picture as a file in your **Downloads** folder. It's named
+     with the date and time, for example `vhl-2026-11-13_14-55-02.png`.
+
+   Click **✕** to close the card.
 
 The toolbars and the small blue and red tabs are left out of the picture. The picture only
 includes what you can see on the screen, so scroll first to show the part you want.
-
-> **Tip:** The picture is only on your clipboard until you copy something else, so paste
-> it right away.
 
 ---
 
@@ -173,15 +177,15 @@ includes what you can see on the screen, so scroll first to show the part you wa
 You chose the wrong folder in Step 2. Click **Load unpacked** again and pick the folder
 named **VHL Text Overlay**. It has a folder named **icons** inside it.
 
-**I clicked 📷 Copy but nothing happened, or it says "Screenshot cancelled."**
+**I clicked 📷 Screenshot but nothing happened, or it says "Screenshot cancelled."**
 When Chrome asks to share this tab, click **Share** (or **Allow**), not **Cancel**.
 
-**It says "Screenshot ready" with a "Copy to clipboard" button.**
-Click that button. (This happens if you clicked somewhere else while Chrome was asking.)
+**It says "Couldn't copy."**
+Click **Copy** again. If it still doesn't work, click **Download** instead.
 
 **Nothing appears when I paste.**
-Make sure you saw the "Screenshot copied" message, then paste with **Ctrl + V**
-(**⌘ Command + V** on a Mac) right away, before copying anything else.
+Make sure the **Copy** button turned green and says **✓ Copied**, then paste with
+**Ctrl + V** (**⌘ Command + V** on a Mac) right away, before copying anything else.
 
 **I can't click the textbook's buttons or turn the page.**
 Typing is on, so your clicks add writing instead. Click **✏️ Typing: on** to turn it
@@ -189,7 +193,7 @@ off. Click it again when you want to write.
 
 **My writing disappeared.**
 Refreshing the page or closing the tab erases your writing. Sometimes turning to a new
-page also hides the writing from the old page. Remember to click **📷 Copy** and paste your picture before you
+page also hides the writing from the old page. Remember to take a picture with **📷 Screenshot** before you
 move on.
 
 **The T button does nothing.**
@@ -200,7 +204,7 @@ This is normal for tools added this way. You can close the message.
 
 **Keyboard shortcuts (optional)**
 - **Alt + Shift + T**: turn the tool on or off (same as the **T** button)
-- **Alt + Shift + S**: copy a picture (same as **📷 Copy**)
+- **Alt + Shift + S**: take a picture (same as **📷 Screenshot**)
 
 On a Mac, **Alt** is the **Option** key.
 
@@ -223,14 +227,14 @@ round arrow ↻ on the **VHL Text Overlay** box.
 
 Con el libro abierto en **reader.vhlcentral.com**, esta herramienta le permite hacer clic
 en cualquier parte de la página y escribir. Sirve para completar espacios en blanco,
-añadir notas o mostrar respuestas. Al terminar, puede copiar una imagen de la página
-con lo que escribió y pegarla donde quiera.
+añadir notas o mostrar respuestas. Al terminar, puede sacar una imagen de la página
+con lo que escribió y copiarla o descargarla.
 
 <img src="docs/images/use-2-type-es.png" width="600" alt="Una página del libro con los espacios en blanco completados con la herramienta">
 
 Lo que escribe **no se guarda** y no cambia el libro de verdad. Queda encima de la
 página, como una hoja de plástico transparente, y desaparece al cerrar o recargar la
-página. Para conservar su trabajo, copie una imagen (vea el paso 6).
+página. Para conservar su trabajo, saque una imagen (vea el paso 6).
 
 Funciona en el navegador **Google Chrome** en un ordenador. No funciona en móviles ni
 tabletas.
@@ -346,7 +350,7 @@ muchos colores, el texto lleva un contorno fino para que se pueda leer.
 | | Botón | Qué hace |
 |---|---|---|
 | **1** | **✏️ Typing: on / off** | Cuando está en **on** (activado), al hacer clic en la página se añade texto. Póngalo en **off** (desactivado) para usar el libro con normalidad (pasar páginas, pulsar botones). Su texto sigue en la página. |
-| **2** | **📷 Copy** | Copia una imagen de la página con su texto (vea abajo). |
+| **2** | **📷 Screenshot** | Saca una imagen de la página con su texto para copiarla o descargarla (vea abajo). |
 | **3** | **🗑 Clear** | Borra todo lo que escribió en la página. |
 | **4** | **?** | Vuelve a mostrar el recorrido de todas las funciones. |
 | **5** | **✕** | Oculta las dos barras. Su texto se queda. Haga clic en el botón **T** para que vuelvan. |
@@ -366,25 +370,28 @@ Puede mover la barra de arriba arrastrando los puntos **⋮⋮** de su lado izqu
 > **Consejo:** para cambiar el tamaño o el color de algo que ya escribió, haga clic en
 > ello primero y luego en **A+**, **A−** o un color.
 
-### 6. Conserve su trabajo: copie una imagen
+### 6. Conserve su trabajo: saque una imagen
 
-1. Haga clic en **📷 Copy** (o pulse **Alt + Mayús + S**).
+1. Haga clic en **📷 Screenshot** (o pulse **Alt + Mayús + S**).
 2. Chrome pregunta si quiere **compartir esta pestaña**. Haga clic en **Compartir** (o
    **Permitir**). No se graba ni se envía nada: la herramienta toma una sola imagen y deja
    de compartir enseguida.
-3. Aparece este mensaje abajo en la página ("Captura copiada. Péguela donde quiera con
-   Ctrl+V"):
+3. Aparece una pequeña tarjeta abajo en la página con una vista previa de la imagen:
 
-   <img src="docs/images/use-6-saved-es.png" width="360" alt="El mensaje: Screenshot copied. Paste it anywhere with Ctrl+V.">
+   <img src="docs/images/use-6-saved-es.png" width="360" alt="La tarjeta Captura lista con una vista previa y los botones Copiar y Descargar">
 
-4. **Pegue** la imagen donde la quiera, por ejemplo en un correo, un documento de Google,
-   Word o una tarea: pulse **Ctrl + V** (en un Mac, **⌘ Comando + V**).
+4. Elija qué hacer con ella. Puede hacer las dos cosas:
+   - **Copiar**: luego **pegue** la imagen donde la quiera, por ejemplo en un correo, un
+     documento de Google, Word o una tarea. Pulse **Ctrl + V** (en un Mac,
+     **⌘ Comando + V**). La imagen solo se queda en el portapapeles hasta que copie otra
+     cosa, así que péguela enseguida.
+   - **Descargar**: guarda la imagen como archivo en su carpeta **Descargas**. Lleva la
+     fecha y la hora en el nombre, por ejemplo `vhl-2026-11-13_14-55-02.png`.
+
+   Pulse **✕** para cerrar la tarjeta.
 
 Las barras de botones y las pestañas azules y rojas no salen en la imagen. La imagen solo
 incluye lo que se ve en la pantalla, así que desplácese primero hasta la parte que quiera.
-
-> **Consejo:** la imagen solo se queda en el portapapeles hasta que copie otra cosa, así
-> que péguela enseguida.
 
 ---
 
@@ -394,16 +401,16 @@ incluye lo que se ve en la pantalla, así que desplácese primero hasta la parte
 Eligió una carpeta equivocada en el Paso 2. Pulse otra vez **Cargar descomprimida** y
 elija la carpeta llamada **VHL Text Overlay**. Dentro tiene una carpeta llamada **icons**.
 
-**Pulsé 📷 Copy y no pasó nada, o sale "Screenshot cancelled" (captura cancelada).**
+**Pulsé 📷 Screenshot y no pasó nada, o sale "Captura cancelada".**
 Cuando Chrome pregunte si quiere compartir esta pestaña, pulse **Compartir** (o
 **Permitir**), no **Cancelar**.
 
-**Sale "Screenshot ready" (captura lista) con un botón "Copy to clipboard".**
-Pulse ese botón. (Pasa si hizo clic en otro sitio mientras Chrome preguntaba.)
+**Sale "No se pudo copiar".**
+Pulse **Copiar** otra vez. Si sigue sin funcionar, pulse **Descargar**.
 
 **Al pegar no aparece nada.**
-Compruebe que vio el mensaje "Screenshot copied" y pegue con **Ctrl + V** (**⌘ Comando + V**
-en un Mac) enseguida, antes de copiar otra cosa.
+Compruebe que el botón **Copiar** se puso verde y dice **✓ Copiada**, y pegue con
+**Ctrl + V** (**⌘ Comando + V** en un Mac) enseguida, antes de copiar otra cosa.
 
 **No puedo pulsar los botones del libro ni pasar de página.**
 La escritura está activada, así que sus clics añaden texto. Pulse **✏️ Typing: on** para
@@ -411,7 +418,7 @@ desactivarla. Púlselo otra vez cuando quiera escribir.
 
 **Mi texto ha desaparecido.**
 Recargar la página o cerrar la pestaña borra lo que escribió. A veces, al pasar de
-página también se oculta el texto de la página anterior. Recuerde pulsar **📷 Copy** y pegar la imagen
+página también se oculta el texto de la página anterior. Recuerde sacar una imagen con **📷 Screenshot**
 antes de seguir.
 
 **El botón T no hace nada.**
@@ -422,7 +429,7 @@ Es normal con las herramientas añadidas de esta forma. Puede cerrar el aviso.
 
 **Atajos de teclado (opcional)**
 - **Alt + Mayús + T**: activar o desactivar la herramienta (igual que el botón **T**)
-- **Alt + Mayús + S**: copiar una imagen (igual que **📷 Copy**)
+- **Alt + Mayús + S**: sacar una imagen (igual que **📷 Screenshot**)
 
 En un Mac, **Alt** es la tecla **Opción**.
 

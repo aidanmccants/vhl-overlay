@@ -270,6 +270,29 @@
     }
     .toast.hidden { transform: translate(-50%, 24px) scale(.92); }
     .toast.error { color: #fff; background: rgba(215, 38, 38, .82); }
+
+    /* screenshot card: preview + Copy / Download */
+    .shotcard {
+      left: 50%; bottom: 24px; transform: translateX(-50%); width: min(340px, calc(100vw - 24px));
+      box-sizing: border-box; padding: 12px; border-radius: 26px; background: var(--glass-strong);
+    }
+    .shotcard.hidden { transform: translate(-50%, 30px) scale(.9); }
+    .shotcard img {
+      display: block; width: 100%; max-height: 190px; object-fit: contain; border-radius: 16px;
+      background: rgba(0, 0, 0, .06); box-shadow: 0 2px 10px rgba(0, 0, 0, .15);
+    }
+    .shotcard:not(.hidden) img { animation: develop .6s var(--ease) both; }
+    @keyframes develop { from { opacity: 0; transform: scale(1.04); filter: brightness(1.6) blur(4px); } }
+    .shotcard .title { display: flex; align-items: center; gap: 8px; margin: 2px 4px 10px; font: 600 14px/1.2 var(--font); }
+    .shotcard .title .grow { flex: 1; }
+    .shotcard .title button { width: 28px; height: 28px; padding: 0; font-size: 12px; }
+    .shotcard .actions { display: flex; gap: 8px; margin-top: 12px; }
+    .shotcard .actions button { flex: 1; padding: 10px 12px; font-weight: 600; font-size: 13.5px; }
+    .shotcard .actions button.primary { background: linear-gradient(180deg, #3b9bff, #0a7aff); color: #fff;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, .45), 0 4px 14px rgba(10, 132, 255, .4); }
+    .shotcard .actions button.done { background: rgba(52, 199, 89, .9); color: #fff; }
+    .shotcard .status { margin: 10px 4px 0; min-height: 1.3em; font: 13px/1.35 var(--font); color: var(--ink-soft); }
+    .shotcard .status:empty { display: none; }
     .toast button { padding: 6px 12px; font-weight: 600; background: var(--accent); color: #fff; }
 
     /* ---------- first-time tour ---------- */
@@ -379,7 +402,7 @@
       sendState({ typing: !state.typing })
     );
 
-    ui.shot = btn('📷 Copy', 'Copy a screenshot with your text to the clipboard (Alt+Shift+S)', () => takeScreenshot());
+    ui.shot = btn('📷 Screenshot', 'Take a screenshot with your text, then copy or download it (Alt+Shift+S)', () => takeScreenshot());
     ui.clear = btn('🗑 Clear', 'Remove all text boxes', () => {
       if (confirm('Remove all of your typed text from this page?')) chrome.runtime.sendMessage({ cmd: 'clear-all' });
     });
@@ -549,10 +572,10 @@
     },
     {
       target: () => [ui.shot],
-      title: L('Copy a picture of your work', 'Copiar una imagen de su trabajo'),
+      title: L('Save a picture of your work', 'Guardar una imagen de su trabajo'),
       body: L(
-        `<p>Click <b>📷 Copy</b>. Chrome asks to <b>share this tab</b>: click <b>Share</b>. Nothing is recorded or sent anywhere.</p><p>Then paste the picture anywhere with ${kbd(MOD + '+V')}.</p><p>Shortcut: ${kbd('Alt+Shift+S')}</p>`,
-        `<p>Pulse <b>📷 Copy</b>. Chrome pregunta si quiere <b>compartir esta pestaña</b>: pulse <b>Compartir</b>. No se graba ni se envía nada.</p><p>Luego pegue la imagen donde quiera con ${kbd(MOD + '+V')}.</p><p>Atajo: ${kbd('Alt+Mayús+S')}</p>`
+        `<p>Click <b>📷 Screenshot</b>. Chrome asks to <b>share this tab</b>: click <b>Share</b>. Nothing is recorded or sent anywhere.</p><p>Then choose <b>Copy</b> (paste it anywhere with ${kbd(MOD + '+V')}) or <b>Download</b> (saves a picture file).</p><p>Shortcut: ${kbd('Alt+Shift+S')}</p>`,
+        `<p>Pulse <b>📷 Screenshot</b>. Chrome pregunta si quiere <b>compartir esta pestaña</b>: pulse <b>Compartir</b>. No se graba ni se envía nada.</p><p>Luego elija <b>Copiar</b> (péguela donde quiera con ${kbd(MOD + '+V')}) o <b>Descargar</b> (guarda un archivo de imagen).</p><p>Atajo: ${kbd('Alt+Mayús+S')}</p>`
       ),
     },
     {
@@ -737,6 +760,7 @@
     if (shooting) return;
     shooting = true;
     ensureUI();
+    hideShotCard();
     let stream;
     try {
       // Chrome asks "Share this tab?" (this tab is offered first). Nothing is recorded
@@ -751,7 +775,12 @@
       });
     } catch (err) {
       shooting = false;
-      toast(err && err.name === 'NotAllowedError' ? 'Screenshot cancelled.' : "Couldn't start the screenshot: " + (err && err.message), err && err.name !== 'NotAllowedError');
+      toast(
+        err && err.name === 'NotAllowedError'
+          ? L('Screenshot cancelled.', 'Captura cancelada.')
+          : L("Couldn't start the screenshot: ", 'No se pudo hacer la captura: ') + (err && err.message),
+        err && err.name !== 'NotAllowedError'
+      );
       return;
     }
     let blob = null;
@@ -761,18 +790,16 @@
       video.playsInline = true;
       video.srcObject = stream;
       await video.play();
+      const frames = watchFrames(video);
       chrome.runtime.sendMessage({ cmd: 'capture', on: true }); // hide toolbars + outlines in every frame
       captureStart();
-      // Give the page a moment to hide our UI (and settle after Chrome's "sharing" bar appears).
-      await sleep(450);
-      await new Promise((res) => {
-        if (!video.requestVideoFrameCallback) return res();
-        const t = setTimeout(res, 400);
-        video.requestVideoFrameCallback(() => {
-          clearTimeout(t);
-          res();
-        });
-      });
+      // Wait until the toolbars are really gone from the screen, then use the first
+      // video frame captured after that (frames recorded earlier still show them).
+      await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+      const hiddenAt = performance.now();
+      await sleep(250); // also lets the page settle after Chrome's "sharing" bar appears
+      await waitFreshFrame(frames, hiddenAt);
+      frames.stop = true;
       const canvas = document.createElement('canvas');
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
@@ -790,20 +817,101 @@
       toast("Couldn't take the screenshot. Please try again.", true);
       return;
     }
-    await copyImage(blob);
+    showShotCard(blob);
+  }
+
+  // Keep track of when the newest video frame was captured.
+  function watchFrames(video) {
+    const w = { capture: -1, present: -1, stop: false };
+    if (!video.requestVideoFrameCallback) return w;
+    const cb = (now, meta) => {
+      w.capture = meta.captureTime ?? -1;
+      w.present = now;
+      if (!w.stop) video.requestVideoFrameCallback(cb);
+    };
+    video.requestVideoFrameCallback(cb);
+    return w;
+  }
+
+  // Wait (up to 2 s) until the video shows a frame captured after `hiddenAt`.
+  async function waitFreshFrame(w, hiddenAt) {
+    const t0 = performance.now();
+    while (performance.now() - t0 < 2000) {
+      if (w.capture >= 0 ? w.capture >= hiddenAt : w.present >= hiddenAt + 150) return;
+      await sleep(30);
+    }
   }
 
   const PASTE_HINT = /Mac|iPhone|iPad/.test(navigator.platform) ? '⌘V' : 'Ctrl+V';
 
-  async function copyImage(blob) {
-    try {
-      window.focus();
-      await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
-      toast(`✓ Screenshot copied. Paste it anywhere with ${PASTE_HINT}.`);
-    } catch (err) {
-      // Usually means the page lost focus during the share prompt; one more click fixes it.
-      toast('Screenshot ready.', false, { label: 'Copy to clipboard', onClick: () => copyImage(blob) });
+  // After a screenshot: a small card with a preview and two choices.
+  let shotCard = null;
+  let shotUrl = null;
+  let shotTimer = null;
+
+  function stamp() {
+    const d = new Date();
+    const p = (n) => String(n).padStart(2, '0');
+    return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}_${p(d.getHours())}-${p(d.getMinutes())}-${p(d.getSeconds())}`;
+  }
+
+  function hideShotCard() {
+    clearTimeout(shotTimer);
+    if (shotCard) shotCard.classList.add('hidden');
+  }
+
+  function showShotCard(blob) {
+    hideShotCard();
+    if (shotUrl) URL.revokeObjectURL(shotUrl);
+    shotUrl = URL.createObjectURL(blob);
+    const name = `vhl-${stamp()}.png`;
+    if (!shotCard) {
+      shotCard = document.createElement('div');
+      shotCard.className = 'glass shotcard hidden';
+      shotCard.setAttribute('role', 'dialog');
+      root.appendChild(shotCard);
     }
+    shotCard.innerHTML = '';
+    const title = document.createElement('div');
+    title.className = 'title';
+    title.innerHTML = `<span>${L('📷 Screenshot ready', '📷 Captura lista')}</span><span class="grow"></span>`;
+    title.append(btn('✕', L('Close', 'Cerrar'), hideShotCard));
+    const img = document.createElement('img');
+    img.src = shotUrl;
+    img.alt = L('Screenshot preview', 'Vista previa de la captura');
+    const status = document.createElement('div');
+    status.className = 'status';
+    const actions = document.createElement('div');
+    actions.className = 'actions';
+    const done = (b, label, msg) => {
+      b.textContent = label;
+      b.classList.remove('primary');
+      b.classList.add('done');
+      status.textContent = msg;
+      clearTimeout(shotTimer);
+      shotTimer = setTimeout(hideShotCard, 12000);
+    };
+    const copyBtn = btn(L('Copy', 'Copiar'), L('Copy the picture so you can paste it anywhere', 'Copiar la imagen para pegarla donde quiera'), async () => {
+      try {
+        window.focus();
+        await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+        done(copyBtn, L('✓ Copied', '✓ Copiada'), L(`Paste it anywhere with ${PASTE_HINT}.`, `Péguela donde quiera con ${PASTE_HINT}.`));
+      } catch (err) {
+        status.textContent = L("Couldn't copy. Click Copy again, or use Download.", 'No se pudo copiar. Pulse Copiar otra vez o use Descargar.');
+      }
+    }, 'primary');
+    const dlBtn = btn(L('Download', 'Descargar'), L('Save the picture as a file', 'Guardar la imagen como archivo'), () => {
+      const a = document.createElement('a');
+      a.href = shotUrl;
+      a.download = name;
+      root.appendChild(a);
+      a.click();
+      a.remove();
+      done(dlBtn, L('✓ Downloaded', '✓ Descargada'), L(`Saved to your Downloads folder as ${name}`, `Guardada en Descargas como ${name}`));
+    });
+    actions.append(copyBtn, dlBtn);
+    shotCard.append(title, img, actions, status);
+    shotCard.classList.remove('hidden');
   }
 
   // ---------------------------------------------------------------------------

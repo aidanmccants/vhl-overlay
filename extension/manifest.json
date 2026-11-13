@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "VHL Text Overlay",
   "version": "0.1.0",
-  "description": "Type temporary text on top of the VHL Central textbook reader and copy a screenshot to your clipboard.",
+  "description": "Type temporary text on top of the VHL Central textbook reader, then copy or download a screenshot.",
   "permissions": [
     "activeTab",
     "storage",
