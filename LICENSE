@@ -19,3 +19,32 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+--------------------------------------------------------------------------------
+
+TRADEMARK NOTICE (not part of the MIT License above)
+
+The MIT License above covers the source code only. It does not grant any
+rights to the name "VHL Text Overlay", its logo or icon, or other branding
+assets, including:
+
+  - assets/icon.svg and assets/icon-small.svg
+  - extension/icons/ (icon16.png, icon32.png, icon48.png, icon128.png)
+  - docs/store/ (store icon, screenshots and promotional images)
+
+You may not use the name, logo or branding assets for your own extension,
+product or service, or in a way that suggests it is made or endorsed by the
+author, without written permission. If you publish a modified version, give
+it a different name and icon. You may still refer to the project by name to
+describe it accurately (for example, "based on VHL Text Overlay").
+
+"VHL" and "VHL Central" are trademarks of Vista Higher Learning, Inc.
+VHL Text Overlay is an independent project and is not made by, endorsed by
+or affiliated with Vista Higher Learning.
+
+--------------------------------------------------------------------------------
+
+THIRD-PARTY NOTICES
+
+The icons in extension/icons.js come from Lucide (https://lucide.dev), used
+under the ISC License; see extension/LICENSE-lucide.txt.
