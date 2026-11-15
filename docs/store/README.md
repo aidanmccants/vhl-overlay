@@ -120,7 +120,7 @@ Upload these from this folder. They were made from the real extension by
 | Field | File | Size |
 |---|---|---|
 | Store icon (required) | [`store-icon-128.png`](store-icon-128.png) | 128×128 (96px artwork + 16px transparent padding, as Google asks) |
-| Screenshot 1 | [`screenshot-1.png`](screenshot-1.png): typing answers | 1280×800 |
+| Screenshot 1 | [`screenshot-1.png`](screenshot-1.png): typed answers | 1280×800 |
 | Screenshot 2 | [`screenshot-2.png`](screenshot-2.png): all 3 ways to highlight verb endings (type `>`, select + color, highlighter) | 1280×800 |
 | Screenshot 3 | [`screenshot-3.png`](screenshot-3.png): pen mode | 1280×800 |
 | Screenshot 4 | [`screenshot-4.png`](screenshot-4.png): copy or download a picture | 1280×800 |
@@ -218,7 +218,7 @@ No account is needed. The extension runs on every vhlcentral.com page, including
 
 1. Open https://www.vhlcentral.com/
 2. Click the extension's toolbar button (red "T" icon), or press Alt+Shift+T. A top bar and a side toolbar appear; a short skippable tour starts the first time.
-3. Typing: click anywhere on the page and type. Type habl>o to see the "o" highlighted.
+3. Text: click anywhere on the page and type. Type habl>o to see the "o" highlighted.
 4. Pen: click "Pen" on the top bar and draw with the mouse. Ctrl+Z undoes.
 5. Screenshot: click "Screenshot" and choose this tab when Chrome asks to share it. Then click Copy or Download.
 6. "Off" returns the page to normal. The X button hides the toolbars.

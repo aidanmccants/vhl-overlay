@@ -28,7 +28,7 @@ async function mode(page, m) {
   await ui(page, m === 'pen' ? '.layer.drawing' : '.layer:not(.drawing)').waitFor({ state: 'attached' });
 }
 
-test('the mode selector has Off, Pen and Typing, and Typing is on at first', async () => {
+test('the mode selector has Off, Pen and Text, and Text is on at first', async () => {
   const { page, sw } = b;
   await gotoReader(page, sw);
   const modes = await ui(page, '.modes button').evaluateAll((bs) => bs.map((x) => [x.dataset.mode, x.getAttribute('aria-pressed')]));
@@ -67,6 +67,23 @@ test('ink stays readable: light shade on the dark box', async () => {
   assert.equal(await ui(page, '.ink path').first().getAttribute('fill'), '#93c5fd');
   assert.equal(await ui(page, '.ink path').nth(1).getAttribute('fill'), '#1d4ed8', 'dark blue on the white page');
   assert.equal(await strokeCount(page), 4);
+});
+
+test('ink is one solid color with no outline, even over a picture (text keeps its outline)', async () => {
+  const { page } = b;
+  // A picture-like area: text drawn here gets an outline; ink must not.
+  await page.evaluate(() => {
+    const pic = document.createElement('div');
+    pic.id = 'pic';
+    pic.style.cssText = 'position:fixed;left:600px;top:560px;width:300px;height:80px;background-image:linear-gradient(90deg,#222,#eee,#333,#ddd)';
+    document.body.appendChild(pic);
+  });
+  await pen(line(620, 600, 15));
+  const strokes = await ui(page, '.ink path').evaluateAll((ps) => ps.map((p) => p.getAttribute('stroke')));
+  assert.ok(strokes.length >= 4);
+  assert.deepEqual([...new Set(strokes)], ['none'], 'no outline on any line');
+  await page.keyboard.press('Control+z'); // remove this test line again
+  await page.evaluate(() => document.getElementById('pic').remove());
 });
 
 test('drawings stick to the page when it scrolls', async () => {

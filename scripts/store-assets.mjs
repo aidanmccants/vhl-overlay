@@ -102,7 +102,7 @@ async function penLine(pts) {
 const noteBox = async (i) => { const b = await sr('.note .text').nth(i).boundingBox(); return { x: b.x, y: b.y, w: b.width, h: b.height }; };
 const shot = (n) => tab.screenshot({ path: path.join(OUT, `screenshot-${n}.png`) });
 
-// 1. Typing answers, readable on any background
+// 1. Typed answers, readable on any background
 await scene('Type your answers right on the textbook page', 'type');
 await fill(['hablo', 'comes', 'vivimos', 'estudian', 'bailan']);
 await shot(1);
@@ -196,7 +196,7 @@ await tab.mouse.move(940, 590);
 await wait(1300);
 await shot(4);
 
-// 5. The built-in tour (shows Off / Pen / Typing)
+// 5. The built-in tour (shows Off / Pen / Text)
 await scene('A one-minute tour shows you every feature', 'circle-help');
 await fill(['hablo', 'comes']);
 await sr('.toolbar button[title^="Show the tour"]').click();

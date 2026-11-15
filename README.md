@@ -7,8 +7,8 @@
 **Write on your VHL textbook pages, like writing on sticky notes over the page.**
 
 When you have your textbook open on **reader.vhlcentral.com**, this tool lets you
-click anywhere on the page and type. You can use it to fill in blanks, add notes, or
-show answers. When you're finished, you can take a picture of the page with your
+click anywhere on the page and type, highlight letters, or draw. You can use it to fill in
+blanks, mark verb endings, add notes, or show answers. When you're finished, you can take a picture of the page with your
 writing on it, then copy it or download it.
 
 <img src="docs/images/use-2-type-en.png" width="600" alt="A textbook page with the blanks filled in using the tool">
@@ -20,13 +20,39 @@ To keep your work, take a picture of it (see step 6 below).
 It works in the **Google Chrome** web browser on a computer. It does not work on phones
 or tablets.
 
+**[Add it to Chrome from the Chrome Web Store](https://chromewebstore.google.com/detail/bkemohhbjdiopmcgfmkmaokfkkhinfhi)** (free)
+
 ---
 
 ## Part 1: Install it (you only do this once)
 
-This takes about 3 minutes.
+This takes about a minute.
 
-### Step 1: Download it
+### Step 1: Add it to Chrome
+
+1. In Google Chrome, open **[VHL Text Overlay on the Chrome Web Store](https://chromewebstore.google.com/detail/bkemohhbjdiopmcgfmkmaokfkkhinfhi)**.
+2. Click **Add to Chrome**, then **Add extension**.
+3. A **welcome page** opens in a new tab with a short summary of the next steps.
+
+   <img src="docs/images/welcome-en.png" width="480" alt="The welcome page that opens after installing">
+
+   The switch at the bottom controls the **one-minute tour** (see Part 2). Leave it on to
+   get the tour, or turn it off to skip it.
+
+Chrome keeps it up to date for you automatically.
+
+### Step 2: Put the button where you can see it
+
+1. At the top right of Chrome, next to the address bar, click the small **puzzle-piece**
+   icon 🧩.
+2. Find **VHL Text Overlay** in the list and click the **pin** 📌 next to it.
+3. This button now stays at the top right of Chrome:
+   <img src="extension/icons/icon48.png" width="28" alt="The T button"> That's your button.
+
+<details>
+<summary><b>Can't use the Chrome Web Store?</b> (for example, if your school blocks it) Install it by hand instead.</summary>
+
+#### A. Download it
 
 1. Click this link: **[Download VHL Text Overlay](https://github.com/aidanmccants/vhl-overlay/releases/latest/download/VHL-Text-Overlay.zip)**.
    A file called **VHL-Text-Overlay.zip** goes into your **Downloads** folder.
@@ -40,14 +66,14 @@ This takes about 3 minutes.
 3. **Don't delete the VHL-Text-Overlay folder**, or the tool stops working. You may want
    to move it somewhere safe, like your **Documents** folder.
 
-### Step 2: Add it to Chrome
+#### B. Add it to Chrome
 
 1. Open Google Chrome.
 2. Click the address bar at the top (where you normally type a website), type
    `chrome://extensions` and press **Enter**.
 3. In the top-right corner, turn on the switch labeled **Developer mode**.
    (The name sounds technical, but turning it on just lets you add tools that aren't from
-   Chrome's online store.)
+   the Chrome Web Store.)
 
    <img src="docs/images/install-1-developer-mode-en.png" width="600" alt="The Developer mode switch at the top right of the Extensions page">
 
@@ -56,7 +82,7 @@ This takes about 3 minutes.
    <img src="docs/images/install-2-load-unpacked-en.png" width="600" alt="The Load unpacked button at the top left of the Extensions page">
 
 5. A window opens so you can choose a folder. Find the **VHL-Text-Overlay** folder from
-   Step 1, click it **once**, and click **Select Folder** (on a Mac, **Select**). Choose
+   step A, click it **once**, and click **Select Folder** (on a Mac, **Select**). Choose
    the folder itself, not a file inside it.
 
    > **Only see an "icons" folder?** That's normal. This window only shows folders, so
@@ -67,20 +93,10 @@ This takes about 3 minutes.
 
    <img src="docs/images/install-3-installed-en.png" width="600" alt="The VHL Text Overlay box on the Extensions page after installing">
 
-7. A **welcome page** also opens in a new tab with a short summary of the next steps.
+Then do **Step 2** above. With this way, Chrome doesn't update it for you: see
+*Getting a newer version* below.
 
-   <img src="docs/images/welcome-en.png" width="480" alt="The welcome page that opens after installing">
-
-   The switch at the bottom controls the **one-minute tour** (see Part 2). Leave it on to
-   get the tour, or turn it off to skip it.
-
-### Step 3: Put the button where you can see it
-
-1. At the top right of Chrome, next to the address bar, click the small **puzzle-piece**
-   icon 🧩.
-2. Find **VHL Text Overlay** in the list and click the **pin** 📌 next to it.
-3. This button now stays at the top right of Chrome:
-   <img src="extension/icons/icon48.png" width="28" alt="The T button"> That's your button.
+</details>
 
 ---
 
@@ -105,7 +121,7 @@ To see it again later, click the **?** button on the top bar.
 
 <img src="docs/images/tour-1-welcome-en.png" width="600" alt="The start of the tour, with Skip tour and Start the tour buttons">
 
-<img src="docs/images/tour-2-step-en.png" width="480" alt="A tour step pointing at the Off, Pen and Typing buttons">
+<img src="docs/images/tour-2-step-en.png" width="480" alt="A tour step pointing at the Off, Pen and Text buttons">
 
 ### 3. Write on the page
 
@@ -132,7 +148,7 @@ your writing gets a thin outline so you can still read it.
 
 | | Button | What it does |
 |---|---|---|
-| **1** | **Off · Pen · Typing** | Chooses what clicking the page does. **Typing**: clicking adds writing. **Pen**: you draw (see below). **Off**: use the textbook normally (turn pages, click buttons). Your work stays on the page in every mode. |
+| **1** | **Off · Pen · Text** | Chooses what clicking the page does. **Text**: clicking adds writing. **Pen**: you draw (see below). **Off**: use the textbook normally (turn pages, click buttons). Your work stays on the page in every mode. |
 | **2** | **Screenshot** | Takes a picture of the page with your writing, to copy or download (see below). |
 | **3** | **Clear** | Erases all of your writing and drawings on the page. |
 | **4** | **?** | Shows the tour of every feature again. |
@@ -173,7 +189,7 @@ There are three ways to do it. Use whichever you like:
 - **Use the highlighter.** Click the **highlighter** button on the side toolbar, then click a
   letter to mark it, or drag across several letters. Click a marked letter again to unmark
   it. While the highlighter is on, the color dots choose the marker color (red at first).
-  Click the **highlighter** button again (or **Typing**) to go back
+  Click the **highlighter** button again (or **Text**) to go back
   to typing.
 
   **Shortcut:** select letters first, then click the **highlighter** button. Just those
@@ -198,7 +214,7 @@ on a touch screen.
 - The mouse wheel still scrolls the page. Once you've used a pen, a finger on the screen
   scrolls instead of drawing, so your hand resting on the screen doesn't leave marks.
 
-Click **Off** when you want to use the textbook again, or **Typing** to write.
+Click **Off** when you want to use the textbook again, or **Text** to write.
 
 ### 6. Keep your work: take a picture
 
@@ -227,10 +243,10 @@ includes what you can see on the screen, so scroll first to show the part you wa
 
 ## If something doesn't work
 
-**Chrome says "Manifest file is missing or unreadable."**
-You chose the wrong folder in Step 2. Click **Load unpacked** again and pick the folder
+**Chrome says "Manifest file is missing or unreadable."** (only if you installed it by hand)
+You chose the wrong folder in step B. Click **Load unpacked** again and pick the folder
 that has **manifest.json** directly inside it. That's the **VHL-Text-Overlay** folder from
-Step 1. (If you downloaded an older version, the right folder may be one level deeper,
+step A. (If you downloaded an older version, the right folder may be one level deeper,
 named **VHL Text Overlay**.)
 
 **I clicked Screenshot but nothing happened, or it says "Screenshot cancelled."**
@@ -244,8 +260,8 @@ Make sure the **Copy** button turned green and says **Copied**, then paste with
 **Ctrl + V** (**⌘ Command + V** on a Mac) right away, before copying anything else.
 
 **I can't click the textbook's buttons or turn the page.**
-Typing or Pen is on, so your clicks add writing or drawing instead. Click **Off** on the
-top bar. Click **Typing** or **Pen** again when you want to write or draw.
+Text or Pen is on, so your clicks add writing or drawing instead. Click **Off** on the
+top bar. Click **Text** or **Pen** again when you want to write or draw.
 
 **My writing disappeared.**
 Refreshing the page or closing the tab erases your writing. Sometimes turning to a new
@@ -256,7 +272,8 @@ move on.
 Make sure you're on reader.vhlcentral.com. The tool only works on that website.
 
 **Chrome shows a message about "developer mode extensions."**
-This is normal for tools added this way. You can close the message.
+This only happens if you installed it by hand. It's normal; you can close the message.
+Installing from the Chrome Web Store instead avoids it.
 
 **Keyboard shortcuts (optional)**
 - **Alt + Shift + T**: turn the tool on or off (same as the **T** button)
@@ -266,7 +283,10 @@ On a Mac, **Alt** is the **Option** key.
 
 ### Getting a newer version
 
-When a new version comes out, download it again (Step 1) and put the new
+If you installed it from the Chrome Web Store, there's nothing to do: Chrome updates it
+automatically.
+
+If you installed it by hand, download it again (step A) and put the new
 **VHL-Text-Overlay** folder in place of the old one. Then go to `chrome://extensions` and click the
 round arrow ↻ on the **VHL Text Overlay** box.
 
@@ -282,8 +302,8 @@ round arrow ↻ on the **VHL Text Overlay** box.
 **Escriba sobre las páginas de su libro de VHL, como si pegara notas encima de la página.**
 
 Con el libro abierto en **reader.vhlcentral.com**, esta herramienta le permite hacer clic
-en cualquier parte de la página y escribir. Sirve para completar espacios en blanco,
-añadir notas o mostrar respuestas. Al terminar, puede sacar una imagen de la página
+en cualquier parte de la página y escribir, resaltar letras o dibujar. Sirve para completar
+espacios en blanco, marcar terminaciones verbales, añadir notas o mostrar respuestas. Al terminar, puede sacar una imagen de la página
 con lo que escribió y copiarla o descargarla.
 
 <img src="docs/images/use-2-type-es.png" width="600" alt="Una página del libro con los espacios en blanco completados con la herramienta">
@@ -295,13 +315,40 @@ página. Para conservar su trabajo, saque una imagen (vea el paso 6).
 Funciona en el navegador **Google Chrome** en un ordenador. No funciona en móviles ni
 tabletas.
 
+**[Añádala a Chrome desde Chrome Web Store](https://chromewebstore.google.com/detail/bkemohhbjdiopmcgfmkmaokfkkhinfhi)** (gratis)
+
 ---
 
 ## Parte 1: Instalación (solo una vez)
 
-Tarda unos 3 minutos.
+Tarda un minuto.
 
-### Paso 1: Descargarla
+### Paso 1: Añadirla a Chrome
+
+1. En Google Chrome, abra **[VHL Text Overlay en Chrome Web Store](https://chromewebstore.google.com/detail/bkemohhbjdiopmcgfmkmaokfkkhinfhi)**.
+2. Pulse **Añadir a Chrome** y luego **Añadir extensión**.
+3. Se abre una **página de bienvenida** en una pestaña nueva con un resumen de los
+   siguientes pasos.
+
+   <img src="docs/images/welcome-es.png" width="480" alt="La página de bienvenida que se abre al instalar">
+
+   El interruptor de abajo controla el **recorrido de un minuto** (vea la Parte 2).
+   Déjelo activado para verlo o desactívelo para saltarlo.
+
+Chrome la mantiene actualizada automáticamente.
+
+### Paso 2: Poner el botón a la vista
+
+1. Arriba a la derecha de Chrome, junto a la barra de direcciones, haga clic en el icono
+   de la **pieza de puzle** 🧩.
+2. Busque **VHL Text Overlay** y haga clic en la **chincheta** 📌 que tiene al lado.
+3. Este botón queda ahora arriba a la derecha de Chrome:
+   <img src="extension/icons/icon48.png" width="28" alt="El botón con la T"> Ese es su botón.
+
+<details>
+<summary><b>¿No puede usar Chrome Web Store?</b> (por ejemplo, si su centro la bloquea) Instálela a mano.</summary>
+
+#### A. Descargarla
 
 1. Haga clic en este enlace: **[Descargar VHL Text Overlay](https://github.com/aidanmccants/vhl-overlay/releases/latest/download/VHL-Text-Overlay.zip)**.
    Se descargará a su carpeta **Descargas** un archivo llamado **VHL-Text-Overlay.zip**.
@@ -317,7 +364,7 @@ Tarda unos 3 minutos.
 3. **No borre la carpeta VHL-Text-Overlay**, porque si no la herramienta deja de
    funcionar. Puede moverla a un lugar seguro, como **Documentos**.
 
-### Paso 2: Añadirla a Chrome
+#### B. Añadirla a Chrome
 
 1. Abra Google Chrome.
 2. Haga clic en la barra de direcciones (donde normalmente escribe una página web),
@@ -343,21 +390,10 @@ Tarda unos 3 minutos.
 
    <img src="docs/images/install-3-installed-es.png" width="600" alt="El recuadro VHL Text Overlay en la página Extensiones después de instalarla">
 
-7. También se abre una **página de bienvenida** en una pestaña nueva con un resumen de los
-   siguientes pasos.
+Después haga el **Paso 2** de arriba. De esta forma Chrome no la actualiza sola: vea
+*Obtener una versión nueva* más abajo.
 
-   <img src="docs/images/welcome-es.png" width="480" alt="La página de bienvenida que se abre después de instalar">
-
-   El interruptor de abajo controla el **recorrido de un minuto** (vea la Parte 2). Déjelo
-   activado para ver el recorrido, o desactívelo para saltarlo.
-
-### Paso 3: Poner el botón a la vista
-
-1. Arriba a la derecha de Chrome, junto a la barra de direcciones, haga clic en el icono
-   de la **pieza de puzle** 🧩.
-2. Busque **VHL Text Overlay** y haga clic en la **chincheta** 📌 que tiene al lado.
-3. Este botón queda ahora arriba a la derecha de Chrome:
-   <img src="extension/icons/icon48.png" width="28" alt="El botón con la T"> Ese es su botón.
+</details>
 
 ---
 
@@ -383,7 +419,7 @@ recorrido aparece en español si Chrome está en español.)
 
 <img src="docs/images/tour-1-welcome-es.png" width="600" alt="El comienzo del recorrido, con los botones Saltar y Empezar">
 
-<img src="docs/images/tour-2-step-es.png" width="480" alt="Un paso del recorrido que señala los botones Apagado, Lápiz y Typing">
+<img src="docs/images/tour-2-step-es.png" width="480" alt="Un paso del recorrido que señala los botones Apagado, Lápiz y Texto">
 
 ### 3. Escriba sobre la página
 
@@ -413,7 +449,7 @@ muchos colores, el texto lleva un contorno fino para que se pueda leer.
 
 | | Botón | Qué hace |
 |---|---|---|
-| **1** | **Apagado · Lápiz · Typing** | Elige qué pasa al hacer clic en la página. **Typing**: el clic añade texto. **Lápiz**: usted dibuja (vea abajo). **Apagado**: use el libro con normalidad (pasar páginas, pulsar botones). Su trabajo se queda en la página en todos los modos. |
+| **1** | **Apagado · Lápiz · Texto** | Elige qué pasa al hacer clic en la página. **Texto**: el clic añade texto. **Lápiz**: usted dibuja (vea abajo). **Apagado**: use el libro con normalidad (pasar páginas, pulsar botones). Su trabajo se queda en la página en todos los modos. |
 | **2** | **Screenshot** | Saca una imagen de la página con su texto para copiarla o descargarla (vea abajo). |
 | **3** | **Clear** | Borra todo lo que escribió y dibujó en la página. |
 | **4** | **?** | Vuelve a mostrar el recorrido de todas las funciones. |
@@ -456,7 +492,7 @@ Hay tres maneras. Use la que prefiera:
   letra para marcarla, o arrastre sobre varias letras. Otro clic en una letra marcada la
   desmarca. Con el marcador activado, los puntos de colores eligen el color del marcador (al
   principio, rojo). Pulse el **marcador** otra vez
-  (o **Typing**) para volver a escribir.
+  (o **Texto**) para volver a escribir.
 
   **Atajo:** seleccione primero las letras y luego pulse el **marcador**. Solo esas letras se
   marcan con el color del marcador, y puede seguir escribiendo. Repítalo para desmarcarlas.
@@ -481,7 +517,7 @@ ratón o con el dedo en una pantalla táctil.
 - La rueda del ratón sigue desplazando la página. Después de usar un lápiz, el dedo en la
   pantalla desplaza en vez de dibujar, así que la mano apoyada no deja marcas.
 
-Pulse **Apagado** cuando quiera volver a usar el libro, o **Typing** para escribir.
+Pulse **Apagado** cuando quiera volver a usar el libro, o **Texto** para escribir.
 
 ### 6. Conserve su trabajo: saque una imagen
 
@@ -510,10 +546,10 @@ incluye lo que se ve en la pantalla, así que desplácese primero hasta la parte
 
 ## Si algo no funciona
 
-**Chrome dice que falta el archivo de manifiesto ("Manifest file is missing").**
-Eligió una carpeta equivocada en el Paso 2. Pulse otra vez **Cargar descomprimida** y
+**Chrome dice que falta el archivo de manifiesto ("Manifest file is missing").** (solo si la instaló a mano)
+Eligió una carpeta equivocada en el paso B. Pulse otra vez **Cargar descomprimida** y
 elija la carpeta que tiene **manifest.json** directamente dentro: la carpeta
-**VHL-Text-Overlay** del Paso 1. (Si descargó una versión anterior, la carpeta correcta
+**VHL-Text-Overlay** del paso A. (Si descargó una versión anterior, la carpeta correcta
 puede estar un nivel más adentro y llamarse **VHL Text Overlay**.)
 
 **Pulsé Screenshot y no pasó nada, o sale "Captura cancelada".**
@@ -528,8 +564,8 @@ Compruebe que el botón **Copiar** se puso verde y dice **Copiada**, y pegue con
 **Ctrl + V** (**⌘ Comando + V** en un Mac) enseguida, antes de copiar otra cosa.
 
 **No puedo pulsar los botones del libro ni pasar de página.**
-Está activado Typing o Lápiz, así que sus clics escriben o dibujan. Pulse **Apagado** en
-la barra de arriba. Pulse **Typing** o **Lápiz** cuando quiera escribir o dibujar.
+Está activado Texto o Lápiz, así que sus clics escriben o dibujan. Pulse **Apagado** en
+la barra de arriba. Pulse **Texto** o **Lápiz** cuando quiera escribir o dibujar.
 
 **Mi texto ha desaparecido.**
 Recargar la página o cerrar la pestaña borra lo que escribió. A veces, al pasar de
@@ -540,7 +576,8 @@ antes de seguir.
 Compruebe que está en reader.vhlcentral.com. La herramienta solo funciona en esa web.
 
 **Chrome muestra un aviso sobre extensiones en "modo de desarrollador".**
-Es normal con las herramientas añadidas de esta forma. Puede cerrar el aviso.
+Solo pasa si la instaló a mano. Es normal; puede cerrar el aviso. Instalarla desde
+Chrome Web Store lo evita.
 
 **Atajos de teclado (opcional)**
 - **Alt + Mayús + T**: activar o desactivar la herramienta (igual que el botón **T**)
@@ -550,7 +587,9 @@ En un Mac, **Alt** es la tecla **Opción**.
 
 ### Obtener una versión nueva
 
-Cuando salga una versión nueva, descárguela otra vez (Paso 1) y ponga la nueva carpeta
+Si la instaló desde Chrome Web Store, no tiene que hacer nada: Chrome la actualiza sola.
+
+Si la instaló a mano, descárguela otra vez (paso A) y ponga la nueva carpeta
 **VHL-Text-Overlay** en lugar de la anterior. Luego vaya a `chrome://extensions` y haga
 clic en la flecha circular ↻ del recuadro **VHL Text Overlay**.
 
@@ -569,7 +608,7 @@ Needs [Node.js](https://nodejs.org) 20 or newer. Run `npm install` once, then
 | `npm run test:unit` | Fast tests for the release tool (zip, version bumps, release notes) |
 | `npm run test:e2e` | Loads the real extension in Chromium and tests every feature on a sample page (`tests/fixtures`) |
 | `npm test` | All of the above |
-| `npm run test:mutations` | Plants 44 realistic bugs, one at a time, and fails if the tests miss any of them |
+| `npm run test:mutations` | Plants 45 realistic bugs, one at a time, and fails if the tests miss any of them |
 
 The mutation check is what keeps the tests honest: if a test stops really checking its
 feature, a planted bug gets through and the check fails. Each mutant is listed in

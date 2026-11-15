@@ -25,7 +25,7 @@ function assertSameBoxes(a, b, what) {
   });
 }
 
-test('switching between Off, Pen and Typing does not resize the top bar or move its buttons', async () => {
+test('switching between Off, Pen and Text does not resize the top bar or move its buttons', async () => {
   const { page, sw } = b;
   await gotoReader(page, sw);
   await settle(page);

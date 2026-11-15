@@ -183,7 +183,6 @@
     .layer.drawing { pointer-events: auto; touch-action: none; cursor: crosshair; }
     .layer.drawing.erasing { cursor: cell; }
     .ink { position: absolute; left: 0; top: 0; width: 1px; height: 1px; overflow: visible; transform-origin: 0 0; pointer-events: none; }
-    .ink path { paint-order: stroke; stroke-linejoin: round; }
 
     /* ---------- typed text ---------- */
     .note {
@@ -287,16 +286,19 @@
     .toolbar .drag { cursor: grab; color: var(--ink-soft); padding: 0 1px 0 3px; display: flex; }
     .toolbar .drag .ico { width: 18px; height: 18px; }
     .toolbar button.icon .ico { width: 17px; height: 17px; }
-    .toolbar button { padding: 8px 13px; white-space: nowrap; font-weight: 500; }
+    /* Optical alignment: an icon has a little empty space built in on its left, so the
+       icon side gets 1px less padding to look even. */
+    .toolbar button { padding: 8px 13px 8px 12px; white-space: nowrap; font-weight: 500; }
     .toolbar button.on {
       background: linear-gradient(180deg, #e0294b, #b00c2b); color: #fff;
       box-shadow: inset 0 1px 0 rgba(255, 255, 255, .45), 0 4px 14px rgba(198, 14, 48, .45);
     }
     .toolbar button.icon { width: 32px; height: 32px; padding: 0; }
-    /* Off | Pen | Typing: one pill, the chosen mode lit up. Every segment keeps its
+    /* Off | Pen | Text: one pill, the chosen mode lit up. Every segment keeps its
        size, so switching never moves anything. */
     .toolbar .modes { display: flex; gap: 2px; padding: 2px; border-radius: 999px; background: rgba(120, 120, 128, .14); }
-    .toolbar .modes button { padding: 7px 11px; background: transparent; box-shadow: none; }
+    /* 28px buttons + 2px pill padding = 32px, the same height as the other buttons. */
+    .toolbar .modes button { padding: 6px 11px 6px 10px; background: transparent; box-shadow: none; }
     .toolbar .modes button:hover { background: var(--chip); }
     .toolbar .modes button.on, .toolbar .modes button.on:hover {
       background: linear-gradient(180deg, #e0294b, #b00c2b); color: #fff;
@@ -318,10 +320,19 @@
     /* Center A+ / A− by the letters themselves (cap height to baseline), not by the
        font's built-in spacing, which differs between Windows, Mac and Linux fonts. */
     .panel .cap { display: block; line-height: 1; text-box: trim-both cap alphabetic; }
-    .panel .size { width: 3ch; text-align: center; font-weight: 600; font-variant-numeric: tabular-nums; padding: 1px 0; white-space: nowrap; }
+    /* Optical: the heavy "A" pulls the eye left of the light "+"/"−"; shift 1px right. */
+    .panel .big .cap, .panel .small .cap { margin-left: 2px; }
+    /* Optical: these icons are heavy at the bottom (and the highlighter on the left). */
+    .panel .markbtn .ico { transform: translate(.5px, -1px); }
+    .panel .erasebtn .ico { transform: translateY(-.75px); }
+    .panel .size { width: 3ch; text-align: center; font-weight: 600; font-variant-numeric: tabular-nums; padding: 1px 0; white-space: nowrap;
+      line-height: 1; text-box: trim-both cap alphabetic; margin: 3px 0; }
     .panel .size.bump { animation: bump .35s var(--spring); }
     @keyframes bump { 40% { transform: scale(1.3); } }
-    .panel .label { font-size: 9.5px; font-weight: 600; color: var(--ink-soft); text-transform: uppercase; letter-spacing: .06em; }
+    /* Trimmed to the capitals so the space above and below looks even; the left padding
+       balances the letter-spacing added after the last letter. */
+    .panel .label { font-size: 9.5px; font-weight: 600; color: var(--ink-soft); text-transform: uppercase; letter-spacing: .06em;
+      padding-left: .06em; line-height: 1; text-box: trim-both cap alphabetic; margin: 2px 0 1px; }
     .panel .sep { height: 1px; width: 26px; background: var(--ink-soft); opacity: .25; margin: 2px 0; }
     .panel .swatch {
       width: 28px; height: 28px; border-radius: 50%;
@@ -529,7 +540,7 @@
     drag.title = 'Drag to move the toolbar';
     makeDraggable(drag, toolbar, null);
 
-    // Mode selector: Off (use the textbook) | Pen (draw) | Typing (add text).
+    // Mode selector: Off (use the textbook) | Pen (draw) | Text (add text).
     ui.modes = document.createElement('div');
     ui.modes.className = 'modes';
     ui.modes.setAttribute('role', 'group');
@@ -539,7 +550,7 @@
         'Use el libro con normalidad (pasar páginas, pulsar botones). Su trabajo se queda en la página.'), () => setMode('off'), '', 'mouse-pointer-2'),
       pen: btn(L('Pen', 'Lápiz'), L('Draw on the page with a pen, mouse or finger',
         'Dibuje en la página con un lápiz, el ratón o el dedo'), () => setMode('pen'), '', 'pen-line'),
-      typing: btn('Typing', L('Click anywhere on the page to add text (Alt+Shift+T closes the toolbar)',
+      typing: btn(L('Text', 'Texto'), L('Click anywhere on the page to add text (Alt+Shift+T closes the toolbar)',
         'Haga clic en cualquier lugar para añadir texto (Alt+Mayús+T cierra la barra)'), () => setMode('typing'), '', 'type'),
     };
     for (const [m, b] of Object.entries(ui.mode)) {
@@ -708,10 +719,10 @@
     },
     {
       target: () => [ui.modes],
-      title: L('Off, Pen or Typing', 'Apagado, Lápiz o Typing'),
+      title: L('Off, Pen or Text', 'Apagado, Lápiz o Texto'),
       body: L(
-        '<p><b>{{type}} Typing</b>: click the page to add text.</p><p><b>{{pen-line}} Pen</b>: draw with a pen, mouse or finger. Press harder for thicker lines. Flip a Surface Pen over to erase.</p><p><b>{{mouse-pointer-2}} Off</b>: use the textbook normally. Your work stays on the page.</p>',
-        '<p><b>{{type}} Typing</b>: haga clic en la página para añadir texto.</p><p><b>{{pen-line}} Lápiz</b>: dibuje con un lápiz, el ratón o el dedo. Si aprieta más, la línea es más gruesa. Dé la vuelta al lápiz de Surface para borrar.</p><p><b>{{mouse-pointer-2}} Apagado</b>: use el libro con normalidad. Su trabajo se queda en la página.</p>'
+        '<p><b>{{type}} Text</b>: click the page to add text.</p><p><b>{{pen-line}} Pen</b>: draw with a pen, mouse or finger. Press harder for thicker lines. Flip a Surface Pen over to erase.</p><p><b>{{mouse-pointer-2}} Off</b>: use the textbook normally. Your work stays on the page.</p>',
+        '<p><b>{{type}} Texto</b>: haga clic en la página para añadir texto.</p><p><b>{{pen-line}} Lápiz</b>: dibuje con un lápiz, el ratón o el dedo. Si aprieta más, la línea es más gruesa. Dé la vuelta al lápiz de Surface para borrar.</p><p><b>{{mouse-pointer-2}} Apagado</b>: use el libro con normalidad. Su trabajo se queda en la página.</p>'
       ),
     },
     {
@@ -1539,13 +1550,13 @@
     return `M${f(left[0][0])} ${f(left[0][1])}${side(left)}A${rEnd} ${rEnd} 0 0 1 ${f(rr[0][0])} ${f(rr[0][1])}${side(rr)}A${rStart} ${rStart} 0 0 1 ${f(left[0][0])} ${f(left[0][1])}Z`;
   }
 
-  // Same readability check as text: the shade of the color that stands out, plus a
-  // thin outline on pictures.
+  // Same readability check as text: the shade of the color that stands out.
   function styleStroke(st) {
-    const { color, halo } = readableColor(st.color, st.bg);
+    // Ink is one solid color (no outline): an outline made overlapping lines look
+    // odd and left light "bites" at the round ends. Text keeps its outline.
+    const { color } = readableColor(st.color, st.bg);
     st.path.setAttribute('fill', color);
-    st.path.setAttribute('stroke', halo || 'none');
-    st.path.setAttribute('stroke-width', halo ? '1.6' : '0');
+    st.path.setAttribute('stroke', 'none');
   }
 
   function removeStroke(st) {
@@ -2044,6 +2055,7 @@
         if (paintSelection(msg.color, msg.highlighter)) sendResponse(true);
         break;
       case 'state': {
+        stateArrived = true;
         state = msg.state;
         if (state.open || state.typing || notes.size) ensureUI();
         // A color/size button was pressed: also restyle the note you're editing.
@@ -2083,9 +2095,12 @@
     }
   });
 
+  // Set once a state update arrives, so a slow answer to init's get-state (sent
+  // earlier, so older) can't undo a mode change made in the meantime.
+  let stateArrived = false;
   function init() {
     chrome.runtime.sendMessage({ cmd: 'get-state' }, (s) => {
-      if (chrome.runtime.lastError || !s) return;
+      if (chrome.runtime.lastError || !s || stateArrived) return;
       state = s;
       if (state.open || state.typing) ensureUI();
       render();
