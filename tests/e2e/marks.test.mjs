@@ -140,7 +140,7 @@ test('highlighter: clicking the page does not add text or reach the reader', asy
   assert.equal(await page.evaluate(() => window.readerClicks), 0);
 });
 
-test('choosing Typing ends the highlighter', async () => {
+test('choosing Text ends the highlighter', async () => {
   const { page } = b;
   assert.equal(await ui(page, '.modes button.on').count(), 0, 'no mode is lit while the highlighter is on');
   await ui(page, '.modes button[data-mode="typing"]').click();

@@ -263,7 +263,7 @@ async function box(loc) { const b = await loc.boundingBox(); return { x: b.x, y:
   const n2 = await box(sr('.note .text').nth(2));
   await penLine(Array.from({ length: 24 }, (_, i) => [n2.x + i * ((n2.w + 8) / 23), n2.y + n2.h + 4 + Math.sin(i / 3) * 1.5]));
   const n3 = await box(sr('.note .text').nth(3));
-  const cx = n3.x + n3.w + 150, cy = n3.y + n3.h / 2;
+  const cx = pageBox.x + pageBox.w - 70, cy = n3.y + n3.h / 2 - 4; // in the empty right margin
   await penLine([...Array.from({ length: 6 }, (_, i) => [cx + i * 2, cy + i * 2.4]), ...Array.from({ length: 12 }, (_, i) => [cx + 12 + i * 2.4, cy + 12 - i * 3])]);
   await page.mouse.move(5, 500);
   await page.waitForTimeout(500);
