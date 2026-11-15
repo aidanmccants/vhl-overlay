@@ -280,6 +280,22 @@ export const MUTANTS = [
     tests: [T('pen')],
   },
   {
+    id: 'ink-end-bite',
+    why: 'the round line ends curve inward, cutting a half-circle "bite" into both ends',
+    file: 'content.js',
+    find: 'A${rEnd} ${rEnd} 0 0 0 ',
+    replace: 'A${rEnd} ${rEnd} 0 0 1 ',
+    tests: [T('pen')],
+  },
+  {
+    id: 'ink-misses-lift-point',
+    why: 'the line stops at the last move instead of where the pen lifted',
+    file: 'content.js',
+    find: "if (ev.type === 'pointerup') {",
+    replace: 'if (false) {',
+    tests: [T('pen')],
+  },
+  {
     id: 'mark-button-grows',
     why: 'turning on the 🖍 highlighter makes its button bigger and pushes the toolbar around',
     file: 'content.js',

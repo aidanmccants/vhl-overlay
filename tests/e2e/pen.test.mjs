@@ -86,6 +86,37 @@ test('ink is one solid color with no outline, even over a picture (text keeps it
   await page.evaluate(() => document.getElementById('pic').remove());
 });
 
+test('lines have full round ends (no "bite") and end exactly where the pen lifts', async () => {
+  const { page } = b;
+  // Release 24px past the last move: the line must reach the lift point.
+  const pts = line(300, 520, 10);
+  const lift = [pts.at(-1)[0] + 24, 520];
+  const send = (type, [x, y], extra) => cdp.send('Input.dispatchMouseEvent', { type, x, y, button: 'left', pointerType: 'pen', ...extra });
+  await send('mousePressed', pts[0], { buttons: 1, clickCount: 1, force: 1 });
+  for (const p of pts.slice(1)) await send('mouseMoved', p, { buttons: 1, force: 1 });
+  await send('mouseReleased', lift, { buttons: 0, clickCount: 1, force: 0 });
+  const filled = await ui(page, '.ink path').first().evaluate((path, [start, lift]) => {
+    const m = path.getScreenCTM().inverse();
+    const at = (x, y) => {
+      const q = new DOMPoint(x, y).matrixTransform(m);
+      const sp = path.ownerSVGElement.createSVGPoint();
+      sp.x = q.x;
+      sp.y = q.y;
+      return path.isPointInFill(sp);
+    };
+    const r = path.getBoundingClientRect().height / 2;
+    return {
+      liftPoint: at(lift[0], lift[1]),
+      insideEndCap: at(lift[0] - r / 2, lift[1]), // where the half-circle bite used to be
+      pastEnd: at(lift[0] + r / 2, lift[1]), // the round end bulges past the tip
+      insideStartCap: at(start[0] + r / 2, start[1]),
+      beforeStart: at(start[0] - r / 2, start[1]),
+    };
+  }, [pts[0], lift]);
+  assert.deepEqual(filled, { liftPoint: true, insideEndCap: true, pastEnd: true, insideStartCap: true, beforeStart: true });
+  await page.keyboard.press('Control+z'); // remove this test line again
+});
+
 test('drawings stick to the page when it scrolls', async () => {
   const { page } = b;
   const y0 = (await strokeBox(page, 1)).y;

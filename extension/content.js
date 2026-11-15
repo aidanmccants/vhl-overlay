@@ -1465,7 +1465,7 @@
     strokes.add(st);
     styleStroke(st);
     const base = Math.max(1.5, st.size / 6);
-    const addPoint = (ev) => {
+    const addPoint = (ev, lifted = false) => {
       const s = st.scale || 1;
       const x = (ev.clientX - st.tx) / s;
       const y = (ev.clientY - st.ty) / s;
@@ -1474,12 +1474,12 @@
       // Pens report pressure (press harder = thicker); a mouse reports 0.5 while pressed.
       const p = ev.pointerType === 'pen' ? ev.pressure : 0.5;
       const raw = base * (0.35 + 1.3 * p);
-      const w = last ? last.w * 0.6 + raw * 0.4 : raw; // smooth out sudden jumps
+      // A lifted pen reports 0 pressure, so the last point keeps the width it had.
+      const w = lifted && last ? last.w : last ? last.w * 0.6 + raw * 0.4 : raw; // smooth out sudden jumps
       st.pts.push({ x, y, w });
     };
     addPoint(e);
     st.path.setAttribute('d', strokePath(st.pts));
-    let inkStyle = null;
     if (navigator.ink && !inkPresenter) {
       navigator.ink.requestPresenter({ presentationArea: layer }).then((p) => (inkPresenter = p)).catch(() => {});
     }
@@ -1490,17 +1490,23 @@
       st.path.setAttribute('d', strokePath(st.pts));
       if (inkPresenter) {
         try {
-          inkStyle = inkStyle || { color: st.path.getAttribute('fill'), diameter: base * (st.scale || 1) };
-          inkPresenter.updateInkTrailStartPoint(ev, inkStyle);
+          // Chrome previews the line from this point on, so match the line's width here.
+          const diameter = st.pts[st.pts.length - 1].w * (st.scale || 1);
+          inkPresenter.updateInkTrailStartPoint(ev, { color: st.path.getAttribute('fill'), diameter });
         } catch {
           /* best effort */
         }
       }
     };
-    const up = () => {
+    const up = (ev) => {
       layer.removeEventListener('pointermove', move);
       layer.removeEventListener('pointerup', up);
       layer.removeEventListener('pointercancel', up);
+      // The line ends exactly where the pen lifted (a cancel has no real position).
+      if (ev.type === 'pointerup') {
+        addPoint(ev, true);
+        st.path.setAttribute('d', strokePath(st.pts));
+      }
       inkHistory.push({ add: [st] });
       inkRedo.length = 0;
       const b = st.el.getBoundingClientRect();
@@ -1511,7 +1517,9 @@
     layer.addEventListener('pointercancel', up);
   }
 
-  // The outline of a line whose width changes along the way, with round ends.
+  // The outline of a line whose width changes along the way, with round ends. The
+  // y axis points down, so each end's arc sweeps counterclockwise (flag 0) to bulge
+  // outward past the tip; flag 1 would cut a half-circle "bite" into the line.
   function strokePath(pts) {
     const f = (n) => Math.round(n * 100) / 100;
     if (pts.length === 1) {
@@ -1547,7 +1555,7 @@
     const rEnd = f(pts[pts.length - 1].w / 2);
     const rStart = f(pts[0].w / 2);
     const rr = right.slice().reverse();
-    return `M${f(left[0][0])} ${f(left[0][1])}${side(left)}A${rEnd} ${rEnd} 0 0 1 ${f(rr[0][0])} ${f(rr[0][1])}${side(rr)}A${rStart} ${rStart} 0 0 1 ${f(left[0][0])} ${f(left[0][1])}Z`;
+    return `M${f(left[0][0])} ${f(left[0][1])}${side(left)}A${rEnd} ${rEnd} 0 0 0 ${f(rr[0][0])} ${f(rr[0][1])}${side(rr)}A${rStart} ${rStart} 0 0 0 ${f(left[0][0])} ${f(left[0][1])}Z`;
   }
 
   // Same readability check as text: the shade of the color that stands out.
