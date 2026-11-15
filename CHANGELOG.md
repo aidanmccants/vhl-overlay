@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.3.1 (2026-11-15)
+
+### 💅 Improvements
+
+- Solid ink, Off | Pen | Text, optical alignment, and install from the Chrome Web Store
+- Trademark notice for the name and branding; store link in the publishing guide
+
 ## 0.3.0 (2026-11-13)
 
 ### ✨ New
